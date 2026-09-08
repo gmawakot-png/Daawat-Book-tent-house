@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>टेंट हाउस एवं कैटरिंग मैनेजमेंट सिस्टम (Google Drive & JPEG Enabled)</title>
+  <!-- JPEG फोटो डाउनलोड लाइब्रेरी (html2canvas) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
+  <style>
+    :root { --maroon: #8b0000; --dark: #2c3e50; --veg-color: #28a745; --nonveg-color: #b22222; }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body { background-color: #f4f6f9; margin: 0; padding: 12px; padding-top: 85px; }
+    .container { max-width: 1250px; margin: auto; }
+    .card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 16px; }
+    h2, h3, h4 { color: var(--maroon); margin-top: 0; margin-bottom: 8px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    label { font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px; color: #333; }
+    input, select { width: 100%; padding: 7px 9px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+    
+    .btn { padding: 7px 11px; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: 0.2s; text-decoration: none; }
+    .btn-maroon { background: var(--maroon); color: white; }
+    .btn-green { background: #28a745; color: white; }
+    .btn-blue { background: #007bff; color: white; }
+    .btn-info { background: #17a2b8; color: white; }
+    .btn-yellow { background: #ffc107; color: #212529; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-secondary { background: #6c757d; color: white; }
+    .btn-dark { background: #343a40; color: white; }
+    .btn-purple { background: #6f42c1; color: white; }
+    .btn:hover { opacity: 0.88; }
+
+    /* फ़्रीज़ किया हुआ फ्लोटिंग एक्शन बार */
+    .sticky-action-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #ffffff;
+      border-bottom: 3px solid var(--maroon);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 8px 16px;
+      z-index: 9999;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    /* सत्र और तारीख व्यवस्था */
+    .day-box { border: 2px solid #bbb; border-radius: 6px; padding: 12px; margin-bottom: 16px; background: #fafafa; }
+    .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+    .session-box { background: white; border: 1px solid #ddd; border-left: 5px solid var(--maroon); border-radius: 6px; padding: 12px; margin-bottom: 12px; }
+    
+    .menu-panel { border-radius: 6px; padding: 10px; margin-top: 8px; }
+    .veg-panel { background: #f4fbf4; border: 1px solid #c3e6cb; }
+    .nonveg-panel { background: #fff5f5; border: 1px solid #f5c6cb; }
+
+    .category-line {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .cat-box { display: flex; flex-direction: column; position: relative; }
+    .cat-box label { font-size: 12px; margin-bottom: 3px; color: #222; }
+
+    /* मल्टी-सलेक्ट चेकबॉक्स ड्रॉपडाउन स्टाइलिंग */
+    .multiselect-container {
+      position: relative;
+      width: 100%;
+    }
+    .multiselect-btn {
+      width: 100%;
+      padding: 7px 9px;
+      background: white;
+      border: 1px solid #b0bec5;
+      border-radius: 4px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 12px;
+      transition: 0.2s;
+      text-align: left;
+    }
+    .multiselect-btn:hover { border-color: #888; }
+    .ms-badge {
+      background: #28a745;
+      color: white;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: bold;
+      display: none;
+      margin-left: 4px;
+    }
+    .multiselect-menu {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      min-width: 230px;
+      max-height: 270px;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #666;
+      border-radius: 5px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+      z-index: 1050;
+      padding: 6px;
+    }
+    .ms-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 3px;
+    }
+    .ms-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.1s;
+      margin-bottom: 2px;
+    }
+    .ms-item:hover { background: #f0f4f8; }
+    .ms-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      cursor: pointer;
+      margin: 0;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      background: #eef7ee;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #c3e6cb;
+    }
+
+    .item-badge { background: #e9f5ff; color: #0056b3; padding: 4px 9px; border-radius: 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; margin: 3px; border: 1px solid #bee5eb; }
+    .item-badge-nonveg { background: #ffebee; color: #b71c1c; border: 1px solid #ffcdd2; }
+
+    /* रसीद (Print View) */
+    #billReceipt { background: white; padding: 25px; border: 2px solid #222; margin-top: 20px; }
+    .bill-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 10px; }
+    .bill-table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 12px; }
+    .bill-table th, .bill-table td { border: 1px solid #444; padding: 6px 8px; font-size: 12px; text-align: left; vertical-align: top; }
+    .bill-table th { background: #f0f0f0; }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .no-print, .sticky-action-bar { display: none !important; }
+      #billReceipt { border: none; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- फ़्रीज़ किया हुआ फ्लोटिंग एक्शन बार (Sticky Action Bar) -->
+<div class="sticky-action-bar no-print">
+  <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
+    <button class="btn btn-maroon" onclick="addNewDayWithCalendar()">📅 + नई तारीख</button>
+    
+    <div style="display:inline-flex; align-items:center; gap:3px; background:#eef2f7; padding:2px 5px; border-radius:4px; border:1px solid #ccd;">
+      <button class="btn btn-blue" style="padding:5px 8px;" onclick="addNextSessionFromSticky()">⏱️ + नया सत्र</button>
+      <select id="stickyDaySelect" style="width:135px; padding:4px; font-weight:bold; font-size:12px;" title="किस तारीख में सत्र जोड़ना है चुनें"></select>
+    </div>
+
+    <button class="btn btn-secondary" onclick="undoAction()" title="Ctrl+Z दबाएं">↩️ पूर्ववत (Ctrl+Z)</button>
+  </div>
+
+  <!-- डाउनलोड व सेविंग बटन (सब एक साथ ऊपर मौजूद) -->
+  <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
+    <button class="btn btn-green" onclick="saveToGoogleDrive()" title="सीधे गूगल ड्राइव में सेव करें">☁️ Google Drive में सेव</button>
+    <button class="btn btn-purple" onclick="openGoogleDriveList()" title="गूगल ड्राइव से फाइलें देखें">📂 Drive फाइलें</button>
+    <button class="btn btn-yellow" onclick="downloadImage()" title="WhatsApp पर भेजने के लिए फोटो डाउनलोड करें">🖼️ JPEG फोटो डाउनलोड</button>
+    <button class="btn btn-blue" onclick="renderReceipt(); window.print();" title="PDF बनाएं या प्रिंट निकालें">🖨️ PDF / प्रिंट</button>
+    <button class="btn btn-info" onclick="renderReceipt(); downloadWord();" title="Word फाइल डाउनलोड करें">📄 Word</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- 1. प्रोफाइल सेटिंग्स -->
+  <div class="card no-print" style="border-top: 4px solid var(--maroon);">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3>🎪 टेंट हाउस की जानकारी (Profile Settings)</h3>
+      <button class="btn btn-secondary" style="font-size:11px;" onclick="saveFirmProfile()">💾 जानकारी सेव रखें</button>
+    </div>
+    <div class="grid">
+      <div>
+        <label>टेंट हाउस का नाम:</label>
+        <input type="text" id="firmName" placeholder="उदा. माँ भवानी टेंट हाउस एवं कैटरर्स">
+      </div>
+      <div>
+        <label>मोबाइल नंबर:</label>
+        <input type="text" id="firmPhone" placeholder="मोबाइल नंबर यहाँ लिखें">
+      </div>
+      <div>
+        <label>टैगलाइन / सेवा विवरण:</label>
+        <input type="text" id="firmTagline" placeholder="उदा. शादी, पार्टी, एवं समस्त मांगलिक कार्यों के लिए संपर्क करें">
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. ग्राहक एवं बुकिंग विवरण -->
+  <div class="card no-print">
+    <h3>👤 ग्राहक एवं कार्यक्रम विवरण</h3>
+    <div class="grid">
+      <div>
+        <label>ग्राहक का नाम:</label>
+        <input type="text" id="custName" placeholder="ग्राहक का नाम लिखें" oninput="saveState(); renderReceipt();">
+      </div>
+      <div>
+        <label>ग्राहक मोबाइल नंबर:</label>
+        <input type="tel" id="custPhone" placeholder="मोबाइल नंबर लिखें" oninput="saveState(); renderReceipt();">
+      </div>
+      <div>
+        <label>कार्यक्रम तारीख (कैलेंडर से चुनें):</label>
+        <input type="date" id="eventStartDate" onchange="saveState(); updateEventDates(); renderReceipt();">
+      </div>
+      <div>
+        <label>स्थान / पता:</label>
+        <input type="text" id="eventAddress" placeholder="स्थान या पता लिखें" oninput="saveState(); renderReceipt();">
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. भोजन एवं कैटरिंग व्यवस्था -->
+  <div class="card no-print">
+    <div style="margin-bottom: 10px;">
+      <h3 style="margin-bottom:2px;">🍲 भोजन एवं नाश्ता व्यवस्था (तारीख वार)</h3>
+      <small style="color:#555;">💡 <strong>सुविधा:</strong> आप ड्रॉपडाउन खोलकर <strong>एक साथ कई व्यंजनों (दाल फ्राई, दाल मखनी, कढ़ी आदि)</strong> पर टिक (✓) लगा सकते हैं और नीचे केवल एक बार <strong>'+ चुने हुए सभी सामान एक साथ जोड़ें'</strong> बटन दबाकर सबको जोड़ सकते हैं!</small>
+    </div>
+    <div id="daysWrapper"></div>
+  </div>
+
+  <!-- 4. टेंट, पांडाल, स्टेज व लाइट का सामान -->
+  <div class="card no-print">
+    <h3>⛺ टेंट, पांडाल, स्टेज व लाइट का सामान</h3>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:10px; background:#f8f9fa; padding:12px; border-radius:5px; margin-bottom:10px;">
+      <div>
+        <label>सामान चुनें:</label>
+        <select id="tentDrop" onchange="toggleCustomTent(this)">
+          <optgroup label="टेंट व पांडाल (साइज खुद भरें)">
+            <option value="बैठक टेंट">बैठक टेंट</option>
+            <option value="खाना टेंट">खाना टेंट</option>
+            <option value="टेंट (घर के पास)">टेंट (घर के पास)</option>
+            <option value="गैलरी टेंट">गैलरी टेंट</option>
+            <option value="टेंट ट्रस">टेंट ट्रस</option>
+            <option value="D. J ट्रस">D. J ट्रस</option>
+          </optgroup>
+          <optgroup label="बैठक व गद्दे">
+            <option value="कुर्सी">कुर्सी</option>
+            <option value="सोफा">सोफा</option>
+            <option value="कुर्सी with सोफा">कुर्सी with सोफा</option>
+            <option value="बिस्तर">बिस्तर (जोड़ी)</option>
+          </optgroup>
+          <optgroup label="स्टेज, काउंटर व गेट">
+            <option value="स्टेज पांडाल">स्टेज पांडाल</option>
+            <option value="हल्दी स्टेज">हल्दी स्टेज</option>
+            <option value="मेहंदी स्टेज">मेहंदी स्टेज</option>
+            <option value="मुख्य गेट">मुख्य गेट</option>
+            <option value="स्टील काउंटर">स्टील काउंटर</option>
+            <option value="गोल टेबल">गोल टेबल</option>
+          </optgroup>
+          <optgroup label="लाइटिंग, साउंड व स्टाफ">
+            <option value="जनरेटर">जनरेटर</option>
+            <option value="लाइट डेकोरेशन">लाइट डेकोरेशन</option>
+            <option value="रोड लाइटिंग">रोड लाइटिंग</option>
+            <option value="माकन पे लड़ियाँ">माकन पे लड़ियाँ</option>
+            <option value="हलवाई">हलवाई (कारीगर)</option>
+            <option value="वेटर">वेटर (स्टाफ)</option>
+          </optgroup>
+          <option value="CUSTOM">✍️ अन्य नया सामान लिखें...</option>
+        </select>
+        <input type="text" id="customTentInput" placeholder="नया सामान नाम" style="display:none; margin-top:4px;">
+      </div>
+
+      <div>
+        <label>साइज / नाप (खुद लिखें):</label>
+        <input type="text" id="tentSize" placeholder="उदा. 60x60 या 45 फीट">
+      </div>
+
+      <div>
+        <label>मात्रा / संख्या:</label>
+        <input type="number" id="tentQty" placeholder="उदा. 250">
+      </div>
+
+      <div>
+        <label>इकाई (Unit):</label>
+        <select id="tentUnit">
+          <option value="नग (Pcs)">नग (Pcs)</option>
+          <option value="सेट">सेट</option>
+          <option value="फीट">फीट</option>
+          <option value="जोड़ी">जोड़ी</option>
+          <option value="आदमी">आदमी</option>
+        </select>
+      </div>
+
+      <div style="align-self: flex-end;">
+        <button class="btn btn-green" onclick="addTentItem()">+ सामान जोड़ें</button>
+      </div>
+    </div>
+
+    <div id="tentBadges" style="min-height:30px; background:white; border:1px solid #ddd; padding:6px; border-radius:4px;"></div>
+  </div>
+
+  <!-- अतिरिक्त विकल्प व ब्राउज़र इतिहास -->
+  <div class="card no-print" style="text-align:center; display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+    <button class="btn btn-secondary" onclick="toggleHistory()">📂 कंप्यूटर / ब्राउज़र का पुराना इतिहास देखें</button>
+  </div>
+
+  <!-- Google Drive फाइलों की सूची -->
+  <div class="card no-print" id="driveListCard" style="display:none; border:2px solid #6f42c1; box-shadow: 0 4px 15px rgba(111,66,193,0.2);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <h3 style="margin:0; color:#6f42c1;">☁️ Google Drive में सुरक्षित ग्राहक फ़ाइलें</h3>
+      <button class="btn btn-danger" style="font-size:11px;" onclick="document.getElementById('driveListCard').style.display='none'">बंद करें ✖</button>
+    </div>
+    <div id="driveLoading" style="display:none; color:#0056b3; padding:8px; font-weight:bold;">⏳ Google Drive से फ़ाइलें खोजी जा रही हैं... कृपया प्रतीक्षा करें।</div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse;" border="1" cellpadding="6">
+        <thead style="background:#f3e8fd;">
+          <tr><th>फ़ाइल नाम (ग्राहक)</th><th>अंतिम अपडेट तारीख</th><th>कार्य</th></tr>
+        </thead>
+        <tbody id="driveFilesBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ब्राउज़र इतिहास -->
+  <div class="card no-print" id="historyCard" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <h3 style="margin:0;">📋 ब्राउज़र में सुरक्षित आर्डरों की सूची</h3>
+      <button class="btn btn-danger" style="font-size:11px;" onclick="toggleHistory()">बंद करें ✖</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse;" border="1" cellpadding="6">
+        <thead style="background:#eee;">
+          <tr><th>सेव तारीख</th><th>ग्राहक का नाम</th><th>मोबाइल</th><th>कार्यक्रम तारीख</th><th>सुधार / कार्य</th></tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 5. रसीद / पर्ची (Printable Output Area) -->
+  <div id="billReceipt">
+    <div class="bill-header">
+      <h1 id="outFirmName" style="margin:0; color:var(--maroon); font-size:22px;">टेंट हाउस एवं कैटरर्स</h1>
+      <p id="outFirmTagline" style="margin:3px 0; font-size:13px;"></p>
+      <p style="margin:2px 0; font-weight:bold;">संपर्क सूत्र: <span id="outFirmPhone">-</span></p>
+    </div>
+
+    <table style="width:100%; font-size:12px; margin-bottom:8px;">
+      <tr>
+        <td style="border:none;"><strong>ग्राहक का नाम:</strong> <span id="outCustName">-</span></td>
+        <td style="border:none; text-align:right;"><strong>कार्यक्रम तारीख:</strong> <span id="outEventDate">-</span></td>
+      </tr>
+      <tr>
+        <td style="border:none;"><strong>स्थान / पता:</strong> <span id="outAddress">-</span></td>
+        <td style="border:none; text-align:right;"><strong>मोबाइल नंबर:</strong> <span id="outPhone">-</span></td>
+      </tr>
+    </table>
+
+    <div id="outFoodArea"></div>
+
+    <table class="bill-table">
+      <thead>
+        <tr style="background:#f0f0f0;"><th colspan="2">⛺ टेंट, स्टेज, लाइट व डेकोरेशन सामान सूची</th></tr>
+      </thead>
+      <tbody id="outTentBody"></tbody>
+    </table>
+
+    <div style="margin-top:25px; display:flex; justify-content:space-between; font-size:12px;">
+      <div>ग्राहक हस्ताक्षर: ___________________</div>
+      <div>टेंट प्रोपराइटर हस्ताक्षर: ___________________</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Google Apps Script Web App URL
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyt4jnpMWLRND8pYlIjpqUkFm-h6iPf_3C89MvTBu3vZf6E6Xw1L4pARwQQnjHMEm8/exec";
+
+  // श्रेणियों और व्यंजनों की सुव्यवस्थित सूची
+  const categoryMaster = {
+    chaat: {
+      title: "🥟 चाट, समोसा व आलू गुटके",
+      items: [
+        "आलू के गुटके (पहाड़ी स्टाइल)", "समोसा", "टिक्की चाट", "पानी बतासा (गोलगप्पा)", "पापड़ी चाट", "दही भल्ला",
+        "मिक्स पकोड़ी", "पनीर पकोड़ा", "आलूबोंडा", "छोला भटूरा", "पाव भाजी", "मूंगफली चाट", "चना मसाला (चाट)"
+      ]
+    },
+    chinese: {
+      title: "🍜 चाइनीज व फास्ट-फूड",
+      items: [
+        "चाउमिन (Chowmein)", "वेज हक्का नूडल्स", "वेज मोमोज़ (स्टीम)", "वेज मोमोज़ (फ्राई / कुरकुरे)", 
+        "स्प्रिंग रोल", "वेज मंचूरियन (ड्राई)", "वेज मंचूरियन (ग्रेवी)", "फ्रेंच फ्राइज", "चिल्ली पोटैटो", 
+        "हनी चिल्ली पोटैटो", "पास्ता (रेड सॉस)", "पास्ता (व्हाइट सॉस)", "डोसा", "इडली सांभर"
+      ]
+    },
+    starters: {
+      title: "🍢 टिक्का, कबाब व स्टार्टर्स",
+      items: [
+        "पनीर टिक्का (ड्राई)", "मलाई पनीर टिक्का", "सोया टिक्का", "सोया मलाई चाप", 
+        "वेज कबाब", "मसाला कबाब", "हरियाली कबाब", "दही के कबाब", "सीक कबाब (वेज)",
+        "कटलेट", "चीजबोल"
+      ]
+    },
+    liquids: {
+      title: "☕ पेय, चाय व सूप",
+      items: [
+        "चाय", "मसाला चाय", "कॉफी (Hot Coffee)", "कोल्ड कॉफी (Cold Coffee)", 
+        "टोमैटो सूप (Tomato Soup)", "वेज मंचाउ सूप", "स्वीट कॉर्न सूप", "हॉट बादाम मिल्क", "दूध (गर्म/मसाला)",
+        "कोल्ड्रिंक", "मॉकटेल", "शिकंजी", "जलजीरा", "छाछ / लस्सी", "ठंडाई",
+        "मिनरल वाटर (बोतल)", "पानी कैंपर", "सोडा पानी"
+      ]
+    },
+    dal: {
+      title: "🍲 दालें, फाणु व चैंसू",
+      items: [
+        "दाल फ्राई (Dal Fry)", "दाल तड़का", "कंडाली फाणु", "दाल फाणु", "चैंसू (उड़द/भट्ट)", 
+        "दाल मखनी", "राजमा दाल (पंजाबी)", "उड़द दाल (फ्राई/तड़का)", "अरहर मसूर दाल (तड़का)", 
+        "कढ़ी पकोड़ा", "चना दाल फ्राई", "दाल पंचमेल"
+      ]
+    },
+    sabzi: {
+      title: "🥦 सब्जी व पनीर",
+      items: [
+        "मटर पनीर", "शाही पनीर", "कढ़ाई पनीर", "पनीर टिक्का मसाला", "पनीर बटर मसाला", "पालक पनीर", "खोया पनीर",
+        "छोला (पिंडी/मसाला)", "चना मसाला", "मिक्स सब्जी", "आलू की सब्जी (भंडारे वाली)", "आलू गोभी मटर", 
+        "सोया चाप मसाला", "मटर मशरूम", "दम आलू", "भिंडी मसाला", "बैंगन भर्ता", "वेज कोफ्ता"
+      ]
+    },
+    rice: {
+      title: "🍚 चावल / भात",
+      items: [
+        "सादा चावल (प्लेन राइस)", "जीरा चावल (जीरा राइस)", "मटर पुलाव", 
+        "कश्मीरी पुलाव", "मीठा चावल (लाल भात / केसरी भात)", "फ्राइड राइस", 
+        "पनीर पुलाव (पनीर राइस)", "वेज पुलाव / बिरयानी", "दाल खिचड़ी"
+      ]
+    },
+    breads: {
+      title: "🫓 रोटी, पूरी व नान",
+      items: [
+        "तवा रोटी (सादा)", "तवा रोटी (मक्खन)", "तंदूरी रोटी (नान)", "बटर नान", "लच्छा पराठा", 
+        "मिस्सी रोटी", "पूरी (सादा)", "बेड़मी पूरी", "कचौड़ी", "भटूरा"
+      ]
+    },
+    sweets: {
+      title: "🍨 मिठाई व आइसक्रीम",
+      items: [
+        "जलेबी", "रबड़ी", "जलेबी रबड़ी", "गुलाब जामुन", "रसगुल्ला / छोटे रसगुल्ले", 
+        "रसमलाई", "गाजर का हलवा", "मूंग दाल हलवा", "सूजी का हलवा", "इमरती",
+        "लड्डू (बूंदी/मोतीचूर)", "बेसन लड्डू", "बालू साही", "मिल्क केक", "काजू कतली", 
+        "मठरी", "सक्कर पारा", "आइसक्रीम (वैनिला/स्ट्रॉबेरी/बटरस्कॉच)", "कुल्फी (मटका/केसर पिस्ता)", "पेस्ट्री"
+      ]
+    },
+    salad: {
+      title: "🥗 रायता, सलाद व पापड़",
+      items: [
+        "रायता बूंदी", "मिक्स वेज रायता", "खीरा रायता", "अनानास (Pineapple) रायता", 
+        "दही वड़ा", "ग्रीन सलाद", "रूसी सलाद (Russian Salad)", "सिरका प्याज", "पापड़", "मसाला पापड़", "आचार", "हरी चटनी", "मीठी चटनी"
+      ]
+    },
+    nvSnacks: {
+      title: "🍗 नॉन-वेज स्नैक्स",
+      items: [
+        "चिकन मोमोज़ (स्टीम)", "चिकन मोमोज़ (फ्राई / कुरकुरे)",
+        "चिकन कबाब", "चिकन मसाला कबाब", "चिकन सीक कबाब", "चिकन शामी कबाब", "चिकन गलौटी कबाब",
+        "मटन सीक कबाब", "मटन शामी कबाब", "मटन गलौटी कबाब", "मटन बोटी कबाब",
+        "चिकन टिक्का (तंदूरी)", "चिकन मलाई टिक्का", "चिकन अफ़गानी टिक्का", "तंदूरी चिकन", 
+        "चिकन रोस्टेड / फ्राई", "चिकन लॉलीपॉप", "चिल्ली चिकन (ड्राई)", "चिकन टंगड़ी कबाब", "चिकन पॉपकॉर्न",
+        "फिश फ्राई", "फिश फिंगर", "फिश टिक्का", "अंडा भुर्जी", "बॉयल एग (मसाला)"
+      ]
+    },
+    nvMain: {
+      title: "🍲 नॉन-वेज मेन कोर्स",
+      items: [
+        "चिकन करी (देसी स्टाइल)", "कढ़ाई चिकन", "बटर चिकन", "चिकन कोरमा", "चिकन मसाला", "हंडी चिकन", "चिकन लबावदार",
+        "चिकन बिरयानी", "मटन बिरयानी",
+        "मटन करी (देसी मटन)", "मटन कोरमा", "मटन रोगन जोश", "मटन रड़ा", "मटन हांडी", "मटन पाया सूप / करी",
+        "फिश करी (मछली तरी)", "फिश मसाला", "एग करी (अंडा तरी)"
+      ]
+    }
+  };
+
+  const defaultSessions = [
+    { title: "सुबह का नाश्ता", pax: "" },
+    { title: "दिन का खाना (लंच)", pax: "" },
+    { title: "शाम का नाश्ता / संगीत", pax: "" },
+    { title: "रात का खाना (प्रीतिभोज)", pax: "" }
+  ];
+
+  let schedule = [];
+  let tentList = [];
+  let currentOrderId = null;
+
+  // Undo (Ctrl+Z)
+  let undoHistory = [];
+  function saveState() {
+    let state = {
+      schedule: JSON.parse(JSON.stringify(schedule)),
+      tentList: JSON.parse(JSON.stringify(tentList)),
+      custName: document.getElementById('custName').value,
+      custPhone: document.getElementById('custPhone').value,
+      eventDate: document.getElementById('eventStartDate').value,
+      address: document.getElementById('eventAddress').value
+    };
+    undoHistory.push(JSON.stringify(state));
+    if (undoHistory.length > 25) undoHistory.shift();
+  }
+
+  function undoAction() {
+    if (undoHistory.length === 0) {
+      alert("वापस (Undo) करने के लिए कोई पिछला कार्य नहीं है!");
+      return;
+    }
+    let lastState = JSON.parse(undoHistory.pop());
+    schedule = lastState.schedule;
+    tentList = lastState.tentList;
+    document.getElementById('custName').value = lastState.custName;
+    document.getElementById('custPhone').value = lastState.custPhone;
+    document.getElementById('eventStartDate').value = lastState.eventDate;
+    document.getElementById('eventAddress').value = lastState.address;
+    
+    updateEventDates();
+    renderDaysUI();
+    renderTentBadges();
+    renderReceipt();
+  }
+
+  window.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+      if (document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        undoAction();
+      }
+    }
+  });
+
+  // बाहर कहीं भी क्लिक करने पर खुले हुए ड्रॉपडाउन बंद हो जाएं
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.multiselect-container')) {
+      closeAllMultiDropdowns();
+    }
+  });
+
+  window.onload = function() {
+    loadFirmProfile();
+    let today = new Date().toISOString().split('T')[0];
+    document.getElementById('eventStartDate').value = today;
+    updateEventDates();
+
+    addNewDayWithCalendar(today);
+    renderReceipt();
+  };
+
+  function saveFirmProfile() {
+    localStorage.setItem('t_name', document.getElementById('firmName').value);
+    localStorage.setItem('t_phone', document.getElementById('firmPhone').value);
+    localStorage.setItem('t_tag', document.getElementById('firmTagline').value);
+    alert("✅ टेंट हाउस की प्रोफाइल सुरक्षित हो गई!");
+    renderReceipt();
+  }
+
+  function loadFirmProfile() {
+    if(localStorage.getItem('t_name')) document.getElementById('firmName').value = localStorage.getItem('t_name');
+    if(localStorage.getItem('t_phone')) document.getElementById('firmPhone').value = localStorage.getItem('t_phone');
+    if(localStorage.getItem('t_tag')) document.getElementById('firmTagline').value = localStorage.getItem('t_tag');
+  }
+
+  function updateEventDates() {
+    let d = document.getElementById('eventStartDate').value;
+    if(d) {
+      let parts = d.split('-');
+      document.getElementById('outEventDate').innerText = `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+  }
+
+  function addNewDayWithCalendar(defaultDateStr = "") {
+    saveState();
+    let dayId = "d_" + Date.now();
+    let dVal = defaultDateStr || document.getElementById('eventStartDate').value || new Date().toISOString().split('T')[0];
+    let dayObj = { id: dayId, date: dVal, sessions: [] };
+    schedule.push(dayObj);
+    addNextSession(dayId);
+    renderDaysUI();
+  }
+
+  function removeDay(dayId) {
+    saveState();
+    schedule = schedule.filter(d => d.id !== dayId);
+    renderDaysUI();
+  }
+
+  function addNextSession(dayId) {
+    saveState();
+    let day = schedule.find(d => d.id === dayId);
+    if (!day) return;
+
+    let nextIdx = day.sessions.length % defaultSessions.length;
+    let template = defaultSessions[nextIdx];
+
+    let sessId = "s_" + Date.now() + Math.floor(Math.random()*100);
+    day.sessions.push({
+      id: sessId,
+      title: template.title,
+      pax: template.pax || "",
+      items: []
+    });
+    renderDaysUI();
+  }
+
+  function addNextSessionFromSticky() {
+    let sel = document.getElementById('stickyDaySelect');
+    if (!sel || !sel.value) {
+      alert("कृपया पहले कोई तारीख जोड़ें!");
+      return;
+    }
+    addNextSession(sel.value);
+  }
+
+  function updateStickyDaySelect() {
+    let sel = document.getElementById('stickyDaySelect');
+    if (!sel) return;
+    
+    let currentVal = sel.value;
+    sel.innerHTML = "";
+
+    schedule.forEach((d, i) => {
+      let dParts = d.date ? d.date.split('-') : [];
+      let dateLabel = dParts.length === 3 ? `${dParts[2]}/${dParts[1]}/${dParts[0]}` : `तारीख ${i+1}`;
+      let opt = document.createElement('option');
+      opt.value = d.id;
+      opt.innerText = `📅 ${dateLabel}`;
+      if (d.id === currentVal) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+
+  function removeSession(dayId, sessId) {
+    saveState();
+    let day = schedule.find(d => d.id === dayId);
+    if (day) {
+      day.sessions = day.sessions.filter(s => s.id !== sessId);
+      renderDaysUI();
+    }
+  }
+
+  // ड्रॉपडाउन खोलना / बंद करना
+  function toggleMultiDropdown(uniqueId, event) {
+    if(event) event.stopPropagation();
+    let menu = document.getElementById('menu_' + uniqueId);
+    let isOpen = menu.style.display === 'block';
+    closeAllMultiDropdowns();
+    if (!isOpen) {
+      menu.style.display = 'block';
+    }
+  }
+
+  function closeAllMultiDropdowns() {
+    document.querySelectorAll('.multiselect-menu').forEach(m => m.style.display = 'none');
+  }
+
+  // चेकबॉक्स टिक होने पर बैज अपडेट करना
+  function updateMultiBadge(sessId, catKey) {
+    let container = document.getElementById(`ms_${sessId}_${catKey}`);
+    if (!container) return;
+    let checked = container.querySelectorAll('input[type="checkbox"]:checked');
+    let badge = document.getElementById(`badge_${sessId}_${catKey}`);
+    let btn = container.querySelector('.multiselect-btn');
+
+    if (checked.length > 0) {
+      badge.innerText = checked.length;
+      badge.style.display = 'inline-block';
+      btn.style.borderColor = '#28a745';
+      btn.style.backgroundColor = '#e8f8ec';
+      btn.style.fontWeight = 'bold';
+    } else {
+      badge.innerText = '0';
+      badge.style.display = 'none';
+      btn.style.borderColor = '#b0bec5';
+      btn.style.backgroundColor = '#ffffff';
+      btn.style.fontWeight = 'normal';
+    }
+  }
+
+  // किसी श्रेणी के सभी टिक हटाना
+  function clearCatSelection(sessId, catKey, event) {
+    if(event) event.stopPropagation();
+    let container = document.getElementById(`ms_${sessId}_${catKey}`);
+    if (!container) return;
+    container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    updateMultiBadge(sessId, catKey);
+  }
+
+  // ड्रॉपडाउन के अंदर सर्च फ़िल्टर
+  function filterMultiItems(inp) {
+    let q = inp.value.toLowerCase();
+    let list = inp.closest('.multiselect-menu').querySelectorAll('.ms-item');
+    list.forEach(item => {
+      let txt = item.textContent.toLowerCase();
+      item.style.display = txt.includes(q) ? 'flex' : 'none';
+    });
+  }
+
+  // एक साथ सभी टिक किए गए सामान जोड़ना (Bulk Multi Add)
+  function addAllSelectedItems(dayId, sessId) {
+    let day = schedule.find(d => d.id === dayId);
+    let sess = day.sessions.find(s => s.id === sessId);
+    
+    let checkedBoxes = document.querySelectorAll(`.chk-item-${sessId}:checked`);
+    let customInput = document.getElementById(`custom_item_${sessId}`);
+    let customVal = customInput ? customInput.value.trim() : "";
+    let qty = document.getElementById(`qty_${sessId}`).value.trim();
+    let unit = document.getElementById(`unit_${sessId}`).value;
+
+    let itemsToAdd = [];
+
+    // 1. सभी टिक किए गए आइटम सूची में जोड़ें
+    checkedBoxes.forEach(cb => {
+      let isNv = cb.getAttribute('data-nv') === '1';
+      itemsToAdd.push({
+        name: cb.value.trim(),
+        qty: qty,
+        unit: unit,
+        isNv: isNv
+      });
+      cb.checked = false; // रीसेट
+    });
+
+    // 2. यदि हाथ से भी कोई नया व्यंजन लिखा हो तो उसे भी जोड़ें
+    if (customVal !== "") {
+      itemsToAdd.push({
+        name: customVal,
+        qty: qty,
+        unit: unit,
+        isNv: false
+      });
+      customInput.value = "";
+    }
+
+    if (itemsToAdd.length === 0) {
+      alert("कृपया किसी भी श्रेणी से कम से कम एक सामान पर टिक (✓) लगाएं या बॉक्स में नाम लिखें!");
+      return;
+    }
+
+    saveState();
+    itemsToAdd.forEach(it => sess.items.push(it));
+
+    document.getElementById(`qty_${sessId}`).value = "";
+    closeAllMultiDropdowns();
+    renderDaysUI();
+  }
+
+  function deleteItem(dayId, sessId, idx) {
+    saveState();
+    let day = schedule.find(d => d.id === dayId);
+    let sess = day.sessions.find(s => s.id === sessId);
+    sess.items.splice(idx, 1);
+    renderDaysUI();
+  }
+
+  // मल्टी-सलेक्ट ड्रॉपडाउन HTML जेनरेटर
+  function generateMultiSelectHTML(sessId, catKey, isNv = false) {
+    let c = categoryMaster[catKey];
+    let uniqueId = `${sessId}_${catKey}`;
+
+    let itemsHTML = c.items.map(it => `
+      <label class="ms-item">
+        <input type="checkbox" class="chk-item-${sessId}" value="${it}" data-nv="${isNv ? '1' : '0'}" onchange="updateMultiBadge('${sessId}', '${catKey}')">
+        <span>${it}</span>
+      </label>
+    `).join("");
+
+    return `
+      <div class="cat-box">
+        <label style="${isNv ? 'color:#b22222; font-weight:bold;' : ''}">${c.title}:</label>
+        <div class="multiselect-container" id="ms_${uniqueId}">
+          <button type="button" class="multiselect-btn" onclick="toggleMultiDropdown('${uniqueId}', event)">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px;">-- चुनें --</span>
+            <div style="display:flex; align-items:center;">
+              <span class="ms-badge" id="badge_${uniqueId}">0</span>
+              <span style="font-size:10px; color:#666; margin-left:4px;">▼</span>
+            </div>
+          </button>
+          
+          <div class="multiselect-menu" id="menu_${uniqueId}">
+            <div class="ms-header">
+              <span style="font-size:11px; font-weight:bold; color:#444;">व्यंजन चुनें (मल्टी):</span>
+              <span onclick="clearCatSelection('${sessId}', '${catKey}', event)" style="font-size:11px; color:red; cursor:pointer;">हटाएं ✖</span>
+            </div>
+            <input type="text" placeholder="🔍 खोजें..." onkeyup="filterMultiItems(this)" onclick="event.stopPropagation();" style="padding:4px 6px; font-size:11px; margin-bottom:5px;">
+            <div style="max-height:180px; overflow-y:auto;">
+              ${itemsHTML}
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderDaysUI() {
+    let wrap = document.getElementById('daysWrapper');
+    wrap.innerHTML = "";
+
+    schedule.forEach((day, dIdx) => {
+      let dayBox = document.createElement('div');
+      dayBox.className = "day-box";
+
+      let dHtml = `
+        <div class="day-header">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <strong>📅 तारीख चुनें:</strong>
+            <input type="date" value="${day.date}" style="width:160px;" onchange="saveState(); schedule[${dIdx}].date = this.value; renderDaysUI(); renderReceipt();">
+          </div>
+          <div>
+            <button class="btn btn-danger" style="font-size:11px; padding:4px 8px;" onclick="removeDay('${day.id}')">दिन हटाएं</button>
+          </div>
+        </div>
+      `;
+
+      day.sessions.forEach((sess, sIdx) => {
+        let badges = sess.items.map((it, iIdx) => `
+          <span class="item-badge ${it.isNv ? 'item-badge-nonveg' : ''}">
+            ${it.name} ${it.qty ? '<strong>('+it.qty+' '+it.unit+')</strong>' : ''}
+            <span style="cursor:pointer; color:red; margin-left:3px;" onclick="deleteItem('${day.id}', '${sess.id}', ${iIdx})">✖</span>
+          </span>
+        `).join("");
+
+        let vegKeys = ['chaat', 'chinese', 'starters', 'liquids', 'dal', 'sabzi', 'rice', 'breads', 'sweets', 'salad'];
+        let vegDropCols = vegKeys.map(k => generateMultiSelectHTML(sess.id, k, false)).join("");
+
+        let nvKeys = ['nvSnacks', 'nvMain'];
+        let nvDropCols = nvKeys.map(k => generateMultiSelectHTML(sess.id, k, true)).join("");
+
+        dHtml += `
+          <div class="session-box">
+            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+              <label style="margin:0;">सत्र:</label>
+              <input type="text" value="${sess.title}" style="width:170px; font-weight:bold;" oninput="schedule[${dIdx}].sessions[${sIdx}].title = this.value; renderReceipt();">
+              <label style="margin:0;">आदमी (Pax):</label>
+              <input type="text" placeholder="खाली छोड़ें या संख्या लिखें" value="${sess.pax}" style="width:160px;" oninput="schedule[${dIdx}].sessions[${sIdx}].pax = this.value; renderReceipt();">
+              <button class="btn btn-danger" style="font-size:10px; padding:2px 6px; margin-left:auto;" onclick="removeSession('${day.id}', '${sess.id}')">सत्र हटाएं</button>
+            </div>
+
+            <div class="menu-panel veg-panel">
+              <div style="font-weight:bold; font-size:12px; color:green; margin-bottom:6px;">🥬 शाकाहारी मेन्यू (ड्रॉपडाउन खोलकर जितने चाहें उतने सामान टिक करें):</div>
+              <div class="category-line">${vegDropCols}</div>
+            </div>
+
+            <div class="menu-panel nonveg-panel">
+              <div style="font-weight:bold; font-size:12px; color:#b22222; margin-bottom:6px;">🍗 मांसाहारी मेन्यू (Non-Veg):</div>
+              <div class="category-line" style="grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));">${nvDropCols}</div>
+            </div>
+
+            <div class="action-row">
+              <span style="font-size:12px; font-weight:bold; color:var(--maroon);">✍️ नया सामान लिखें (वैकल्पिक):</span>
+              <input type="text" id="custom_item_${sess.id}" placeholder="यहाँ नया व्यंजन खुद भी लिख सकते हैं" style="width:230px;">
+              <input type="number" id="qty_${sess.id}" placeholder="मात्रा (उदा. 25)" style="width:95px;">
+              <select id="unit_${sess.id}" style="width:95px;">
+                <option value="kg">kg (किलो)</option>
+                <option value="लीटर">लीटर</option>
+                <option value="लोग">लोग</option>
+                <option value="पीस">पीस</option>
+                <option value="प्लेट">प्लेट</option>
+                <option value="कप">कप</option>
+              </select>
+              <button class="btn btn-green" style="padding:7px 16px; font-size:13px; font-weight:bold; box-shadow:0 2px 6px rgba(0,0,0,0.2);" onclick="addAllSelectedItems('${day.id}','${sess.id}')">
+                ➕ चुने हुए सभी सामान एक साथ जोड़ें
+              </button>
+            </div>
+
+            <div style="margin-top:10px; padding-top:4px;">
+              <strong>जुड़े हुए सामान:</strong>
+              <div style="margin-top:4px;">
+                ${badges || '<small style="color:#888;">इस सत्र में अभी कोई सामान नहीं जुड़ा है। ऊपर से जितने चाहें सामान चुनें और जोड़ें।</small>'}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      dayBox.innerHTML = dHtml;
+      wrap.appendChild(dayBox);
+    });
+
+    updateStickyDaySelect();
+    renderReceipt();
+  }
+
+  function toggleCustomTent(sel) {
+    document.getElementById('customTentInput').style.display = (sel.value === "CUSTOM") ? "block" : "none";
+  }
+
+  function addTentItem() {
+    let sel = document.getElementById('tentDrop');
+    let itemName = (sel.value === "CUSTOM") ? document.getElementById('customTentInput').value.trim() : sel.value;
+    if(!itemName) { alert("सामान का नाम लिखें!"); return; }
+
+    saveState();
+    let size = document.getElementById('tentSize').value.trim();
+    let qty = document.getElementById('tentQty').value.trim();
+    let unit = document.getElementById('tentUnit').value;
+
+    tentList.push({ name: itemName, size: size, qty: qty, unit: unit });
+    
+    document.getElementById('tentSize').value = "";
+    document.getElementById('tentQty').value = "";
+    renderTentBadges();
+    renderReceipt();
+  }
+
+  function deleteTent(idx) {
+    saveState();
+    tentList.splice(idx, 1);
+    renderTentBadges();
+    renderReceipt();
+  }
+
+  function renderTentBadges() {
+    let box = document.getElementById('tentBadges');
+    box.innerHTML = tentList.map((t, i) => `
+      <span class="item-badge" style="background:#fff3cd; color:#856404; border-color:#ffeeba;">
+        ${t.name} ${t.size ? '<strong>(साइज: '+t.size+')</strong>' : ''} ${t.qty ? ': '+t.qty+' '+t.unit : ''}
+        <span style="cursor:pointer; color:red; margin-left:4px;" onclick="deleteTent(${i})">✖</span>
+      </span>
+    `).join("") || '<small style="color:#888;">कोई टेंट सामान नहीं जुड़ा।</small>';
+  }
+
+  function renderReceipt() {
+    document.getElementById('outFirmName').innerText = document.getElementById('firmName').value || "टेंट हाउस एवं कैटरर्स";
+    document.getElementById('outFirmPhone').innerText = document.getElementById('firmPhone').value || "-";
+    document.getElementById('outFirmTagline').innerText = document.getElementById('firmTagline').value || "";
+
+    document.getElementById('outCustName').innerText = document.getElementById('custName').value || "-";
+    document.getElementById('outPhone').innerText = document.getElementById('custPhone').value || "-";
+    document.getElementById('outAddress').innerText = document.getElementById('eventAddress').value || "-";
+
+    let foodHtml = "";
+    schedule.forEach(d => {
+      if(d.sessions.length > 0) {
+        let dParts = d.date.split('-');
+        let dFormatted = `${dParts[2]}/${dParts[1]}/${dParts[0]}`;
+
+        foodHtml += `<table class="bill-table">
+          <thead><tr style="background:#f0f0f0;"><th colspan="2">📅 दिनांक: ${dFormatted}</th></tr></thead><tbody>`;
+        
+        d.sessions.forEach(s => {
+          let itemsStr = s.items.map(it => `${it.name}${it.qty ? ' ('+it.qty+' '+it.unit+')' : ''}`).join(", ") || "—";
+          
+          let paxText = "";
+          if (s.pax && s.pax.trim() !== "") {
+            let cleanPax = s.pax.trim();
+            paxText = cleanPax.includes("लोग") ? `(${cleanPax})` : `(${cleanPax} लोग)`;
+          }
+
+          foodHtml += `<tr>
+            <td width="30%"><strong>${s.title}</strong>${paxText ? '<br><small style="color:#555;">' + paxText + '</small>' : ''}</td>
+            <td width="70%">${itemsStr}</td>
+          </tr>`;
+        });
+
+        foodHtml += `</tbody></table>`;
+      }
+    });
+    document.getElementById('outFoodArea').innerHTML = foodHtml || "<p style='font-size:12px; color:#888;'>कोई भोजन मीनू दर्ज नहीं है।</p>";
+
+    let tentRows = "";
+    for(let i=0; i<tentList.length; i+=2) {
+      let t1 = tentList[i];
+      let t2 = tentList[i+1];
+      
+      let t1Text = t1 ? `• ${t1.name} ${t1.size ? '('+t1.size+')' : ''} ${t1.qty ? ': <strong>'+t1.qty+' '+t1.unit+'</strong>' : ''}` : '';
+      let t2Text = t2 ? `• ${t2.name} ${t2.size ? '('+t2.size+')' : ''} ${t2.qty ? ': <strong>'+t2.qty+' '+t2.unit+'</strong>' : ''}` : '';
+
+      tentRows += `<tr>
+        <td width="50%">${t1Text}</td>
+        <td width="50%">${t2Text}</td>
+      </tr>`;
+    }
+    document.getElementById('outTentBody').innerHTML = tentRows || "<tr><td colspan='2' style='color:#888;'>कोई टेंट सामान दर्ज नहीं किया गया।</td></tr>";
+  }
+
+  // -------------------------------------------------------------
+  // JPEG फोटो डाउनलोड फ़ंक्शन (WhatsApp व शेयरिंग के लिए)
+  // -------------------------------------------------------------
+  function downloadImage() {
+    renderReceipt();
+    let cName = document.getElementById('custName').value.trim() || "Tent_Order";
+    let receiptEl = document.getElementById('billReceipt');
+
+    window.scrollTo(0, receiptEl.offsetTop - 70);
+
+    // html2canvas के जरिए साफ़ HD फोटो बनाना
+    html2canvas(receiptEl, {
+      scale: 2,
+      useCORS: true,
+      backgroundColor: "#ffffff"
+    }).then(canvas => {
+      let a = document.createElement("a");
+      a.href = canvas.toDataURL("image/jpeg", 0.95);
+      a.download = `${cName}_बिल_पर्ची.jpg`;
+      a.click();
+    }).catch(err => {
+      alert("❌ फोटो बनाने में समस्या: " + err.message);
+    });
+  }
+
+  // -------------------------------------------------------------
+  // Google Drive डायरेक्ट इंटीग्रेशन
+  // -------------------------------------------------------------
+  async function saveToGoogleDrive() {
+    let cName = document.getElementById('custName').value.trim();
+    if (!cName) {
+      alert("कृपया ग्राहक का नाम लिखें!");
+      return;
+    }
+
+    let orderData = {
+      custName: cName,
+      custPhone: document.getElementById('custPhone').value,
+      address: document.getElementById('eventAddress').value,
+      eventDate: document.getElementById('eventStartDate').value,
+      firmName: document.getElementById('firmName').value,
+      firmPhone: document.getElementById('firmPhone').value,
+      firmTagline: document.getElementById('firmTagline').value,
+      schedule: schedule,
+      tentList: tentList
+    };
+
+    try {
+      // बैकग्राउंड में Google Apps Script Web App को भेजना
+      await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData)
+      });
+
+      alert(`✅ बधाई! "${cName}" का आर्डर आपकी Google Drive के 'Tent_House_Orders' फ़ोल्डर में हमेशा के लिए सुरक्षित हो गया है!`);
+      saveOrderToBrowserStorage();
+    } catch(err) {
+      alert("❌ Google Drive में सेव करने में समस्या: " + err.message);
+    }
+  }
+
+  async function openGoogleDriveList() {
+    let card = document.getElementById('driveListCard');
+    let body = document.getElementById('driveFilesBody');
+    let loading = document.getElementById('driveLoading');
+    
+    card.style.display = 'block';
+    body.innerHTML = "";
+    loading.style.display = 'block';
+
+    try {
+      let res = await fetch(GOOGLE_SCRIPT_URL);
+      let list = await res.json();
+      loading.style.display = 'none';
+
+      if (!list || list.length === 0) {
+        body.innerHTML = "<tr><td colspan='3' align='center'>Google Drive में अभी कोई आर्डर नहीं मिला।</td></tr>";
+        return;
+      }
+
+      list.forEach(f => {
+        let cleanName = f.name.replace("_Order.tent", "");
+        body.innerHTML += `
+          <tr>
+            <td><strong>${cleanName}</strong></td>
+            <td>${f.date}</td>
+            <td>
+              <button class="btn btn-green" style="font-size:11px; padding:3px 8px;" onclick="loadFromGoogleDrive('${f.id}')">✏️ Drive से खोलें</button>
+            </td>
+          </tr>
+        `;
+      });
+    } catch(err) {
+      loading.style.display = 'none';
+      alert("Google Drive से सूची लाने में समस्या हुई। कृपया इंटरनेट कनेक्शन जांचें!");
+    }
+  }
+
+  async function loadFromGoogleDrive(fileId) {
+    try {
+      let res = await fetch(`${GOOGLE_SCRIPT_URL}?fileId=${fileId}`);
+      let o = await res.json();
+
+      saveState();
+      document.getElementById('custName').value = o.custName || "";
+      document.getElementById('custPhone').value = o.custPhone || "";
+      document.getElementById('eventAddress').value = o.address || "";
+      document.getElementById('eventStartDate').value = o.eventDate || "";
+      updateEventDates();
+
+      schedule = o.schedule || [];
+      tentList = o.tentList || [];
+
+      renderDaysUI();
+      renderTentBadges();
+      renderReceipt();
+      document.getElementById('driveListCard').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      alert(`🎉 Google Drive से "${o.custName}" का रिकॉर्ड लोड हो गया! अब आप इसमें कोई भी सुधार करके दोबारा 'Google Drive में सेव' कर सकते हैं।`);
+    } catch(err) {
+      alert("फ़ाइल लोड करने में समस्या हुई!");
+    }
+  }
+
+  function saveOrderToBrowserStorage() {
+    let cName = document.getElementById('custName').value.trim() || "अज्ञात_ग्राहक";
+    let all = JSON.parse(localStorage.getItem('my_tent_history_v4') || '[]');
+    let orderId = currentOrderId || Date.now();
+
+    let data = {
+      id: orderId,
+      created: new Date().toLocaleDateString('hi-IN'),
+      custName: cName,
+      custPhone: document.getElementById('custPhone').value,
+      address: document.getElementById('eventAddress').value,
+      eventDate: document.getElementById('eventStartDate').value,
+      schedule: schedule,
+      tentList: tentList
+    };
+
+    let existingIndex = all.findIndex(x => x.id === orderId);
+    if (existingIndex !== -1) {
+      all[existingIndex] = data;
+    } else {
+      all.unshift(data);
+    }
+    localStorage.setItem('my_tent_history_v4', JSON.stringify(all));
+  }
+
+  function downloadWord() {
+    let cName = document.getElementById('custName').value || "Tent_Order";
+    let billHtml = document.getElementById('billReceipt').innerHTML;
+
+    let docHtml = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+            xmlns:w='urn:schemas-microsoft-com:office:word' 
+            xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset='utf-8'>
+        <title>Order Receipt</title>
+        <style>
+          @page Section1 {
+            size: 210mm 297mm;
+            margin: 15mm 15mm 15mm 15mm;
+            mso-header-margin: 35.4pt;
+            mso-footer-margin: 35.4pt;
+            mso-paper-source: 0;
+          }
+          div.Section1 { page: Section1; }
+          body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11pt; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+          table, th, td { border: 1px solid #444; }
+          th { background-color: #f0f0f0; }
+          th, td { padding: 6px 8px; text-align: left; }
+        </style>
+      </head>
+      <body>
+        <div class="Section1">
+          ${billHtml}
+        </div>
+      </body>
+      </html>
+    `;
+
+    let blob = new Blob(['\ufeff' + docHtml], { type: 'application/msword' });
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${cName}_Order.doc`;
+    a.click();
+  }
+
+  function toggleHistory() {
+    let card = document.getElementById('historyCard');
+    card.style.display = (card.style.display === "none") ? "block" : "none";
+    renderHistory();
+  }
+
+  function renderHistory() {
+    let all = JSON.parse(localStorage.getItem('my_tent_history_v4') || '[]');
+    let body = document.getElementById('historyBody');
+    body.innerHTML = all.length === 0 ? "<tr><td colspan='5' align='center'>कोई पुराना आर्डर नहीं मिला।</td></tr>" : "";
+
+    all.forEach(o => {
+      body.innerHTML += `
+        <tr>
+          <td>${o.created}</td>
+          <td><strong>${o.custName}</strong></td>
+          <td>${o.custPhone || '-'}</td>
+          <td>${o.eventDate || '-'}</td>
+          <td>
+            <button class="btn btn-green" style="font-size:11px; padding:4px 8px;" onclick="loadOrder(${o.id})">✏️ खोलें व सुधार करें</button>
+            <button class="btn btn-danger" style="font-size:11px; padding:4px 8px;" onclick="deleteOrder(${o.id})">हटाएं</button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  function loadOrder(id) {
+    let all = JSON.parse(localStorage.getItem('my_tent_history_v4') || '[]');
+    let o = all.find(x => x.id === id);
+    if (!o) return;
+
+    currentOrderId = o.id;
+    document.getElementById('custName').value = o.custName;
+    document.getElementById('custPhone').value = o.custPhone || "";
+    document.getElementById('eventAddress').value = o.address || "";
+    document.getElementById('eventStartDate').value = o.eventDate || "";
+    updateEventDates();
+
+    schedule = o.schedule || [];
+    tentList = o.tentList || [];
+
+    renderDaysUI();
+    renderTentBadges();
+    renderReceipt();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    alert("✅ " + o.custName + " का पुराना रिकॉर्ड लोड हो गया!");
+  }
+
+  function deleteOrder(id) {
+    if(!confirm("क्या आप वाकई इस रिकॉर्ड को हटाना चाहते हैं?")) return;
+    let all = JSON.parse(localStorage.getItem('my_tent_history_v4') || '[]');
+    all = all.filter(x => x.id !== id);
+    localStorage.setItem('my_tent_history_v4', JSON.stringify(all));
+    renderHistory();
+  }
+</script>
+
+</body>
+</html>
