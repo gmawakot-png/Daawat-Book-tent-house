@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>टेंट हाउस एवं कैटरिंग मैनेजमेंट सिस्टम (Google Drive & JPEG Enabled)</title>
+  <title>टेंट हाउस एवं कैटरिंग मैनेजमेंट सिस्टम (Auto-Date, Hindi Sorting & Session Copy)</title>
   <!-- JPEG फोटो डाउनलोड लाइब्रेरी (html2canvas) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   
@@ -170,7 +170,7 @@
 </head>
 <body>
 
-<!-- फ़्रीज़ किया हुआ फ्लोटिंग एक्शन बार (Sticky Action Bar) -->
+<!-- फ़्रीज़ किया हुआ फ्लोटिंग एक्शन बार -->
 <div class="sticky-action-bar no-print">
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
     <button class="btn btn-maroon" onclick="addNewDayWithCalendar()">📅 + नई तारीख</button>
@@ -180,10 +180,12 @@
       <select id="stickyDaySelect" style="width:135px; padding:4px; font-weight:bold; font-size:12px;" title="किस तारीख में सत्र जोड़ना है चुनें"></select>
     </div>
 
+    <!-- Undo और Redo बटन -->
     <button class="btn btn-secondary" onclick="undoAction()" title="Ctrl+Z दबाएं">↩️ पूर्ववत (Ctrl+Z)</button>
+    <button class="btn btn-secondary" onclick="redoAction()" title="Ctrl+Y दबाएं">↪️ दोहराएं (Ctrl+Y)</button>
   </div>
 
-  <!-- डाउनलोड व सेविंग बटन (सब एक साथ ऊपर मौजूद) -->
+  <!-- डाउनलोड व सेविंग बटन -->
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
     <button class="btn btn-green" onclick="saveToGoogleDrive()" title="सीधे गूगल ड्राइव में सेव करें">☁️ Google Drive में सेव</button>
     <button class="btn btn-purple" onclick="openGoogleDriveList()" title="गूगल ड्राइव से फाइलें देखें">📂 Drive फाइलें</button>
@@ -244,7 +246,7 @@
   <div class="card no-print">
     <div style="margin-bottom: 10px;">
       <h3 style="margin-bottom:2px;">🍲 भोजन एवं नाश्ता व्यवस्था (तारीख वार)</h3>
-      <small style="color:#555;">💡 <strong>सुविधा:</strong> आप ड्रॉपडाउन खोलकर <strong>एक साथ कई व्यंजनों (दाल फ्राई, दाल मखनी, कढ़ी आदि)</strong> पर टिक (✓) लगा सकते हैं और नीचे केवल एक बार <strong>'+ चुने हुए सभी सामान एक साथ जोड़ें'</strong> बटन दबाकर सबको जोड़ सकते हैं!</small>
+      <small style="color:#555;">💡 <strong>सुविधा:</strong> सभी व्यंजन हिंदी वर्णमाला (अ, आ, इ, क, ख...) के अनुसार क्रमित हैं। आप किसी भी सत्र को दूसरी तारीख में हूबहू कॉपी करने के लिए <strong>'📋 सत्र कॉपी करें'</strong> बटन का इस्तेमाल कर सकते हैं।</small>
     </div>
     <div id="daysWrapper"></div>
   </div>
@@ -395,11 +397,10 @@
 </div>
 
 <script>
-  // Google Apps Script Web App URL
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyt4jnpMWLRND8pYlIjpqUkFm-h6iPf_3C89MvTBu3vZf6E6Xw1L4pARwQQnjHMEm8/exec";
 
   // श्रेणियों और व्यंजनों की सुव्यवस्थित सूची
-  const categoryMaster = {
+  const rawCategoryMaster = {
     chaat: {
       title: "🥟 चाट, समोसा व आलू गुटके",
       items: [
@@ -501,6 +502,15 @@
     }
   };
 
+  // सभी खाद्य पदार्थों को हिंदी वर्णमाला क्रम (अ, आ, इ, क, ख... A-Z Sequence) में स्वचालित रूप से सॉर्ट करना
+  const categoryMaster = {};
+  for (let key in rawCategoryMaster) {
+    categoryMaster[key] = {
+      title: rawCategoryMaster[key].title,
+      items: [...rawCategoryMaster[key].items].sort((a, b) => a.localeCompare(b, 'hi'))
+    };
+  }
+
   const defaultSessions = [
     { title: "सुबह का नाश्ता", pax: "" },
     { title: "दिन का खाना (लंच)", pax: "" },
@@ -512,33 +522,29 @@
   let tentList = [];
   let currentOrderId = null;
 
-  // Undo (Ctrl+Z)
-  let undoHistory = [];
-  function saveState() {
-    let state = {
-      schedule: JSON.parse(JSON.stringify(schedule)),
-      tentList: JSON.parse(JSON.stringify(tentList)),
+  // Undo (Ctrl+Z) और Redo (Ctrl+Y) की व्यवस्था
+  let undoStack = [];
+  let redoStack = [];
+
+  function getCurrentSnapshot() {
+    return JSON.stringify({
+      schedule: schedule,
+      tentList: tentList,
       custName: document.getElementById('custName').value,
       custPhone: document.getElementById('custPhone').value,
       eventDate: document.getElementById('eventStartDate').value,
       address: document.getElementById('eventAddress').value
-    };
-    undoHistory.push(JSON.stringify(state));
-    if (undoHistory.length > 25) undoHistory.shift();
+    });
   }
 
-  function undoAction() {
-    if (undoHistory.length === 0) {
-      alert("वापस (Undo) करने के लिए कोई पिछला कार्य नहीं है!");
-      return;
-    }
-    let lastState = JSON.parse(undoHistory.pop());
-    schedule = lastState.schedule;
-    tentList = lastState.tentList;
-    document.getElementById('custName').value = lastState.custName;
-    document.getElementById('custPhone').value = lastState.custPhone;
-    document.getElementById('eventStartDate').value = lastState.eventDate;
-    document.getElementById('eventAddress').value = lastState.address;
+  function applySnapshot(jsonStr) {
+    let state = JSON.parse(jsonStr);
+    schedule = state.schedule || [];
+    tentList = state.tentList || [];
+    document.getElementById('custName').value = state.custName || "";
+    document.getElementById('custPhone').value = state.custPhone || "";
+    document.getElementById('eventStartDate').value = state.eventDate || "";
+    document.getElementById('eventAddress').value = state.address || "";
     
     updateEventDates();
     renderDaysUI();
@@ -546,16 +552,54 @@
     renderReceipt();
   }
 
+  function saveState() {
+    let cur = getCurrentSnapshot();
+    if (undoStack.length === 0 || undoStack[undoStack.length - 1] !== cur) {
+      undoStack.push(cur);
+      if (undoStack.length > 30) undoStack.shift();
+      redoStack = []; // नया कार्य करने पर redo खाली करें
+    }
+  }
+
+  function undoAction() {
+    if (undoStack.length === 0) {
+      alert("वापस (Undo) करने के लिए कोई पिछला कार्य नहीं है!");
+      return;
+    }
+    let current = getCurrentSnapshot();
+    redoStack.push(current);
+    let previous = undoStack.pop();
+    applySnapshot(previous);
+  }
+
+  function redoAction() {
+    if (redoStack.length === 0) {
+      alert("दोहराने (Redo) के लिए कोई कार्य नहीं है!");
+      return;
+    }
+    let current = getCurrentSnapshot();
+    undoStack.push(current);
+    let nextState = redoStack.pop();
+    applySnapshot(nextState);
+  }
+
+  // Ctrl+Z और Ctrl+Y शॉर्टकट सुनना
   window.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
       if (document.activeElement.tagName !== 'INPUT') {
         e.preventDefault();
         undoAction();
       }
+    } else if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') || 
+               ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z')) {
+      if (document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        redoAction();
+      }
     }
   });
 
-  // बाहर कहीं भी क्लिक करने पर खुले हुए ड्रॉपडाउन बंद हो जाएं
+  // बाहर कहीं भी क्लिक करने पर खुले हुए ड्रॉपडाउन बंद हों
   document.addEventListener('click', function(e) {
     if (!e.target.closest('.multiselect-container')) {
       closeAllMultiDropdowns();
@@ -594,10 +638,30 @@
     }
   }
 
-  function addNewDayWithCalendar(defaultDateStr = "") {
+  // ऑटो अगली तारीख निकालने वाला हेल्पर फ़ंक्शन (+1 Day)
+  function getNextDayDateString(dateStr) {
+    if(!dateStr) return new Date().toISOString().split('T')[0];
+    let parts = dateStr.split('-');
+    let dt = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    dt.setDate(dt.getDate() + 1);
+    return dt.toISOString().split('T')[0];
+  }
+
+  // नई तारीख जोड़ना: पिछली तारीख से अगली तारीख स्वतः सेट होना
+  function addNewDayWithCalendar(preferredDate = "") {
     saveState();
+    let dVal = preferredDate;
+
+    if (!dVal) {
+      if (schedule.length > 0) {
+        let lastDate = schedule[schedule.length - 1].date;
+        dVal = getNextDayDateString(lastDate);
+      } else {
+        dVal = document.getElementById('eventStartDate').value || new Date().toISOString().split('T')[0];
+      }
+    }
+
     let dayId = "d_" + Date.now();
-    let dVal = defaultDateStr || document.getElementById('eventStartDate').value || new Date().toISOString().split('T')[0];
     let dayObj = { id: dayId, date: dVal, sessions: [] };
     schedule.push(dayObj);
     addNextSession(dayId);
@@ -637,6 +701,37 @@
     addNextSession(sel.value);
   }
 
+  // -------------------------------------------------------------
+  // सत्र कॉपी (Clone / Duplicate Session to any Date)
+  // -------------------------------------------------------------
+  function cloneSessionToTarget(sourceDayId, sourceSessId, targetDayId) {
+    if (!targetDayId) return;
+    saveState();
+
+    let srcDay = schedule.find(d => d.id === sourceDayId);
+    if (!srcDay) return;
+    let srcSess = srcDay.sessions.find(s => s.id === sourceSessId);
+    if (!srcSess) return;
+
+    let tgtDay = schedule.find(d => d.id === targetDayId);
+    if (!tgtDay) return;
+
+    // सत्र की गहरी प्रतिलिपि (Deep Copy)
+    let clonedSession = {
+      id: "s_" + Date.now() + Math.floor(Math.random()*1000),
+      title: srcSess.title,
+      pax: srcSess.pax,
+      items: JSON.parse(JSON.stringify(srcSess.items))
+    };
+
+    tgtDay.sessions.push(clonedSession);
+    renderDaysUI();
+
+    let tDate = tgtDay.date.split('-');
+    let dateFmt = `${tDate[2]}/${tDate[1]}/${tDate[0]}`;
+    alert(`✅ "${srcSess.title}" को तारीख ${dateFmt} में सफलतापूर्वक कॉपी कर दिया गया!`);
+  }
+
   function updateStickyDaySelect() {
     let sel = document.getElementById('stickyDaySelect');
     if (!sel) return;
@@ -664,7 +759,6 @@
     }
   }
 
-  // ड्रॉपडाउन खोलना / बंद करना
   function toggleMultiDropdown(uniqueId, event) {
     if(event) event.stopPropagation();
     let menu = document.getElementById('menu_' + uniqueId);
@@ -679,7 +773,6 @@
     document.querySelectorAll('.multiselect-menu').forEach(m => m.style.display = 'none');
   }
 
-  // चेकबॉक्स टिक होने पर बैज अपडेट करना
   function updateMultiBadge(sessId, catKey) {
     let container = document.getElementById(`ms_${sessId}_${catKey}`);
     if (!container) return;
@@ -702,7 +795,6 @@
     }
   }
 
-  // किसी श्रेणी के सभी टिक हटाना
   function clearCatSelection(sessId, catKey, event) {
     if(event) event.stopPropagation();
     let container = document.getElementById(`ms_${sessId}_${catKey}`);
@@ -711,7 +803,6 @@
     updateMultiBadge(sessId, catKey);
   }
 
-  // ड्रॉपडाउन के अंदर सर्च फ़िल्टर
   function filterMultiItems(inp) {
     let q = inp.value.toLowerCase();
     let list = inp.closest('.multiselect-menu').querySelectorAll('.ms-item');
@@ -721,7 +812,6 @@
     });
   }
 
-  // एक साथ सभी टिक किए गए सामान जोड़ना (Bulk Multi Add)
   function addAllSelectedItems(dayId, sessId) {
     let day = schedule.find(d => d.id === dayId);
     let sess = day.sessions.find(s => s.id === sessId);
@@ -734,7 +824,6 @@
 
     let itemsToAdd = [];
 
-    // 1. सभी टिक किए गए आइटम सूची में जोड़ें
     checkedBoxes.forEach(cb => {
       let isNv = cb.getAttribute('data-nv') === '1';
       itemsToAdd.push({
@@ -743,10 +832,9 @@
         unit: unit,
         isNv: isNv
       });
-      cb.checked = false; // रीसेट
+      cb.checked = false;
     });
 
-    // 2. यदि हाथ से भी कोई नया व्यंजन लिखा हो तो उसे भी जोड़ें
     if (customVal !== "") {
       itemsToAdd.push({
         name: customVal,
@@ -778,7 +866,6 @@
     renderDaysUI();
   }
 
-  // मल्टी-सलेक्ट ड्रॉपडाउन HTML जेनरेटर
   function generateMultiSelectHTML(sessId, catKey, isNv = false) {
     let c = categoryMaster[catKey];
     let uniqueId = `${sessId}_${catKey}`;
@@ -831,7 +918,8 @@
             <strong>📅 तारीख चुनें:</strong>
             <input type="date" value="${day.date}" style="width:160px;" onchange="saveState(); schedule[${dIdx}].date = this.value; renderDaysUI(); renderReceipt();">
           </div>
-          <div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-blue" style="font-size:11px; padding:4px 8px;" onclick="addNextSession('${day.id}')">+ नया सत्र जोड़ें</button>
             <button class="btn btn-danger" style="font-size:11px; padding:4px 8px;" onclick="removeDay('${day.id}')">दिन हटाएं</button>
           </div>
         </div>
@@ -851,18 +939,34 @@
         let nvKeys = ['nvSnacks', 'nvMain'];
         let nvDropCols = nvKeys.map(k => generateMultiSelectHTML(sess.id, k, true)).join("");
 
+        // सत्र को दूसरी तारीख में कॉपी करने के विकल्प
+        let copyOptions = schedule.map((d, idx) => {
+          let dp = d.date ? d.date.split('-') : [];
+          let dLabel = dp.length === 3 ? `${dp[2]}/${dp[1]}/${dp[0]}` : `तारीख ${idx+1}`;
+          let isSame = d.id === day.id;
+          return `<option value="${d.id}">${isSame ? 'इसी तारीख में' : dLabel}</option>`;
+        }).join("");
+
         dHtml += `
           <div class="session-box">
-            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
               <label style="margin:0;">सत्र:</label>
-              <input type="text" value="${sess.title}" style="width:170px; font-weight:bold;" oninput="schedule[${dIdx}].sessions[${sIdx}].title = this.value; renderReceipt();">
+              <input type="text" value="${sess.title}" style="width:160px; font-weight:bold;" oninput="schedule[${dIdx}].sessions[${sIdx}].title = this.value; renderReceipt();">
               <label style="margin:0;">आदमी (Pax):</label>
-              <input type="text" placeholder="खाली छोड़ें या संख्या लिखें" value="${sess.pax}" style="width:160px;" oninput="schedule[${dIdx}].sessions[${sIdx}].pax = this.value; renderReceipt();">
-              <button class="btn btn-danger" style="font-size:10px; padding:2px 6px; margin-left:auto;" onclick="removeSession('${day.id}', '${sess.id}')">सत्र हटाएं</button>
+              <input type="text" placeholder="उदा. 250" value="${sess.pax}" style="width:110px;" oninput="schedule[${dIdx}].sessions[${sIdx}].pax = this.value; renderReceipt();">
+              
+              <!-- सत्र कॉपी करने का टूल -->
+              <div style="display:inline-flex; align-items:center; gap:4px; margin-left:auto; background:#f0f4f8; padding:3px 6px; border-radius:4px; border:1px solid #c8d3de;">
+                <span style="font-size:11px; font-weight:bold;">📋 कॉपी करें:</span>
+                <select id="copy_tgt_${sess.id}" style="width:130px; font-size:11px; padding:3px;">${copyOptions}</select>
+                <button class="btn btn-purple" style="font-size:11px; padding:3px 7px;" onclick="cloneSessionToTarget('${day.id}', '${sess.id}', document.getElementById('copy_tgt_${sess.id}').value)">कॉपी करें</button>
+              </div>
+
+              <button class="btn btn-danger" style="font-size:10px; padding:2px 6px;" onclick="removeSession('${day.id}', '${sess.id}')">सत्र हटाएं</button>
             </div>
 
             <div class="menu-panel veg-panel">
-              <div style="font-weight:bold; font-size:12px; color:green; margin-bottom:6px;">🥬 शाकाहारी मेन्यू (ड्रॉपडाउन खोलकर जितने चाहें उतने सामान टिक करें):</div>
+              <div style="font-weight:bold; font-size:12px; color:green; margin-bottom:6px;">🥬 शाकाहारी मेन्यू (वर्णमाला क्रम में):</div>
               <div class="category-line">${vegDropCols}</div>
             </div>
 
@@ -873,7 +977,7 @@
 
             <div class="action-row">
               <span style="font-size:12px; font-weight:bold; color:var(--maroon);">✍️ नया सामान लिखें (वैकल्पिक):</span>
-              <input type="text" id="custom_item_${sess.id}" placeholder="यहाँ नया व्यंजन खुद भी लिख सकते हैं" style="width:230px;">
+              <input type="text" id="custom_item_${sess.id}" placeholder="यहाँ नया व्यंजन खुद भी लिख सकते हैं" style="width:220px;">
               <input type="number" id="qty_${sess.id}" placeholder="मात्रा (उदा. 25)" style="width:95px;">
               <select id="unit_${sess.id}" style="width:95px;">
                 <option value="kg">kg (किलो)</option>
@@ -999,9 +1103,7 @@
     document.getElementById('outTentBody').innerHTML = tentRows || "<tr><td colspan='2' style='color:#888;'>कोई टेंट सामान दर्ज नहीं किया गया।</td></tr>";
   }
 
-  // -------------------------------------------------------------
-  // JPEG फोटो डाउनलोड फ़ंक्शन (WhatsApp व शेयरिंग के लिए)
-  // -------------------------------------------------------------
+  // JPEG फोटो डाउनलोड
   function downloadImage() {
     renderReceipt();
     let cName = document.getElementById('custName').value.trim() || "Tent_Order";
@@ -1009,7 +1111,6 @@
 
     window.scrollTo(0, receiptEl.offsetTop - 70);
 
-    // html2canvas के जरिए साफ़ HD फोटो बनाना
     html2canvas(receiptEl, {
       scale: 2,
       useCORS: true,
@@ -1024,9 +1125,7 @@
     });
   }
 
-  // -------------------------------------------------------------
   // Google Drive डायरेक्ट इंटीग्रेशन
-  // -------------------------------------------------------------
   async function saveToGoogleDrive() {
     let cName = document.getElementById('custName').value.trim();
     if (!cName) {
@@ -1047,7 +1146,6 @@
     };
 
     try {
-      // बैकग्राउंड में Google Apps Script Web App को भेजना
       await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
         mode: "no-cors",
@@ -1055,7 +1153,7 @@
         body: JSON.stringify(orderData)
       });
 
-      alert(`✅ बधाई! "${cName}" का आर्डर आपकी Google Drive के 'Tent_House_Orders' फ़ोल्डर में हमेशा के लिए सुरक्षित हो गया है!`);
+      alert(`✅ बधाई! "${cName}" का आर्डर आपकी Google Drive के 'Tent_House_Orders' फ़ोल्डर में सुरक्षित हो गया है!`);
       saveOrderToBrowserStorage();
     } catch(err) {
       alert("❌ Google Drive में सेव करने में समस्या: " + err.message);
@@ -1119,7 +1217,7 @@
       renderReceipt();
       document.getElementById('driveListCard').style.display = 'none';
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      alert(`🎉 Google Drive से "${o.custName}" का रिकॉर्ड लोड हो गया! अब आप इसमें कोई भी सुधार करके दोबारा 'Google Drive में सेव' कर सकते हैं।`);
+      alert(`🎉 Google Drive से "${o.custName}" का रिकॉर्ड लोड हो गया!`);
     } catch(err) {
       alert("फ़ाइल लोड करने में समस्या हुई!");
     }
