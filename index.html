@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>टेंट हाउस एवं कैटरिंग मैनेजमेंट सिस्टम (Auto-Date, Hindi Sorting & Session Copy)</title>
+  <title>टेंट हाउस एवं कैटरिंग मैनेजमेंट सिस्टम</title>
   <!-- JPEG फोटो डाउनलोड लाइब्रेरी (html2canvas) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   
@@ -173,7 +173,8 @@
 <!-- फ़्रीज़ किया हुआ फ्लोटिंग एक्शन बार -->
 <div class="sticky-action-bar no-print">
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
-    <button class="btn btn-maroon" onclick="addNewDayWithCalendar()">📅 + नई तारीख</button>
+    <!-- ऑटो अगली तारीख जोड़ने के लिए बटन -->
+    <button class="btn btn-maroon" onclick="addNewDayNextDate()">📅 + नई तारीख</button>
     
     <div style="display:inline-flex; align-items:center; gap:3px; background:#eef2f7; padding:2px 5px; border-radius:4px; border:1px solid #ccd;">
       <button class="btn btn-blue" style="padding:5px 8px;" onclick="addNextSessionFromSticky()">⏱️ + नया सत्र</button>
@@ -246,7 +247,7 @@
   <div class="card no-print">
     <div style="margin-bottom: 10px;">
       <h3 style="margin-bottom:2px;">🍲 भोजन एवं नाश्ता व्यवस्था (तारीख वार)</h3>
-      <small style="color:#555;">💡 <strong>सुविधा:</strong> सभी व्यंजन हिंदी वर्णमाला (अ, आ, इ, क, ख...) के अनुसार क्रमित हैं। आप किसी भी सत्र को दूसरी तारीख में हूबहू कॉपी करने के लिए <strong>'📋 सत्र कॉपी करें'</strong> बटन का इस्तेमाल कर सकते हैं।</small>
+      <small style="color:#555;">💡 <strong>सुविधा:</strong> सभी व्यंजन शुद्ध <strong>हिंदी वर्णमाला क्रम (अ, आ, इ, ई, उ, ऊ, ए, ऐ, ओ, क, ख, ग...)</strong> में क्रमित हैं। किसी भी सत्र को दूसरी तारीख में हूबहू कॉपी करने के लिए <strong>'📋 सत्र कॉपी करें'</strong> का प्रयोग करें।</small>
     </div>
     <div id="daysWrapper"></div>
   </div>
@@ -399,7 +400,51 @@
 <script>
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyt4jnpMWLRND8pYlIjpqUkFm-h6iPf_3C89MvTBu3vZf6E6Xw1L4pARwQQnjHMEm8/exec";
 
-  // श्रेणियों और व्यंजनों की सुव्यवस्थित सूची
+  // ------------------------------------------------------------------
+  // सटीक हिंदी वर्णमाला सॉर्टिंग इंजन (अ, आ, इ, ई, उ, ऊ, ए, ऐ, ओ, औ, क, ख, ग...)
+  // ------------------------------------------------------------------
+  const hindiAlphabetOrder = [
+    'अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः',
+    'क','ख','ग','घ','ङ',
+    'च','छ','ज','झ','ञ',
+    'ट','ठ','ड','ढ','ण',
+    'त','थ','द','ध','न',
+    'प','फ','ब','भ','म',
+    'य','र','ल','व',
+    'श','ष','स','ह',
+    'क्ष','त्र','ज्ञ'
+  ];
+
+  function getHindiCharRank(char) {
+    let idx = hindiAlphabetOrder.indexOf(char);
+    return idx === -1 ? 999 : idx;
+  }
+
+  function compareHindiWords(wordA, wordB) {
+    let a = wordA.trim();
+    let b = wordB.trim();
+    let minLen = Math.min(a.length, b.length);
+
+    for (let i = 0; i < minLen; i++) {
+      let charA = a[i];
+      let charB = b[i];
+
+      if (charA !== charB) {
+        let rankA = getHindiCharRank(charA);
+        let rankB = getHindiCharRank(charB);
+
+        // अगर दोनों देवनागरी वर्णमाला सूची में हैं
+        if (rankA !== 999 && rankB !== 999) {
+          if (rankA !== rankB) return rankA - rankB;
+        } else {
+          return charA.localeCompare(charB, 'hi');
+        }
+      }
+    }
+    return a.length - b.length;
+  }
+
+  // सभी व्यंजनों का कच्चा डेटा
   const rawCategoryMaster = {
     chaat: {
       title: "🥟 चाट, समोसा व आलू गुटके",
@@ -502,12 +547,12 @@
     }
   };
 
-  // सभी खाद्य पदार्थों को हिंदी वर्णमाला क्रम (अ, आ, इ, क, ख... A-Z Sequence) में स्वचालित रूप से सॉर्ट करना
+  // सभी आइटम्स को शुद्ध हिंदी वर्णमाला क्रम में सॉर्ट करना
   const categoryMaster = {};
   for (let key in rawCategoryMaster) {
     categoryMaster[key] = {
       title: rawCategoryMaster[key].title,
-      items: [...rawCategoryMaster[key].items].sort((a, b) => a.localeCompare(b, 'hi'))
+      items: [...rawCategoryMaster[key].items].sort(compareHindiWords)
     };
   }
 
@@ -557,7 +602,7 @@
     if (undoStack.length === 0 || undoStack[undoStack.length - 1] !== cur) {
       undoStack.push(cur);
       if (undoStack.length > 30) undoStack.shift();
-      redoStack = []; // नया कार्य करने पर redo खाली करें
+      redoStack = [];
     }
   }
 
@@ -583,7 +628,7 @@
     applySnapshot(nextState);
   }
 
-  // Ctrl+Z और Ctrl+Y शॉर्टकट सुनना
+  // Ctrl+Z और Ctrl+Y शॉर्टकट
   window.addEventListener('keydown', function(e) {
     if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
       if (document.activeElement.tagName !== 'INPUT') {
@@ -612,7 +657,7 @@
     document.getElementById('eventStartDate').value = today;
     updateEventDates();
 
-    addNewDayWithCalendar(today);
+    addNewDayWithDate(today);
     renderReceipt();
   };
 
@@ -638,31 +683,39 @@
     }
   }
 
-  // ऑटो अगली तारीख निकालने वाला हेल्पर फ़ंक्शन (+1 Day)
+  // ऑटो अगली तारीख निकालने वाला सॉलिड हेल्पर (+1 Day)
   function getNextDayDateString(dateStr) {
     if(!dateStr) return new Date().toISOString().split('T')[0];
     let parts = dateStr.split('-');
-    let dt = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+    let y = parseInt(parts[0], 10);
+    let m = parseInt(parts[1], 10) - 1;
+    let d = parseInt(parts[2], 10);
+
+    let dt = new Date(y, m, d);
     dt.setDate(dt.getDate() + 1);
-    return dt.toISOString().split('T')[0];
+
+    let nextY = dt.getFullYear();
+    let nextM = String(dt.getMonth() + 1).padStart(2, '0');
+    let nextD = String(dt.getDate()).padStart(2, '0');
+    return `${nextY}-${nextM}-${nextD}`;
   }
 
-  // नई तारीख जोड़ना: पिछली तारीख से अगली तारीख स्वतः सेट होना
-  function addNewDayWithCalendar(preferredDate = "") {
-    saveState();
-    let dVal = preferredDate;
-
-    if (!dVal) {
-      if (schedule.length > 0) {
-        let lastDate = schedule[schedule.length - 1].date;
-        dVal = getNextDayDateString(lastDate);
-      } else {
-        dVal = document.getElementById('eventStartDate').value || new Date().toISOString().split('T')[0];
-      }
+  // जब भी बटन दबेगा तो ठीक अगली तारीख ही जुड़ेगी
+  function addNewDayNextDate() {
+    let nextDate = "";
+    if (schedule.length > 0) {
+      let lastDate = schedule[schedule.length - 1].date;
+      nextDate = getNextDayDateString(lastDate);
+    } else {
+      nextDate = document.getElementById('eventStartDate').value || new Date().toISOString().split('T')[0];
     }
+    addNewDayWithDate(nextDate);
+  }
 
-    let dayId = "d_" + Date.now();
-    let dayObj = { id: dayId, date: dVal, sessions: [] };
+  function addNewDayWithDate(targetDateStr) {
+    saveState();
+    let dayId = "d_" + Date.now() + Math.floor(Math.random()*100);
+    let dayObj = { id: dayId, date: targetDateStr, sessions: [] };
     schedule.push(dayObj);
     addNextSession(dayId);
     renderDaysUI();
@@ -701,9 +754,7 @@
     addNextSession(sel.value);
   }
 
-  // -------------------------------------------------------------
-  // सत्र कॉपी (Clone / Duplicate Session to any Date)
-  // -------------------------------------------------------------
+  // सत्र को किसी भी तारीख में कॉपी करने की सुविधा
   function cloneSessionToTarget(sourceDayId, sourceSessId, targetDayId) {
     if (!targetDayId) return;
     saveState();
@@ -716,7 +767,6 @@
     let tgtDay = schedule.find(d => d.id === targetDayId);
     if (!tgtDay) return;
 
-    // सत्र की गहरी प्रतिलिपि (Deep Copy)
     let clonedSession = {
       id: "s_" + Date.now() + Math.floor(Math.random()*1000),
       title: srcSess.title,
@@ -891,7 +941,7 @@
           
           <div class="multiselect-menu" id="menu_${uniqueId}">
             <div class="ms-header">
-              <span style="font-size:11px; font-weight:bold; color:#444;">व्यंजन चुनें (मल्टी):</span>
+              <span style="font-size:11px; font-weight:bold; color:#444;">व्यंजन चुनें (वर्णमाला क्रम):</span>
               <span onclick="clearCatSelection('${sessId}', '${catKey}', event)" style="font-size:11px; color:red; cursor:pointer;">हटाएं ✖</span>
             </div>
             <input type="text" placeholder="🔍 खोजें..." onkeyup="filterMultiItems(this)" onclick="event.stopPropagation();" style="padding:4px 6px; font-size:11px; margin-bottom:5px;">
@@ -939,7 +989,6 @@
         let nvKeys = ['nvSnacks', 'nvMain'];
         let nvDropCols = nvKeys.map(k => generateMultiSelectHTML(sess.id, k, true)).join("");
 
-        // सत्र को दूसरी तारीख में कॉपी करने के विकल्प
         let copyOptions = schedule.map((d, idx) => {
           let dp = d.date ? d.date.split('-') : [];
           let dLabel = dp.length === 3 ? `${dp[2]}/${dp[1]}/${dp[0]}` : `तारीख ${idx+1}`;
@@ -955,9 +1004,9 @@
               <label style="margin:0;">आदमी (Pax):</label>
               <input type="text" placeholder="उदा. 250" value="${sess.pax}" style="width:110px;" oninput="schedule[${dIdx}].sessions[${sIdx}].pax = this.value; renderReceipt();">
               
-              <!-- सत्र कॉपी करने का टूल -->
+              <!-- सत्र कॉपी करने की व्यवस्था -->
               <div style="display:inline-flex; align-items:center; gap:4px; margin-left:auto; background:#f0f4f8; padding:3px 6px; border-radius:4px; border:1px solid #c8d3de;">
-                <span style="font-size:11px; font-weight:bold;">📋 कॉपी करें:</span>
+                <span style="font-size:11px; font-weight:bold;">📋 सत्र कॉपी करें:</span>
                 <select id="copy_tgt_${sess.id}" style="width:130px; font-size:11px; padding:3px;">${copyOptions}</select>
                 <button class="btn btn-purple" style="font-size:11px; padding:3px 7px;" onclick="cloneSessionToTarget('${day.id}', '${sess.id}', document.getElementById('copy_tgt_${sess.id}').value)">कॉपी करें</button>
               </div>
@@ -966,7 +1015,7 @@
             </div>
 
             <div class="menu-panel veg-panel">
-              <div style="font-weight:bold; font-size:12px; color:green; margin-bottom:6px;">🥬 शाकाहारी मेन्यू (वर्णमाला क्रम में):</div>
+              <div style="font-weight:bold; font-size:12px; color:green; margin-bottom:6px;">🥬 शाकाहारी मेन्यू (वर्णमाला क्रम: अ, आ, इ, ई, उ, क, ख...):</div>
               <div class="category-line">${vegDropCols}</div>
             </div>
 
@@ -1125,7 +1174,7 @@
     });
   }
 
-  // Google Drive डायरेक्ट इंटीग्रेशन
+  // Google Drive डायरेक्ट सेव
   async function saveToGoogleDrive() {
     let cName = document.getElementById('custName').value.trim();
     if (!cName) {
