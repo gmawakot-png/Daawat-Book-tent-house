@@ -72,7 +72,7 @@
       left: 0;
       top: 85px;
       bottom: 0;
-      width: 255px;
+      width: 260px;
       background: #ffffff;
       border-right: 3px solid var(--maroon);
       box-shadow: 3px 0 12px rgba(0,0,0,0.1);
@@ -85,7 +85,7 @@
 
     .sidebar-toggle-btn {
       position: fixed;
-      left: 255px;
+      left: 260px;
       top: 88px;
       background: var(--maroon);
       color: white;
@@ -102,11 +102,13 @@
     .sidebar-section { margin-bottom: 14px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
     .sidebar-btn { width: 100%; text-align: left; margin-bottom: 5px; font-size: 11px; padding: 6px 8px; border-radius: 4px; border: 1px solid #ddd; background: #fafafa; cursor: pointer; }
     .sidebar-btn:hover { background: #eef2f7; border-color: #007bff; }
+    .sidebar-session-link { margin-left: 12px; width: calc(100% - 12px); border-left: 3px solid var(--maroon); background: #fdfefe; margin-bottom: 3px; }
+    .sidebar-session-link:hover { background: #fff8e1; }
 
     /* सत्र व दिन डिब्बे */
     .day-box { border: 2px solid #8b0000; border-radius: 8px; padding: 12px; margin-bottom: 20px; background: #fffcfc; }
-    .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #8b0000; padding-bottom: 8px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; background: #ffebee; padding: 8px 12px; border-radius: 5px; }
-    .session-box { background: white; border: 1px solid #ddd; border-left: 6px solid var(--maroon); border-radius: 6px; padding: 12px; margin-bottom: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
+    .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #8b0000; padding: 8px 12px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; background: #ffebee; border-radius: 5px; }
+    .session-box { background: white; border: 1px solid #ddd; border-left: 6px solid var(--maroon); border-radius: 6px; padding: 12px; margin-bottom: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.04); transition: border-color 0.3s; }
     
     .session-date-banner {
       background: #fff8e1;
@@ -151,7 +153,7 @@
     .bill-table th, .bill-table td { border: 1px solid #444; padding: 6px 8px; font-size: 12px; text-align: left; vertical-align: top; }
     .bill-table th { background: #f0f0f0; }
 
-    .admin-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
+    .admin-badge { display: inline-flex; align-items: center; gap: 4px; padding: 5px 9px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
     .admin-logged-in { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     .admin-logged-out { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
@@ -171,12 +173,12 @@
 <!-- 🚩 बाईं तरफ का साइडबार (Left Sidebar) -->
 <div id="quickSidebar" class="no-print">
   <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--maroon); padding-bottom:6px; margin-bottom:10px;">
-    <h4 style="margin:0; font-size:14px;">⚡ क्विक मेन्यू</h4>
+    <h4 style="margin:0; font-size:14px;">⚡ क्विक नेविगेशन</h4>
     <span onclick="toggleSidebar()" style="cursor:pointer; color:red; font-weight:bold;">✖</span>
   </div>
 
   <div class="sidebar-section">
-    <div style="font-size:12px; font-weight:bold; color:var(--maroon); margin-bottom:6px;">📅 तारीखों पर सीधे जाएं:</div>
+    <div style="font-size:12px; font-weight:bold; color:var(--maroon); margin-bottom:6px;">📅 तारीख एवं सत्र वार स्थिति:</div>
     <div id="sidebarDateList"><small style="color:#777;">कोई तारीख नहीं जुड़ी</small></div>
   </div>
 
@@ -191,7 +193,7 @@
   </div>
 
   <div class="sidebar-section">
-    <div style="font-size:12px; font-weight:bold; color:var(--maroon); margin-bottom:6px;">📋 नेविगेशन:</div>
+    <div style="font-size:12px; font-weight:bold; color:var(--maroon); margin-bottom:6px;">📋 पेज नेविगेशन:</div>
     <button class="sidebar-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆️ सबसे ऊपर जाएं</button>
     <button class="sidebar-btn" onclick="document.getElementById('billReceipt').scrollIntoView({behavior:'smooth'})">📄 बिल पर्ची पर जाएं</button>
   </div>
@@ -202,18 +204,19 @@
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
     <button class="btn btn-maroon" onclick="addNewDayNextDate()">📅 + नई तारीख</button>
     
-    <div style="display:inline-flex; align-items:center; gap:3px; background:#eef2f7; padding:2px 5px; border-radius:4px; border:1px solid #ccd;">
+    <div style="display:inline-flex; align-items:center; gap:4px; background:#eef2f7; padding:3px 6px; border-radius:4px; border:1px solid #ccd;">
       <button class="btn btn-blue" style="padding:5px 9px;" onclick="addNextSessionFromSticky()">⏱️ + नया सत्र</button>
-      <select id="stickyDaySelect" style="width:145px; padding:4px; font-weight:bold; font-size:12px;" title="सत्र के लिए तारीख चुनें"></select>
+      <select id="stickyDaySelect" style="width:170px; padding:4px; font-weight:bold; font-size:12px;" title="सत्र जोड़ने हेतु तारीख चुनें"></select>
     </div>
 
     <button class="btn btn-secondary" onclick="undoAction()">↩️ Undo</button>
     <button class="btn btn-secondary" onclick="redoAction()">↪️ Redo</button>
   </div>
 
-  <!-- सुरक्षित एडमिन व डाउनलोड बटन्स -->
+  <!-- सुरक्षित एडमिन, पासवर्ड चेंज व एक्सपोर्ट बटन्स -->
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
     <span id="adminStatusDisplay" class="admin-badge admin-logged-out" onclick="handleAdminLogin()">🔒 Admin Login</span>
+    <button class="btn btn-secondary" style="font-size:11px;" onclick="changeAdminPasswordPrompt()" title="Google Drive पासवर्ड बदलें">🔑 पासवर्ड बदलें</button>
     <button class="btn btn-green" onclick="saveToGoogleDrive()">☁️ Drive में सेव</button>
     <button class="btn btn-purple" onclick="openGoogleDriveList()">📂 Drive फाइलें</button>
     <button class="btn btn-yellow" onclick="downloadImage()">🖼️ JPEG फोटो</button>
@@ -225,7 +228,7 @@
 <!-- 🚩 हमेशा दिखने वाला लाइव एक्टिव डेट बैनर -->
 <div class="live-date-indicator no-print" id="liveDateIndicator">
   <span>👉 वर्तमान कार्य स्थिति: <span id="currentActiveInfo" style="color:#b71c1c;">तारीख 1 का मेन्यू तैयार हो रहा है</span></span>
-  <span style="font-size:11px; color:#555;">💡 जिस सत्र पर काम करेंगे, उसकी तारीख यहाँ दिखाई देगी</span>
+  <span style="font-size:11px; color:#555;">💡 सत्र पर क्लिक करने पर उसकी सटीक तारीख यहाँ दिखाई देगी</span>
 </div>
 
 <div class="container" id="mainContainer">
@@ -279,7 +282,7 @@
   <div class="card no-print">
     <div style="margin-bottom: 10px;">
       <h3 style="margin-bottom:2px;">🍲 भोजन एवं नाश्ता व्यवस्था (तारीख वार मेन्यू)</h3>
-      <small style="color:#555;">💡 <strong>सुविधा:</strong> हर सत्र के ऊपर और शीर्ष पीले बैनर में लाइव तारीख साफ़ दिखाई देगी।</small>
+      <small style="color:#555;">💡 जिस भी तारीख में सत्र जोड़ना हो, शीर्ष हेडर में ड्रॉपडाउन से तारीख चुनकर <strong>"+ नया सत्र"</strong> दबाएं।</small>
     </div>
     <div id="daysWrapper"></div>
   </div>
@@ -428,7 +431,7 @@
 </div>
 
 <script>
-  // 🔗 आपका नया Google Apps Script Web App URL
+  // 🔗 Google Apps Script Web App URL
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZTfOU_8emrIKCofGcCHB9O-r-9ik8AgXlINxNBcfVIQgi7oANBoRu-_GJMgU4AEnH/exec";
 
   // हिंदी वर्णमाला क्रमबद्धता
@@ -535,6 +538,46 @@
       }
     }
     return adminSessionPass;
+  }
+
+  // 🔑 पासवर्ड बदलने की प्रक्रिया
+  async function changeAdminPasswordPrompt() {
+    let oldPass = getAdminPassword();
+    if (!oldPass) {
+      alert("पासवर्ड बदलने के लिए वर्तमान पासवर्ड आवश्यक है!");
+      return;
+    }
+    let newPass = prompt("🔑 नया पासवर्ड दर्ज करें:");
+    if (!newPass || !newPass.trim()) {
+      alert("नया पासवर्ड खाली नहीं हो सकता!");
+      return;
+    }
+    newPass = newPass.trim();
+
+    let confirmNew = prompt("🔑 नया पासवर्ड दोबारा दर्ज करें (पुष्टि हेतु):");
+    if (newPass !== (confirmNew ? confirmNew.trim() : "")) {
+      alert("❌ दोनों पासवर्ड मेल नहीं खाते! पासवर्ड नहीं बदला गया।");
+      return;
+    }
+
+    try {
+      let res = await callDriveAPI({
+        action: "changePass",
+        pass: oldPass,
+        newPass: newPass
+      });
+
+      if (res.status === "success") {
+        adminSessionPass = newPass;
+        sessionStorage.setItem('tent_admin_pass', newPass);
+        updateAdminStatusUI();
+        alert("🎉 बधाई! आपका एडमिन पासवर्ड सफलतापूर्वक बदल दिया गया है!");
+      } else {
+        alert("❌ पासवर्ड बदलने में समस्या: " + res.message);
+      }
+    } catch (err) {
+      alert("❌ सर्वर से संपर्क नहीं हो सका: " + err.message);
+    }
   }
 
   function formatDisplayDate(dateStr) {
@@ -676,6 +719,9 @@
     schedule.push({ id: dayId, date: targetDateStr, sessions: [] });
     addNextSession(dayId, false);
     renderDaysUI();
+    // ड्रॉपडाउन में नई तारीख तुरंत चुन लें
+    let sel = document.getElementById('stickyDaySelect');
+    if (sel) sel.value = dayId;
   }
 
   function removeDay(dayId) {
@@ -702,6 +748,10 @@
     let dIdx = schedule.findIndex(d => d.id === dayId);
     setActiveSessionInfo(dIdx + 1, day.date, template.title);
 
+    // ड्रॉपडाउन को भी इसी तारीख पर सेट रखें
+    let sel = document.getElementById('stickyDaySelect');
+    if (sel) sel.value = dayId;
+
     if (shouldScroll) {
       setTimeout(() => {
         let el = document.getElementById("box_" + newSessId);
@@ -710,6 +760,7 @@
     }
   }
 
+  // ✅ शीर्ष हेडर के सिंक ड्रॉपडाउन से सत्र जोड़ना
   function addNextSessionFromSticky() {
     let sel = document.getElementById('stickyDaySelect');
     if (!sel || !sel.value) { 
@@ -741,6 +792,7 @@
     alert(`✅ "${srcSess.title}" को तारीख ${formatDisplayDate(tgtDay.date)} में कॉपी कर दिया गया!`);
   }
 
+  // 🚩 साइडबार में हर तारीख के सत्रों को लाइव दिखाना
   function updateStickyDaySelect() {
     let sel = document.getElementById('stickyDaySelect');
     let sbList = document.getElementById('sidebarDateList');
@@ -752,18 +804,33 @@
     schedule.forEach((d, i) => {
       let opt = document.createElement('option');
       opt.value = d.id;
-      opt.innerText = `📅 दिन ${i+1}: ${formatDisplayDate(d.date)}`;
+      opt.innerText = `दिन ${i+1}: ${formatDisplayDate(d.date)}`;
       if (d.id === cur) opt.selected = true;
       sel.appendChild(opt);
 
       if (sbList) {
-        sbList.innerHTML += `
-          <button class="sidebar-btn" onclick="document.getElementById('day_card_${d.id}').scrollIntoView({behavior:'smooth', block:'start'})">
-            📅 दिन ${i+1}: <strong>${formatDisplayDate(d.date)}</strong>
+        let sessLinks = d.sessions.map((s) => `
+          <button class="sidebar-btn sidebar-session-link" onclick="document.getElementById('box_${s.id}').scrollIntoView({behavior:'smooth', block:'center'}); setActiveSessionInfo(${i+1}, '${d.date}', '${s.title}');">
+            ⏱️ ${s.title} (${s.items.length} सामान)
           </button>
+        `).join("");
+
+        sbList.innerHTML += `
+          <div style="margin-bottom:8px; background:#f9f9f9; padding:4px; border-radius:4px; border:1px solid #e2e8f0;">
+            <button class="sidebar-btn" style="background:#eef2f7; font-weight:bold; color:var(--maroon);" onclick="document.getElementById('day_card_${d.id}').scrollIntoView({behavior:'smooth', block:'start'}); document.getElementById('stickyDaySelect').value='${d.id}';">
+              📅 दिन ${i+1}: ${formatDisplayDate(d.date)}
+            </button>
+            <div style="margin-top:2px;">
+              ${sessLinks || '<small style="color:#999; margin-left:14px;">कोई सत्र नहीं</small>'}
+            </div>
+          </div>
         `;
       }
     });
+
+    if (!sel.value && schedule.length > 0) {
+      sel.value = schedule[0].id;
+    }
   }
 
   function removeSession(dayId, sessId) {
@@ -902,6 +969,7 @@
 
   function renderDaysUI() {
     let wrap = document.getElementById('daysWrapper');
+    let prevSelectedSticky = document.getElementById('stickyDaySelect') ? document.getElementById('stickyDaySelect').value : null;
     wrap.innerHTML = "";
 
     schedule.forEach((day, dIdx) => {
@@ -946,9 +1014,9 @@
         }).join("");
 
         dHtml += `
-          <div class="session-box" id="box_${sess.id}" onclick="setActiveSessionInfo(${dIdx + 1}, '${day.date}', '${sess.title}')">
+          <div class="session-box" id="box_${sess.id}" onclick="setActiveSessionInfo(${dIdx + 1}, '${day.date}', '${sess.title}'); document.getElementById('stickyDaySelect').value='${day.id}';">
             
-            <!-- 🚩 बड़ा स्पष्ट तारीख बैनर -->
+            <!-- 🚩 स्पष्ट तारीख बैनर -->
             <div class="session-date-banner">
               <span>👉 आप भर रहे हैं: <strong>दिन ${dIdx + 1}</strong> | तारीख: <span style="font-size:14px; text-decoration:underline;">${displayDateText}</span> | (${sess.title})</span>
               <button class="btn btn-danger" style="font-size:10px; padding:2px 6px;" onclick="removeSession('${day.id}', '${sess.id}')">सत्र हटाएं ✖</button>
@@ -956,7 +1024,7 @@
 
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
               <label style="margin:0;">सत्र नाम:</label>
-              <input type="text" value="${sess.title}" style="width:160px; font-weight:bold;" onfocus="setActiveSessionInfo(${dIdx + 1}, '${day.date}', this.value)" oninput="schedule[${dIdx}].sessions[${sIdx}].title = this.value; renderReceipt();">
+              <input type="text" value="${sess.title}" style="width:160px; font-weight:bold;" onfocus="setActiveSessionInfo(${dIdx + 1}, '${day.date}', this.value); document.getElementById('stickyDaySelect').value='${day.id}';" oninput="schedule[${dIdx}].sessions[${sIdx}].title = this.value; renderReceipt();">
               <label style="margin:0;">आदमी (Pax):</label>
               <input type="text" placeholder="उदा. 250" value="${sess.pax}" style="width:110px;" oninput="schedule[${dIdx}].sessions[${sIdx}].pax = this.value; renderReceipt();">
               
@@ -1009,6 +1077,9 @@
     });
 
     updateStickyDaySelect();
+    if (prevSelectedSticky && document.querySelector(`#stickyDaySelect option[value="${prevSelectedSticky}"]`)) {
+      document.getElementById('stickyDaySelect').value = prevSelectedSticky;
+    }
     renderReceipt();
   }
 
