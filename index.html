@@ -28,6 +28,7 @@
     .btn-danger { background: #dc3545; color: white; }
     .btn-secondary { background: #6c757d; color: white; }
     .btn-purple { background: #6f42c1; color: white; }
+    .btn-dark { background: #343a40; color: white; }
     .btn:hover { opacity: 0.88; }
 
     /* शीर्ष एक्शन बार */
@@ -203,6 +204,17 @@
       padding: 4px 8px;
     }
 
+    /* एडमिन बार हाइलाइट */
+    .admin-controls-group {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      background: #e8f5e9;
+      padding: 2px 6px;
+      border-radius: 5px;
+      border: 1px solid #a5d6a7;
+    }
+
     /* रसीद */
     #billReceipt { background: white; padding: 25px; border: 2px solid #222; margin-top: 20px; }
     .bill-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 10px; }
@@ -284,12 +296,20 @@
     <button class="btn btn-secondary" onclick="redoAction()">↪️ Redo</button>
   </div>
 
-  <!-- सुरक्षित Google Drive एवं एक्सपोर्ट बटन्स -->
+  <!-- सुरक्षित एडमिन व एक्सपोर्ट बटन्स -->
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
-    <!-- 🔑 यहाँ से पासवर्ड बदलने पर यह दोनों जगह (यहाँ भी और Google Script में भी) एक साथ बदल जाएगा -->
-    <button class="btn btn-secondary" style="font-size:11px;" onclick="changeMasterPasswordDirectly()" title="पासवर्ड बदलें">🔑 पासवर्ड बदलें</button>
-    <button class="btn btn-green" id="btnSaveDrive" onclick="saveToGoogleDrive()">☁️ Drive में सेव</button>
-    <button class="btn btn-purple" onclick="openGoogleDriveList()">📂 Drive फाइलें</button>
+    <!-- केवल एडमिन लॉगिन बटन (शुरू में सिर्फ यह दिखेगा) -->
+    <button class="btn btn-dark" id="btnAdminLogin" onclick="handleAdminLogin()">🔐 एडमिन लॉगिन</button>
+
+    <!-- एडमिन कंट्रोल्स (लॉगिन के बाद ही दिखाई देंगे) -->
+    <div class="admin-controls-group" id="adminControlsArea">
+      <span style="font-size:11px; font-weight:bold; color:#2e7d32;">👑 एडमिन सक्रिय</span>
+      <button class="btn btn-green" id="btnSaveDrive" onclick="saveToGoogleDriveDirect()">☁️ Drive में सेव</button>
+      <button class="btn btn-purple" onclick="openGoogleDriveList()">📂 Drive फाइलें</button>
+      <button class="btn btn-secondary" style="font-size:11px;" onclick="changeMasterPasswordDirectly()" title="पासवर्ड बदलें">🔑 पासवर्ड बदलें</button>
+      <button class="btn btn-danger" style="font-size:11px;" onclick="handleAdminLogout()" title="लॉगआउट">🚪 लॉगआउट</button>
+    </div>
+
     <button class="btn btn-yellow" onclick="downloadImage()">🖼️ JPEG फोटो</button>
     <button class="btn btn-blue" onclick="renderReceipt(); window.print();">🖨️ PDF / प्रिंट</button>
     <button class="btn btn-info" onclick="renderReceipt(); downloadWord();">📄 Word</button>
@@ -485,13 +505,43 @@
   // 🔗 Google Apps Script URL
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZTfOU_8emrIKCofGcCHB9O-r-9ik8AgXlINxNBcfVIQgi7oANBoRu-_GJMgU4AEnH/exec";
 
-  function getSavedDrivePass() {
-    return localStorage.getItem('tent_universal_pass') || "";
+  let adminAuthPassword = localStorage.getItem('tent_admin_auth_pass') || "";
+
+  function checkAdminStatus() {
+    let loginBtn = document.getElementById('btnAdminLogin');
+    let controls = document.getElementById('adminControlsArea');
+    if (adminAuthPassword) {
+      if (loginBtn) loginBtn.style.display = "none";
+      if (controls) controls.style.display = "inline-flex";
+    } else {
+      if (loginBtn) loginBtn.style.display = "inline-flex";
+      if (controls) controls.style.display = "none";
+    }
   }
 
-  function setSavedDrivePass(pass) {
-    if (pass) localStorage.setItem('tent_universal_pass', pass);
-    else localStorage.removeItem('tent_universal_pass');
+  async function handleAdminLogin() {
+    let enteredPass = await askPassword("🔐 एडमिन लॉगिन", "एडमिन टूल्स (Drive Save, Files, Password) खोलने के लिए एडमिन पासवर्ड डालें:");
+    if (!enteredPass) return;
+
+    let res = await callBackendDirect({ action: "verify_login", pass: enteredPass });
+    if (res.status === "success") {
+      adminAuthPassword = enteredPass;
+      localStorage.setItem('tent_admin_auth_pass', enteredPass);
+      checkAdminStatus();
+      alert("🎉 एडमिन लॉगिन सफल! अब आप एक क्लिक में बिना किसी पासवर्ड के सीधे गूगल ड्राइव में सेव कर सकते हैं।");
+    } else {
+      alert("❌ " + res.message);
+    }
+  }
+
+  function handleAdminLogout() {
+    if (confirm("क्या आप एडमिन पैनल से लॉगआउट करना चाहते हैं?")) {
+      adminAuthPassword = "";
+      localStorage.removeItem('tent_admin_auth_pass');
+      checkAdminStatus();
+      document.getElementById('driveListCard').style.display = 'none';
+      alert("🚪 आप सफलतापूर्वक लॉगआउट हो गए हैं।");
+    }
   }
 
   let modalResolve = null;
@@ -532,12 +582,33 @@
     inp.type = (inp.type === "password") ? "text" : "password";
   }
 
-  // 🚀 सीधे वेबसाइट से पासवर्ड बदलने का मास्टर फंक्शन (दोनों जगह एक साथ बदलेगा)
-  async function changeMasterPasswordDirectly() {
-    let oldPass = await askPassword("🔑 पुराना पासवर्ड", "कृपया अपना पुराना पासवर्ड दर्ज करें:");
-    if (!oldPass) return;
+  // सीधे बैकएंड कॉल हेल्पर
+  async function callBackendDirect(bodyData) {
+    try {
+      let resp = await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(bodyData)
+      });
+      let text = await resp.text();
+      try {
+        return JSON.parse(text);
+      } catch (err) {
+        return { status: "error", message: "Google Script से अमान्य उत्तर: " + text.substring(0, 150) };
+      }
+    } catch (e) {
+      return { status: "error", message: "इंटरनेट या सर्वर एरर: " + e.message };
+    }
+  }
 
-    let newPass = await askPassword("🔑 नया पासवर्ड", "नया पासवर्ड दर्ज करें जो आप रखना चाहते हैं:");
+  // पासवर्ड बदलने का कार्य
+  async function changeMasterPasswordDirectly() {
+    if (!adminAuthPassword) {
+      alert("कृपया पहले एडमिन लॉगिन करें!");
+      return;
+    }
+
+    let newPass = await askPassword("🔑 नया पासवर्ड", "नया एडमिन पासवर्ड दर्ज करें जो आप रखना चाहते हैं:");
     if (!newPass) { alert("नया पासवर्ड खाली नहीं हो सकता!"); return; }
 
     let confirmNew = await askPassword("🔑 पुनः पुष्टि करें", "नया पासवर्ड फिर से दर्ज करें:");
@@ -546,27 +617,138 @@
       return;
     }
 
-    try {
-      let resp = await fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({
-          action: "change_password",
-          oldPass: oldPass,
-          newPass: newPass
-        })
-      });
-      let res = JSON.parse(await resp.text());
+    let res = await callBackendDirect({
+      action: "change_password",
+      oldPass: adminAuthPassword,
+      newPass: newPass
+    });
 
-      if (res.status === "success") {
-        setSavedDrivePass(newPass); // ब्राउज़र में भी नया पासवर्ड सेव हो गया
-        alert("🎉 बधाई! आपका पासवर्ड हमेशा के लिए दोनों जगह (Google Drive और सिस्टम में) सफलतापूर्वक बदल दिया गया है!");
-      } else {
-        alert("❌ पासवर्ड नहीं बदला जा सका: " + res.message);
-      }
-    } catch (e) {
-      alert("❌ एरर: " + e.message);
+    if (res.status === "success") {
+      adminAuthPassword = newPass;
+      localStorage.setItem('tent_admin_auth_pass', newPass);
+      alert("🎉 बधाई! आपका पासवर्ड हमेशा के लिए Google Drive और सिस्टम दोनों जगह बदल गया है!");
+    } else {
+      alert("❌ पासवर्ड नहीं बदला जा सका: " + res.message);
     }
+  }
+
+  // 1-Click डायरेक्ट ड्राइव सेव (बिना किसी पासवर्ड पॉपअप के)
+  async function saveToGoogleDriveDirect() {
+    if (!adminAuthPassword) {
+      alert("❌ सुरक्षित सेव करने के लिए कृपया पहले '🔐 एडमिन लॉगिन' करें!");
+      return;
+    }
+
+    let cName = document.getElementById('custName').value.trim();
+    if (!cName) { alert("कृपया पहले ग्राहक का नाम लिखें!"); return; }
+
+    let orderData = {
+      custName: cName,
+      custPhone: document.getElementById('custPhone').value,
+      address: document.getElementById('eventAddress').value,
+      eventDate: document.getElementById('eventStartDate').value,
+      firmName: document.getElementById('firmName').value,
+      firmPhone: document.getElementById('firmPhone').value,
+      firmTagline: document.getElementById('firmTagline').value,
+      schedule: schedule,
+      tentList: tentList
+    };
+
+    let btn = document.getElementById('btnSaveDrive');
+    let originalText = btn ? btn.innerText : "☁️ Drive में सेव";
+    if (btn) btn.innerText = "⏳ सेव हो रहा है...";
+
+    let res = await callBackendDirect({
+      action: "save",
+      pass: adminAuthPassword,
+      payload: orderData
+    });
+
+    if (btn) btn.innerText = originalText;
+
+    if (res.status === "success") {
+      alert(`✅ सफलता! "${cName}" का पूरा रिकॉर्ड सीधे Google Drive में सुरक्षित सेव हो गया है!`);
+    } else {
+      alert("❌ सेव नहीं हुआ: " + res.message);
+      if (res.message.includes("पासवर्ड")) {
+        adminAuthPassword = "";
+        localStorage.removeItem('tent_admin_auth_pass');
+        checkAdminStatus();
+      }
+    }
+  }
+
+  async function openGoogleDriveList() {
+    if (!adminAuthPassword) {
+      alert("❌ ड्राइव फाइलें देखने के लिए पहले एडमिन लॉगिन करें!");
+      return;
+    }
+
+    let card = document.getElementById('driveListCard');
+    let body = document.getElementById('driveFilesBody');
+    let loading = document.getElementById('driveLoading');
+    
+    card.style.display = 'block';
+    body.innerHTML = "";
+    loading.style.display = 'block';
+
+    let res = await callBackendDirect({ action: "list", pass: adminAuthPassword });
+    loading.style.display = 'none';
+
+    if (res.status !== "success") {
+      alert("❌ " + res.message);
+      card.style.display = 'none';
+      return;
+    }
+
+    if (!res.list || res.list.length === 0) {
+      body.innerHTML = "<tr><td colspan='3' align='center'>Google Drive में अभी कोई आर्डर नहीं मिला।</td></tr>";
+      return;
+    }
+
+    res.list.forEach(f => {
+      body.innerHTML += `
+        <tr>
+          <td><strong>${f.name}</strong></td>
+          <td>${f.date}</td>
+          <td>
+            <button class="btn btn-green" style="font-size:11px; padding:3px 8px;" onclick="loadFromGoogleDrive('${f.id}')">✏️ Drive से खोलें</button>
+          </td>
+        </tr>
+      `;
+    });
+  }
+
+  async function loadFromGoogleDrive(fileId) {
+    let res = await callBackendDirect({
+      action: "load",
+      pass: adminAuthPassword,
+      fileId: fileId
+    });
+
+    if (res.status !== "success") {
+      alert("फ़ाइल लोड नहीं हो सकी: " + res.message);
+      return;
+    }
+
+    let o = res.data;
+    saveState();
+
+    document.getElementById('custName').value = o.custName || "";
+    document.getElementById('custPhone').value = o.custPhone || "";
+    document.getElementById('eventAddress').value = o.address || "";
+    document.getElementById('eventStartDate').value = o.eventDate || "";
+    updateEventDates();
+
+    schedule = o.schedule || [];
+    tentList = o.tentList || [];
+
+    renderDaysUI();
+    renderTentBadges();
+    renderReceipt();
+    document.getElementById('driveListCard').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    alert(`🎉 Google Drive से "${o.custName}" का रिकॉर्ड सफलतापूर्वक खुल गया!`);
   }
 
   const hindiAlphabetOrder = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः','क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह','क्ष','त्र','ज्ञ'];
@@ -687,9 +869,6 @@
     document.querySelectorAll('.session-box').forEach(el => sessionObserver.observe(el));
   }
 
-  // ✅ सत्र/दिन की छिपाने की स्थिति डेटा में भी सेव होगी।
-  // इससे renderDaysUI(), नया सामान जोड़ने, Drive Save/Load आदि के बाद
-  // छिपा हुआ सत्र दोबारा अपने-आप नहीं खुलेगा।
   function toggleSessionDetails(sessId, ev) {
     if(ev) ev.stopPropagation();
     let found = null;
@@ -699,9 +878,7 @@
     }
     if (!found) return;
 
-    // Undo में पुरानी स्थिति रहे
     saveState();
-
     found.hidden = !found.hidden;
     const bodyEl = document.getElementById('body_' + sessId);
     const btn = document.getElementById('tgl_btn_' + sessId);
@@ -710,7 +887,6 @@
     if (btn) btn.innerText = found.hidden ? "खोलें 🔽" : "छिपाएं 🔼";
   }
 
-  // ✅ पूरा दिन हाइड/शो — स्थिति schedule में सेव होगी
   function toggleWholeDay(dayId) {
     let day = schedule.find(d => d.id === dayId);
     if (!day) return;
@@ -725,7 +901,6 @@
     if (btn) btn.innerText = day.hidden ? "दिन खोलें 🔽" : "दिन छिपाएं 🔼";
   }
 
-  // ✅ उस दिन के सभी सत्र एक साथ छिपाएं/खोलें
   function toggleAllSessionsInDay(dayId, expand = true) {
     let day = schedule.find(d => d.id === dayId);
     if (!day) return;
@@ -754,7 +929,6 @@
   function applySnapshot(jsonStr) {
     let state = JSON.parse(jsonStr);
     schedule = state.schedule || [];
-    // पुराने Drive records में hidden property नहीं होगी; उसे सुरक्षित default दें।
     schedule.forEach(day => {
       day.hidden = !!day.hidden;
       (day.sessions || []).forEach(sess => { sess.hidden = !!sess.hidden; });
@@ -805,6 +979,7 @@
 
   window.onload = function() {
     loadFirmProfile();
+    checkAdminStatus();
     let today = new Date().toISOString().split('T')[0];
     document.getElementById('eventStartDate').value = today;
     updateEventDates();
@@ -1175,7 +1350,6 @@
               </div>
             </div>
 
-            <!-- केवल इस सत्र की बॉडी (स्वतंत्र हाइड) -->
             <div class="session-body-content" id="body_${sess.id}" style="display:${sess.hidden ? 'none' : 'block'};">
               <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
                 <label style="margin:0;">सत्र नाम:</label>
@@ -1326,184 +1500,6 @@
       tentRows += `<tr><td width="50%">${t1Text}</td><td width="50%">${t2Text}</td></tr>`;
     }
     document.getElementById('outTentBody').innerHTML = tentRows || "<tr><td colspan='2' style='color:#888;'>कोई टेंट सामान दर्ज नहीं किया गया।</td></tr>";
-  }
-
-  // ☁️ सुरक्षित API कॉल
-  // पहले बिना अलग Drive पासवर्ड के अनुरोध भेजा जाता है।
-  // यदि Google Script पहले से लॉगिन/अधिकृत सत्र को स्वीकार करती है तो दोबारा पासवर्ड नहीं माँगा जाएगा।
-  // केवल तभी पासवर्ड पूछा जाएगा जब Google Script वास्तव में उसे आवश्यक बताए।
-  async function callDriveAPI(bodyData) {
-    const savedPass = getSavedDrivePass();
-
-    async function sendRequest(passValue = "") {
-      const requestData = { ...bodyData };
-      if (passValue) requestData.pass = passValue;
-      else delete requestData.pass;
-
-      const response = await fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(requestData)
-      });
-      const resText = await response.text();
-      try {
-        return JSON.parse(resText);
-      } catch(e) {
-        throw new Error("गूगल से अमान्य उत्तर: " + resText.substring(0, 150));
-      }
-    }
-
-    const isPasswordError = (resJson) => {
-      const msg = String(resJson && resJson.message || "");
-      return resJson && resJson.status !== "success" &&
-        (msg.includes("पासवर्ड") || msg.toLowerCase().includes("password"));
-    };
-
-    // 1) पहले बिना पासवर्ड प्रयास — लॉगिन/अधिकृत सत्र होने पर यही सफल होगा।
-    let resJson = await sendRequest("");
-    if (resJson.status === "success") return resJson;
-
-    // 2) यदि backend ने password माँगा और browser में पहले से saved password है, तो उसे आजमाएँ।
-    if (isPasswordError(resJson) && savedPass) {
-      resJson = await sendRequest(savedPass);
-      if (resJson.status === "success") {
-        setSavedDrivePass(savedPass);
-        return resJson;
-      }
-    }
-
-    // 3) केवल वास्तविक password requirement/error होने पर ही password popup दिखाएँ।
-    if (isPasswordError(resJson)) {
-      const pass = await askPassword(
-        "🔐 Google Drive पासवर्ड",
-        "Google Script ने Save के लिए Admin Password माँगा है।"
-      );
-      if (!pass) throw new Error("पासवर्ड दर्ज नहीं किया गया!");
-
-      resJson = await sendRequest(pass);
-      if (resJson.status === "success") {
-        setSavedDrivePass(pass);
-      } else if (isPasswordError(resJson)) {
-        setSavedDrivePass("");
-      }
-    }
-
-    return resJson;
-  }
-
-  async function saveToGoogleDrive() {
-    let cName = document.getElementById('custName').value.trim();
-    if (!cName) { alert("कृपया पहले ग्राहक का नाम लिखें!"); return; }
-
-    let orderData = {
-      custName: cName,
-      custPhone: document.getElementById('custPhone').value,
-      address: document.getElementById('eventAddress').value,
-      eventDate: document.getElementById('eventStartDate').value,
-      firmName: document.getElementById('firmName').value,
-      firmPhone: document.getElementById('firmPhone').value,
-      firmTagline: document.getElementById('firmTagline').value,
-      schedule: schedule,
-      tentList: tentList
-    };
-
-    let btn = document.getElementById('btnSaveDrive');
-    let originalText = btn ? btn.innerText : "☁️ Drive में सेव";
-    if(btn) btn.innerText = "⏳ सेव हो रहा है...";
-
-    try {
-      let res = await callDriveAPI({
-        action: "save",
-        payload: orderData
-      });
-
-      if(btn) btn.innerText = originalText;
-
-      if (res.status === "success") {
-        alert(`✅ बधाई! "${cName}" का पूरा रिकॉर्ड Google Drive में सुरक्षित सेव हो गया है!`);
-      } else {
-        alert("❌ " + res.message);
-      }
-    } catch(err) {
-      if(btn) btn.innerText = originalText;
-      alert("❌ सेव करने में समस्या: " + err.message);
-    }
-  }
-
-  async function openGoogleDriveList() {
-    let card = document.getElementById('driveListCard');
-    let body = document.getElementById('driveFilesBody');
-    let loading = document.getElementById('driveLoading');
-    
-    card.style.display = 'block';
-    body.innerHTML = "";
-    loading.style.display = 'block';
-
-    try {
-      let res = await callDriveAPI({ action: "list" });
-      loading.style.display = 'none';
-
-      if (res.status !== "success") {
-        alert("❌ " + res.message);
-        card.style.display = 'none';
-        return;
-      }
-
-      if (!res.list || res.list.length === 0) {
-        body.innerHTML = "<tr><td colspan='3' align='center'>Google Drive में अभी कोई आर्डर नहीं मिला।</td></tr>";
-        return;
-      }
-
-      res.list.forEach(f => {
-        body.innerHTML += `
-          <tr>
-            <td><strong>${f.name}</strong></td>
-            <td>${f.date}</td>
-            <td>
-              <button class="btn btn-green" style="font-size:11px; padding:3px 8px;" onclick="loadFromGoogleDrive('${f.id}')">✏️ Drive से खोलें</button>
-            </td>
-          </tr>
-        `;
-      });
-    } catch(err) {
-      loading.style.display = 'none';
-      alert("❌ ड्राइव फाइलें लोड नहीं हो सकीं: " + err.message);
-    }
-  }
-
-  async function loadFromGoogleDrive(fileId) {
-    try {
-      let res = await callDriveAPI({
-        action: "load",
-        fileId: fileId
-      });
-
-      if (res.status !== "success") {
-        alert("फ़ाइल लोड नहीं हो सकी: " + res.message);
-        return;
-      }
-
-      let o = res.data;
-      saveState();
-
-      document.getElementById('custName').value = o.custName || "";
-      document.getElementById('custPhone').value = o.custPhone || "";
-      document.getElementById('eventAddress').value = o.address || "";
-      document.getElementById('eventStartDate').value = o.eventDate || "";
-      updateEventDates();
-
-      schedule = o.schedule || [];
-      tentList = o.tentList || [];
-
-      renderDaysUI();
-      renderTentBadges();
-      renderReceipt();
-      document.getElementById('driveListCard').style.display = 'none';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      alert(`🎉 Google Drive से "${o.custName}" का रिकॉर्ड खुल गया!`);
-    } catch(err) {
-      alert("❌ फ़ाइल खोलने में त्रुटि: " + err.message);
-    }
   }
 
   function downloadImage() {
