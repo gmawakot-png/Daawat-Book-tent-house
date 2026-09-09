@@ -121,8 +121,10 @@
     /* सत्र व दिन डिब्बे */
     .day-box { border: 2px solid #8b0000; border-radius: 8px; padding: 12px; margin-bottom: 20px; background: #fffcfc; }
     .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #8b0000; padding: 8px 12px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; background: #ffebee; border-radius: 5px; }
+    .day-content-area { transition: all 0.3s ease; }
     .day-bottom-actions { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; margin-top: 10px; background: #fff1f3; border: 1px dashed #e57373; border-radius: 6px; }
-    .session-box { background: white; border: 1px solid #ddd; border-left: 6px solid var(--maroon); border-radius: 6px; padding: 12px; margin-bottom: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.04); transition: border-color 0.3s; }
+    
+    .session-box { background: white; border: 1px solid #ddd; border-left: 6px solid var(--maroon); border-radius: 6px; padding: 12px; margin-bottom: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
     
     .session-date-banner {
       background: #fff8e1;
@@ -136,7 +138,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+    }
+
+    .session-body-content {
+      display: block;
+      margin-top: 8px;
     }
 
     .menu-panel { border-radius: 6px; padding: 10px; margin-top: 8px; }
@@ -160,7 +167,7 @@
     .item-badge { background: #e9f5ff; color: #0056b3; padding: 4px 9px; border-radius: 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; margin: 3px; border: 1px solid #bee5eb; }
     .item-badge-nonveg { background: #ffebee; color: #b71c1c; border: 1px solid #ffcdd2; }
 
-    /* पासवर्ड मोडल (पॉपअप) */
+    /* पासवर्ड मोडल */
     .custom-modal-overlay {
       display: none;
       position: fixed;
@@ -221,7 +228,7 @@
 </head>
 <body>
 
-<!-- पासवर्ड इनपुट मोडल (आँख वाले बटन के साथ) -->
+<!-- पासवर्ड मोडल -->
 <div id="passwordModal" class="custom-modal-overlay">
   <div class="custom-modal">
     <h3 id="modalTitle" style="color:var(--maroon); margin-top:0; font-size:16px;">🔐 एडमिन पासवर्ड दर्ज करें</h3>
@@ -239,10 +246,10 @@
   </div>
 </div>
 
-<!-- बाईं तरफ का साइडबार टॉगल बटन -->
+<!-- साइडबार टॉगल बटन -->
 <button class="sidebar-toggle-btn no-print" id="sbToggleBtn" onclick="toggleSidebar()">◀ साइडबार</button>
 
-<!-- बाईं तरफ का साइडबार -->
+<!-- साइडबार -->
 <div id="quickSidebar" class="no-print">
   <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--maroon); padding-bottom:6px; margin-bottom:10px;">
     <h4 style="margin:0; font-size:14px;">⚡ क्विक नेविगेशन</h4>
@@ -285,11 +292,11 @@
     <button class="btn btn-secondary" onclick="redoAction()">↪️ Redo</button>
   </div>
 
-  <!-- सुरक्षित एडमिन, पासवर्ड व एक्सपोर्ट बटन्स -->
+  <!-- एडमिन एवं एक्सपोर्ट बटन्स -->
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
     <span id="adminStatusDisplay" class="admin-badge admin-logged-out" onclick="handleAdminLogin()">🔒 Admin Login</span>
     <button class="btn btn-secondary" style="font-size:11px;" onclick="changeAdminPasswordPrompt()" title="पासवर्ड बदलें">🔑 पासवर्ड बदलें</button>
-    <button class="btn btn-green" onclick="saveToGoogleDrive()">☁️ Drive में सेव</button>
+    <button class="btn btn-green" id="btnSaveDrive" onclick="saveToGoogleDrive()">☁️ Drive में सेव</button>
     <button class="btn btn-purple" onclick="openGoogleDriveList()">📂 Drive फाइलें</button>
     <button class="btn btn-yellow" onclick="downloadImage()">🖼️ JPEG फोटो</button>
     <button class="btn btn-blue" onclick="renderReceipt(); window.print();">🖨️ PDF / प्रिंट</button>
@@ -300,7 +307,7 @@
 <!-- लाइव एक्टिव डेट बैनर -->
 <div class="live-date-indicator no-print" id="liveDateIndicator">
   <span>👉 वर्तमान कार्य स्थिति: <span id="currentActiveInfo" class="live-badge-glow">[ दिन 1 ] | 📅 तारीख: -- | ⏱️ सत्र: --</span></span>
-  <span style="font-size:12px; color:#6d5204; font-weight:bold;">⚡ ऑटो-ट्रैकिंग सक्रिय (स्क्रॉल करने पर स्वचालित अपडेट)</span>
+  <span style="font-size:12px; color:#6d5204; font-weight:bold;">⚡ ऑटो-ट्रैकिंग सक्रिय</span>
 </div>
 
 <div class="container" id="mainContainer">
@@ -354,7 +361,7 @@
   <div class="card no-print">
     <div style="margin-bottom: 10px;">
       <h3 style="margin-bottom:2px;">🍲 भोजन एवं नाश्ता व्यवस्था (तारीख वार मेन्यू)</h3>
-      <small style="color:#555;">💡 जिस भी तारीख में सत्र जोड़ना हो, उस तारीख के <strong>ऊपर या नीचे दिए गए बटन</strong> या हेडर से <strong>"+ नया सत्र"</strong> दबाएं। किसी सत्र को भरने के बाद स्क्रीन हल्की रखने के लिए आप उसे <strong>"छिपाएं 🔼"</strong> कर सकते हैं।</small>
+      <small style="color:#555;">💡 जिस भी सत्र को छिपाना हो, उसी सत्र के सामने दिए गए <strong>"छिपाएं 🔼"</strong> बटन को दबाएं। पूरा दिन एक साथ छिपाने हेतु दिन के हेडर का बटन प्रयोग करें।</small>
     </div>
     <div id="daysWrapper"></div>
   </div>
@@ -429,7 +436,7 @@
     <div id="tentBadges" style="min-height:30px; background:white; border:1px solid #ddd; padding:6px; border-radius:4px;"></div>
   </div>
 
-  <!-- 🔒 केवल एडमिन लॉगिन होने पर ही दिखने वाला एरिया -->
+  <!-- एडमिन हिस्ट्री बटन -->
   <div class="card no-print" id="adminHistoryBtnCard" style="text-align:center; display:none;">
     <button class="btn btn-secondary" onclick="toggleHistory()">📂 ब्राउज़र का पुराना लोकल इतिहास देखें</button>
   </div>
@@ -507,7 +514,7 @@
   // 🔗 Google Apps Script URL
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZTfOU_8emrIKCofGcCHB9O-r-9ik8AgXlINxNBcfVIQgi7oANBoRu-_GJMgU4AEnH/exec";
 
-  // पासवर्ड मैनेजमेंट - डिफ़ॉल्ट 2050
+  // पासवर्ड प्रबंधन
   function getActivePlainPass() {
     let p = localStorage.getItem('tent_active_plain_pass');
     if (!p) {
@@ -706,7 +713,7 @@
     }
 
     updatePassword(newPass);
-    alert("🎉 बधाई! आपका पासवर्ड सफलतापूर्वक बदल दिया गया है!");
+    alert("🎉 बधाई! आपका पासवर्ड सफलतापूर्वक बदल दिया गया है!\nनोट: यदि Google Script में भी पासवर्ड सेट है, तो दोनों समान रखें।");
   }
 
   function formatDisplayDate(dateStr) {
@@ -776,28 +783,45 @@
     });
   }
 
-  function toggleSessionDetails(sessId) {
-    let details = document.getElementById('details_' + sessId);
+  // ✅ केवल वही सत्र हाइड/शो करने का सटीक फंक्शन
+  function toggleSessionDetails(sessId, ev) {
+    if(ev) ev.stopPropagation();
+    let bodyEl = document.getElementById('body_' + sessId);
     let btn = document.getElementById('tgl_btn_' + sessId);
-    if (!details) return;
+    if (!bodyEl) return;
 
-    if (details.style.display === "none") {
-      details.style.display = "block";
+    if (bodyEl.style.display === "none") {
+      bodyEl.style.display = "block";
       if (btn) btn.innerText = "छिपाएं 🔼";
     } else {
-      details.style.display = "none";
+      bodyEl.style.display = "none";
       if (btn) btn.innerText = "खोलें 🔽";
     }
   }
 
+  // ✅ केवल पूरा दिन समेटने या खोलने का फंक्शन
+  function toggleWholeDay(dayId) {
+    let content = document.getElementById('day_content_' + dayId);
+    let btn = document.getElementById('btn_day_toggle_' + dayId);
+    if (!content) return;
+    if (content.style.display === "none") {
+      content.style.display = "block";
+      if (btn) btn.innerText = "दिन छिपाएं 🔼";
+    } else {
+      content.style.display = "none";
+      if (btn) btn.innerText = "दिन खोलें 🔽";
+    }
+  }
+
+  // उस दिन के अंदर के सभी सत्रों को एक साथ समेटने या खोलने का फंक्शन
   function toggleAllSessionsInDay(dayId, expand = true) {
     let day = schedule.find(d => d.id === dayId);
     if (!day) return;
     day.sessions.forEach(sess => {
-      let details = document.getElementById('details_' + sess.id);
+      let bodyEl = document.getElementById('body_' + sess.id);
       let btn = document.getElementById('tgl_btn_' + sess.id);
-      if (details) {
-        details.style.display = expand ? "block" : "none";
+      if (bodyEl) {
+        bodyEl.style.display = expand ? "block" : "none";
       }
       if (btn) {
         btn.innerText = expand ? "छिपाएं 🔼" : "खोलें 🔽";
@@ -1200,12 +1224,15 @@
             <span style="font-size:14px; font-weight:bold; color:var(--maroon);">[ ${displayDateText} ]</span>
           </div>
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-yellow" id="btn_day_toggle_${day.id}" style="font-size:11px; padding:4px 8px;" onclick="toggleWholeDay('${day.id}')">दिन छिपाएं 🔼</button>
             <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="toggleAllSessionsInDay('${day.id}', false)">🔼 सभी सत्र छिपाएं</button>
             <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="toggleAllSessionsInDay('${day.id}', true)">🔽 सभी सत्र खोलें</button>
-            <button class="btn btn-blue" style="font-size:11px; padding:4px 8px;" onclick="addNextSession('${day.id}', true)">+ इस दिन में सत्र जोड़ें</button>
+            <button class="btn btn-blue" style="font-size:11px; padding:4px 8px;" onclick="addNextSession('${day.id}', true)">+ सत्र जोड़ें</button>
             <button class="btn btn-danger" style="font-size:11px; padding:4px 8px;" onclick="removeDay('${day.id}')">दिन हटाएं</button>
           </div>
         </div>
+        
+        <div class="day-content-area" id="day_content_${day.id}">
       `;
 
       day.sessions.forEach((sess, sIdx) => {
@@ -1227,18 +1254,19 @@
                data-daynum="${dIdx + 1}" 
                data-date="${day.date}" 
                data-title="${sess.title}" 
-               data-dayid="${day.id}"
-               onclick="setActiveSessionInfo(${dIdx + 1}, '${day.date}', '${sess.title}', '${day.id}');">
+               data-dayid="${day.id}">
             
             <div class="session-date-banner">
               <span>👉 <strong>दिन ${dIdx + 1}</strong> | तारीख: <span style="font-size:14px; text-decoration:underline;">${displayDateText}</span> | (${sess.title}) - <small style="color:#28a745;">[${sess.items.length} सामान जुड़ा]</small></span>
               <div style="display:flex; gap:6px; align-items:center;">
-                <button class="btn btn-yellow" id="tgl_btn_${sess.id}" style="font-size:11px; padding:3px 8px;" onclick="toggleSessionDetails('${sess.id}')">छिपाएं 🔼</button>
-                <button class="btn btn-danger" style="font-size:10px; padding:2px 6px;" onclick="removeSession('${day.id}', '${sess.id}')">सत्र हटाएं ✖</button>
+                <!-- स्वतंत्र सत्र हाइड/शो बटन -->
+                <button class="btn btn-yellow" id="tgl_btn_${sess.id}" type="button" style="font-size:11px; padding:3px 8px;" onclick="toggleSessionDetails('${sess.id}', event)">छिपाएं 🔼</button>
+                <button class="btn btn-danger" type="button" style="font-size:10px; padding:2px 6px;" onclick="removeSession('${day.id}', '${sess.id}')">सत्र हटाएं ✖</button>
               </div>
             </div>
 
-            <div id="details_${sess.id}">
+            <!-- केवल इस सत्र की बॉडी (हाइड होने पर केवल यही बंद होगी) -->
+            <div class="session-body-content" id="body_${sess.id}">
               <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
                 <label style="margin:0;">सत्र नाम:</label>
                 <input type="text" value="${sess.title}" style="width:160px; font-weight:bold;" onfocus="setActiveSessionInfo(${dIdx + 1}, '${day.date}', this.value, '${day.id}');" oninput="schedule[${dIdx}].sessions[${sIdx}].title = this.value; document.getElementById('box_${sess.id}').setAttribute('data-title', this.value); renderReceipt();">
@@ -1291,6 +1319,7 @@
       });
 
       dHtml += `
+        </div> <!-- day-content-area end -->
         <div class="day-bottom-actions">
           <span style="font-size:12.5px; font-weight:bold; color:var(--maroon);">
             📅 दिन ${dIdx + 1} (${displayDateText}) में नया सत्र जोड़ें:
@@ -1389,7 +1418,7 @@
     document.getElementById('outTentBody').innerHTML = tentRows || "<tr><td colspan='2' style='color:#888;'>कोई टेंट सामान दर्ज नहीं किया गया।</td></tr>";
   }
 
-  // ☁️ Google Drive सुरक्षित API कॉल (ऑटो री-ट्राई पासवर्ड के साथ)
+  // ☁️ सुरक्षित एवं स्मार्ट Google Drive API (पासवर्ड मिसमैच पर ऑटो-सॉल्व)
   async function callDriveAPI(bodyData) {
     let currentPass = bodyData.pass || getActivePlainPass();
     bodyData.pass = currentPass;
@@ -1407,12 +1436,12 @@
       throw new Error("गूगल से अमान्य उत्तर: " + resText.substring(0, 100));
     }
 
-    // अगर ड्राइव स्क्रिप्ट ने पासवर्ड गलत बताया, तो यहीं सही पासवर्ड मांगकर री-ट्राई करें
-    if (resJson.status !== "success" && resJson.message && resJson.message.includes("पासवर्ड")) {
-      let correctPass = await askPassword("🔐 Google Drive पासवर्ड आवश्यक", "Google Drive का पासवर्ड दर्ज करें (डिफ़ॉल्ट 2050):");
-      if (correctPass) {
-        updatePassword(correctPass.trim());
-        bodyData.pass = correctPass.trim();
+    // यदि स्क्रिप्ट से पासवर्ड मिसमैच एरर आए, तो सीधे सही पासवर्ड पूछें
+    if (resJson.status !== "success" && resJson.message && resJson.message.toLowerCase().includes("पासवर्ड")) {
+      let promptPass = await askPassword("🔐 Google Drive पासवर्ड सत्यापन", "Google Drive का सही पासवर्ड दर्ज करें (डिफ़ॉल्ट 2050):");
+      if (promptPass) {
+        updatePassword(promptPass.trim());
+        bodyData.pass = promptPass.trim();
         let retryResp = await fetch(GOOGLE_SCRIPT_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
@@ -1430,7 +1459,7 @@
     if (!authed) return;
 
     let cName = document.getElementById('custName').value.trim();
-    if (!cName) { alert("कृपया ग्राहक का नाम लिखें!"); return; }
+    if (!cName) { alert("कृपया पहले ग्राहक का नाम लिखें!"); return; }
 
     let orderData = {
       custName: cName,
@@ -1444,8 +1473,8 @@
       tentList: tentList
     };
 
-    let btn = event ? event.target : null;
-    let originalText = btn ? btn.innerText : "";
+    let btn = document.getElementById('btnSaveDrive');
+    let originalText = btn ? btn.innerText : "☁️ Drive में सेव";
     if(btn) btn.innerText = "⏳ सेव हो रहा है...";
 
     try {
@@ -1458,7 +1487,7 @@
       if(btn) btn.innerText = originalText;
 
       if (res.status === "success") {
-        alert(`✅ बधाई! "${cName}" का पूरा आर्डर Google Drive में सुरक्षित सेव हो गया है!`);
+        alert(`✅ बधाई! "${cName}" का पूरा रिकॉर्ड Google Drive में सुरक्षित सेव हो गया है!`);
         saveOrderToBrowserStorage();
       } else {
         alert("❌ " + res.message);
