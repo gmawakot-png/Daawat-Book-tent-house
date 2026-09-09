@@ -4,21 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>टेंट हाउस एवं कैटरिंग मैनेजमेंट सिस्टम</title>
-  <!-- JPEG फोटो डाउनलोड लाइब्रेरी (html2canvas) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   
   <style>
-    :root { --maroon: #8b0000; --dark: #2c3e50; --veg-color: #28a745; --nonveg-color: #b22222; }
+    :root { --maroon: #8b0000; --dark: #2c3e50; }
     * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-    body { background-color: #f4f6f9; margin: 0; padding: 12px; padding-top: 85px; }
-    .container { max-width: 1280px; margin: auto; transition: margin-right 0.3s; }
+    body { background-color: #f4f6f9; margin: 0; padding: 12px; padding-top: 110px; }
+    .container { max-width: 1200px; margin-left: 270px; transition: margin-left 0.3s; }
+    .container.full-width { margin-left: auto; margin-right: auto; }
+
     .card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 16px; }
     h2, h3, h4 { color: var(--maroon); margin-top: 0; margin-bottom: 8px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
     label { font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px; color: #333; }
     input, select { width: 100%; padding: 7px 9px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
     
-    .btn { padding: 7px 11px; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: 0.2s; text-decoration: none; }
+    .btn { padding: 7px 11px; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: 0.2s; }
     .btn-maroon { background: var(--maroon); color: white; }
     .btn-green { background: #28a745; color: white; }
     .btn-blue { background: #007bff; color: white; }
@@ -26,11 +27,10 @@
     .btn-yellow { background: #ffc107; color: #212529; }
     .btn-danger { background: #dc3545; color: white; }
     .btn-secondary { background: #6c757d; color: white; }
-    .btn-dark { background: #343a40; color: white; }
     .btn-purple { background: #6f42c1; color: white; }
     .btn:hover { opacity: 0.88; }
 
-    /* फ़्रीज़ किया हुआ फ्लोटिंग एक्शन बार */
+    /* शीर्ष एक्शन बार */
     .sticky-action-bar {
       position: fixed;
       top: 0;
@@ -38,8 +38,8 @@
       right: 0;
       background: #ffffff;
       border-bottom: 3px solid var(--maroon);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      padding: 8px 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      padding: 6px 14px;
       z-index: 9999;
       display: flex;
       justify-content: space-between;
@@ -48,17 +48,71 @@
       gap: 6px;
     }
 
-    /* सत्र और तारीख व्यवस्था */
-    .day-box { border: 2px solid #8b0000; border-radius: 8px; padding: 14px; margin-bottom: 22px; background: #fffcfc; }
+    /* 🚩 वर्तमान एक्टिव कार्य-तारीख का लाइव बैनर */
+    .live-date-indicator {
+      position: fixed;
+      top: 48px;
+      left: 0;
+      right: 0;
+      background: #fff3cd;
+      border-bottom: 2px solid #ffeeba;
+      color: #856404;
+      padding: 5px 16px;
+      font-size: 13px;
+      font-weight: bold;
+      z-index: 9998;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* 🚩 बाईं तरफ का साइडबार (Left Sidebar) */
+    #quickSidebar {
+      position: fixed;
+      left: 0;
+      top: 85px;
+      bottom: 0;
+      width: 255px;
+      background: #ffffff;
+      border-right: 3px solid var(--maroon);
+      box-shadow: 3px 0 12px rgba(0,0,0,0.1);
+      z-index: 9997;
+      padding: 12px;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+    #quickSidebar.collapsed { transform: translateX(-100%); }
+
+    .sidebar-toggle-btn {
+      position: fixed;
+      left: 255px;
+      top: 88px;
+      background: var(--maroon);
+      color: white;
+      border: none;
+      border-radius: 0 6px 6px 0;
+      padding: 8px 10px;
+      cursor: pointer;
+      z-index: 9998;
+      font-size: 12px;
+      font-weight: bold;
+      transition: left 0.3s ease;
+    }
+    .sidebar-toggle-btn.collapsed { left: 0; }
+    .sidebar-section { margin-bottom: 14px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .sidebar-btn { width: 100%; text-align: left; margin-bottom: 5px; font-size: 11px; padding: 6px 8px; border-radius: 4px; border: 1px solid #ddd; background: #fafafa; cursor: pointer; }
+    .sidebar-btn:hover { background: #eef2f7; border-color: #007bff; }
+
+    /* सत्र व दिन डिब्बे */
+    .day-box { border: 2px solid #8b0000; border-radius: 8px; padding: 12px; margin-bottom: 20px; background: #fffcfc; }
     .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #8b0000; padding-bottom: 8px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; background: #ffebee; padding: 8px 12px; border-radius: 5px; }
-    .session-box { background: white; border: 1px solid #ddd; border-left: 6px solid var(--maroon); border-radius: 6px; padding: 12px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+    .session-box { background: white; border: 1px solid #ddd; border-left: 6px solid var(--maroon); border-radius: 6px; padding: 12px; margin-bottom: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
     
-    /* प्रत्येक सत्र के ऊपर विशेष स्पष्ट तारीख बैनर */
     .session-date-banner {
       background: #fff8e1;
       border: 1px solid #ffe082;
       border-left: 4px solid #f57f17;
-      padding: 5px 10px;
+      padding: 6px 10px;
       border-radius: 4px;
       font-size: 13px;
       font-weight: bold;
@@ -66,146 +120,58 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .menu-panel { border-radius: 6px; padding: 10px; margin-top: 8px; }
     .veg-panel { background: #f4fbf4; border: 1px solid #c3e6cb; }
     .nonveg-panel { background: #fff5f5; border: 1px solid #f5c6cb; }
 
-    .category-line {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 10px;
-      align-items: flex-start;
-    }
+    .category-line { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; align-items: flex-start; }
     .cat-box { display: flex; flex-direction: column; position: relative; }
     .cat-box label { font-size: 12px; margin-bottom: 3px; color: #222; }
 
-    /* मल्टी-सलेक्ट चेकबॉक्स मेन्यू */
     .multiselect-container { position: relative; width: 100%; }
-    .multiselect-btn {
-      width: 100%;
-      padding: 7px 9px;
-      background: white;
-      border: 1px solid #b0bec5;
-      border-radius: 4px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-      font-size: 12px;
-      text-align: left;
-    }
-    .ms-badge {
-      background: #28a745;
-      color: white;
-      padding: 1px 6px;
-      border-radius: 10px;
-      font-size: 11px;
-      font-weight: bold;
-      display: none;
-      margin-left: 4px;
-    }
-    .multiselect-menu {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      min-width: 230px;
-      max-height: 270px;
-      overflow-y: auto;
-      background: white;
-      border: 1px solid #666;
-      border-radius: 5px;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.25);
-      z-index: 1050;
-      padding: 6px;
-    }
+    .multiselect-btn { width: 100%; padding: 7px 9px; background: white; border: 1px solid #b0bec5; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 12px; }
+    .ms-badge { background: #28a745; color: white; padding: 1px 6px; border-radius: 10px; font-size: 11px; font-weight: bold; display: none; margin-left: 4px; }
+    .multiselect-menu { display: none; position: absolute; top: 100%; left: 0; right: 0; min-width: 230px; max-height: 270px; overflow-y: auto; background: white; border: 1px solid #666; border-radius: 5px; box-shadow: 0 6px 16px rgba(0,0,0,0.25); z-index: 1050; padding: 6px; }
     .ms-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 3px; }
     .ms-item { display: flex; align-items: center; gap: 7px; padding: 4px 6px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-bottom: 2px; }
     .ms-item:hover { background: #f0f4f8; }
-    .ms-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; margin: 0; }
+    .ms-item input[type="checkbox"] { width: 16px; height: 16px; margin: 0; }
 
-    .action-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 12px;
-      align-items: center;
-      flex-wrap: wrap;
-      background: #eef7ee;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #c3e6cb;
-    }
-
+    .action-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; flex-wrap: wrap; background: #eef7ee; padding: 10px; border-radius: 6px; border: 1px solid #c3e6cb; }
     .item-badge { background: #e9f5ff; color: #0056b3; padding: 4px 9px; border-radius: 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; margin: 3px; border: 1px solid #bee5eb; }
     .item-badge-nonveg { background: #ffebee; color: #b71c1c; border: 1px solid #ffcdd2; }
 
-    /* 🚩 नया उपयोगी साइडबार (Sidebar) */
-    #quickSidebar {
-      position: fixed;
-      right: 0;
-      top: 85px;
-      bottom: 0;
-      width: 260px;
-      background: #ffffff;
-      border-left: 2px solid #8b0000;
-      box-shadow: -3px 0 10px rgba(0,0,0,0.1);
-      z-index: 9998;
-      padding: 12px;
-      overflow-y: auto;
-      transition: transform 0.3s ease;
-    }
-    #quickSidebar.collapsed { transform: translateX(100%); }
-    .sidebar-toggle-btn {
-      position: fixed;
-      right: 260px;
-      top: 92px;
-      background: var(--maroon);
-      color: white;
-      border: none;
-      border-radius: 5px 0 0 5px;
-      padding: 7px 10px;
-      cursor: pointer;
-      z-index: 9999;
-      font-size: 12px;
-      transition: right 0.3s ease;
-    }
-    .sidebar-toggle-btn.collapsed { right: 0; }
-    .sidebar-section { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-    .sidebar-btn { width: 100%; text-align: left; margin-bottom: 4px; font-size: 11px; padding: 5px 8px; border-radius: 4px; border: 1px solid #ddd; background: #fdfdfd; cursor: pointer; }
-    .sidebar-btn:hover { background: #eef2f7; }
-
-    /* रसीद (Print Area) */
+    /* रसीद (Print) */
     #billReceipt { background: white; padding: 25px; border: 2px solid #222; margin-top: 20px; }
     .bill-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 10px; }
     .bill-table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 12px; }
     .bill-table th, .bill-table td { border: 1px solid #444; padding: 6px 8px; font-size: 12px; text-align: left; vertical-align: top; }
     .bill-table th { background: #f0f0f0; }
 
-    /* एडमिन लॉगिन स्टेटस बैज */
     .admin-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
     .admin-logged-in { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     .admin-logged-out { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
     @media print {
       body { background: white; padding: 0; }
-      .no-print, .sticky-action-bar, #quickSidebar, .sidebar-toggle-btn { display: none !important; }
+      .no-print, .sticky-action-bar, .live-date-indicator, #quickSidebar, .sidebar-toggle-btn { display: none !important; }
+      .container { margin: 0 !important; max-width: 100% !important; }
       #billReceipt { border: none; padding: 0; }
     }
   </style>
 </head>
 <body>
 
-<!-- साइडबार टॉगल बटन -->
+<!-- बाईं तरफ का साइडबार टॉगल बटन -->
 <button class="sidebar-toggle-btn no-print" id="sbToggleBtn" onclick="toggleSidebar()">◀ साइडबार</button>
 
-<!-- उपयोगी फ्लोटिंग साइडबार -->
+<!-- 🚩 बाईं तरफ का साइडबार (Left Sidebar) -->
 <div id="quickSidebar" class="no-print">
   <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--maroon); padding-bottom:6px; margin-bottom:10px;">
-    <h4 style="margin:0; font-size:14px;">⚡ क्विक साइडबार</h4>
+    <h4 style="margin:0; font-size:14px;">⚡ क्विक मेन्यू</h4>
     <span onclick="toggleSidebar()" style="cursor:pointer; color:red; font-weight:bold;">✖</span>
   </div>
 
@@ -215,10 +181,10 @@
   </div>
 
   <div class="sidebar-section">
-    <div style="font-size:12px; font-weight:bold; color:var(--maroon); margin-bottom:6px;">⚡ जरूरी सामान (1-Click Add):</div>
+    <div style="font-size:12px; font-weight:bold; color:var(--maroon); margin-bottom:6px;">⚡ आवश्यक सामान (1-Click Add):</div>
     <button class="sidebar-btn" onclick="quickAddTent('पानी कैंपर (20L)', '10 नग')">💧 पानी कैंपर (20L)</button>
     <button class="sidebar-btn" onclick="quickAddTent('मिनरल वाटर बोतल', '5 पेटी')">🍾 मिनरल वाटर बोतल</button>
-    <button class="sidebar-btn" onclick="quickAddTent('डिस्पोजल गिलास व प्लेट', '1 सेट')">🍽️ डिस्पोजल सेट</button>
+    <button class="sidebar-btn" onclick="quickAddTent('डिस्पोजल प्लेट व गिलास', '1 सेट')">🍽️ डिस्पोजल सेट</button>
     <button class="sidebar-btn" onclick="quickAddTent('जनरेटर (साउंड प्रूफ)', '1 नग')">⚡ साइलेंट जनरेटर</button>
     <button class="sidebar-btn" onclick="quickAddTent('वेटर (सर्विस स्टाफ)', '5 आदमी')">🤵 वेटर स्टाफ</button>
     <button class="sidebar-btn" onclick="quickAddTent('हलवाई (कारीगर टीम)', '1 सेट')">👨‍🍳 हलवाई टीम</button>
@@ -231,23 +197,23 @@
   </div>
 </div>
 
-<!-- फ़्रीज़ किया हुआ फ्लोटिंग एक्शन बार -->
+<!-- शीर्ष फ्लोटिंग बार -->
 <div class="sticky-action-bar no-print">
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
     <button class="btn btn-maroon" onclick="addNewDayNextDate()">📅 + नई तारीख</button>
     
     <div style="display:inline-flex; align-items:center; gap:3px; background:#eef2f7; padding:2px 5px; border-radius:4px; border:1px solid #ccd;">
       <button class="btn btn-blue" style="padding:5px 9px;" onclick="addNextSessionFromSticky()">⏱️ + नया सत्र</button>
-      <select id="stickyDaySelect" style="width:140px; padding:4px; font-weight:bold; font-size:12px;" title="किस तारीख में सत्र जोड़ना है चुनें"></select>
+      <select id="stickyDaySelect" style="width:145px; padding:4px; font-weight:bold; font-size:12px;" title="सत्र के लिए तारीख चुनें"></select>
     </div>
 
-    <button class="btn btn-secondary" onclick="undoAction()" title="Ctrl+Z">↩️ Undo</button>
-    <button class="btn btn-secondary" onclick="redoAction()" title="Ctrl+Y">↪️ Redo</button>
+    <button class="btn btn-secondary" onclick="undoAction()">↩️ Undo</button>
+    <button class="btn btn-secondary" onclick="redoAction()">↪️ Redo</button>
   </div>
 
   <!-- सुरक्षित एडमिन व डाउनलोड बटन्स -->
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
-    <span id="adminStatusDisplay" class="admin-badge admin-logged-out" onclick="handleAdminLogin()" title="क्लिक करके पासवर्ड डालें">🔒 Admin Login</span>
+    <span id="adminStatusDisplay" class="admin-badge admin-logged-out" onclick="handleAdminLogin()">🔒 Admin Login</span>
     <button class="btn btn-green" onclick="saveToGoogleDrive()">☁️ Drive में सेव</button>
     <button class="btn btn-purple" onclick="openGoogleDriveList()">📂 Drive फाइलें</button>
     <button class="btn btn-yellow" onclick="downloadImage()">🖼️ JPEG फोटो</button>
@@ -256,13 +222,19 @@
   </div>
 </div>
 
+<!-- 🚩 हमेशा दिखने वाला लाइव एक्टिव डेट बैनर -->
+<div class="live-date-indicator no-print" id="liveDateIndicator">
+  <span>👉 वर्तमान कार्य स्थिति: <span id="currentActiveInfo" style="color:#b71c1c;">तारीख 1 का मेन्यू तैयार हो रहा है</span></span>
+  <span style="font-size:11px; color:#555;">💡 जिस सत्र पर क्लिक करेंगे, उसकी तारीख यहाँ दिखाई देगी</span>
+</div>
+
 <div class="container" id="mainContainer">
 
   <!-- 1. प्रोफाइल सेटिंग्स -->
   <div class="card no-print" style="border-top: 4px solid var(--maroon);">
     <div style="display:flex; justify-content:space-between; align-items:center;">
-      <h3>🎪 टेंट हाउस की जानकारी (Profile Settings)</h3>
-      <button class="btn btn-secondary" style="font-size:11px;" onclick="saveFirmProfile()">💾 जानकारी सेव रखें</button>
+      <h3>🎪 टेंट हाउस प्रोफाइल</h3>
+      <button class="btn btn-secondary" style="font-size:11px;" onclick="saveFirmProfile()">💾 प्रोफाइल सेव रखें</button>
     </div>
     <div class="grid">
       <div>
@@ -275,14 +247,14 @@
       </div>
       <div>
         <label>टैगलाइन / सेवा विवरण:</label>
-        <input type="text" id="firmTagline" placeholder="उदा. शादी, पार्टी, एवं समस्त मांगलिक कार्यों के लिए संपर्क करें">
+        <input type="text" id="firmTagline" placeholder="उदा. शादी व समस्त मांगलिक कार्यों के लिए">
       </div>
     </div>
   </div>
 
-  <!-- 2. ग्राहक एवं बुकिंग विवरण -->
+  <!-- 2. ग्राहक विवरण -->
   <div class="card no-print">
-    <h3>👤 ग्राहक एवं कार्यक्रम विवरण</h3>
+    <h3>👤 ग्राहक एवं बुकिंग विवरण</h3>
     <div class="grid">
       <div>
         <label>ग्राहक का नाम:</label>
@@ -293,21 +265,21 @@
         <input type="tel" id="custPhone" placeholder="मोबाइल नंबर लिखें" oninput="saveState(); renderReceipt();">
       </div>
       <div>
-        <label>कार्यक्रम तारीख (कैलेंडर से चुनें):</label>
+        <label>कार्यक्रम तारीख:</label>
         <input type="date" id="eventStartDate" onchange="saveState(); updateEventDates(); renderReceipt();">
       </div>
       <div>
         <label>स्थान / पता:</label>
-        <input type="text" id="eventAddress" placeholder="स्थान या पता लिखें" oninput="saveState(); renderReceipt();">
+        <input type="text" id="eventAddress" placeholder="स्थान लिखें" oninput="saveState(); renderReceipt();">
       </div>
     </div>
   </div>
 
-  <!-- 3. भोजन एवं कैटरिंग व्यवस्था -->
+  <!-- 3. भोजन मीनू व्यवस्था -->
   <div class="card no-print">
     <div style="margin-bottom: 10px;">
       <h3 style="margin-bottom:2px;">🍲 भोजन एवं नाश्ता व्यवस्था (तारीख वार मेन्यू)</h3>
-      <small style="color:#555;">💡 <strong>सुविधा:</strong> हर सत्र पर बड़े पीले-लाल बैनर में कार्य तारीख साफ दिखाई देगी ताकि 4-5 दिन के काम में कभी गलती न हो।</small>
+      <small style="color:#555;">💡 <strong>ध्यान दें:</strong> हर सत्र के डिब्बे के ऊपर और स्क्रीन के सबसे ऊपर पीले बैनर में लाइव तारीख दिखती रहेगी।</small>
     </div>
     <div id="daysWrapper"></div>
   </div>
@@ -341,7 +313,7 @@
             <option value="स्टील काउंटर">स्टील काउंटर</option>
             <option value="गोल टेबल">गोल टेबल</option>
           </optgroup>
-          <optgroup label="लाइटिंग व स्टाफ">
+          <optgroup label="अन्य व्यवस्थाएं">
             <option value="जनरेटर">जनरेटर</option>
             <option value="लाइट डेकोरेशन">लाइट डेकोरेशन</option>
             <option value="रोड लाइटिंग">रोड लाइटिंग</option>
@@ -382,11 +354,11 @@
     <div id="tentBadges" style="min-height:30px; background:white; border:1px solid #ddd; padding:6px; border-radius:4px;"></div>
   </div>
 
-  <div class="card no-print" style="text-align:center; display:flex; justify-content:center; gap:8px;">
-    <button class="btn btn-secondary" onclick="toggleHistory()">📂 ब्राउज़र का पुराना इतिहास देखें</button>
+  <div class="card no-print" style="text-align:center;">
+    <button class="btn btn-secondary" onclick="toggleHistory()">📂 ब्राउज़र का पुराना लोकल इतिहास देखें</button>
   </div>
 
-  <!-- Google Drive फाइलों की सुरक्षित सूची -->
+  <!-- Google Drive सुरक्षित फाइलों की सूची -->
   <div class="card no-print" id="driveListCard" style="display:none; border:2px solid #6f42c1;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
       <h3 style="margin:0; color:#6f42c1;">☁️ Google Drive सुरक्षित फाइलें</h3>
@@ -396,7 +368,7 @@
     <div style="overflow-x:auto;">
       <table style="width:100%; border-collapse:collapse;" border="1" cellpadding="6">
         <thead style="background:#f3e8fd;">
-          <tr><th>फ़ाइल नाम (ग्राहक)</th><th>अंतिम अपडेट तारीख</th><th>कार्य</th></tr>
+          <tr><th>फ़ाइल नाम (ग्राहक)</th><th>अंतिम सेव तारीख</th><th>कार्य</th></tr>
         </thead>
         <tbody id="driveFilesBody"></tbody>
       </table>
@@ -477,11 +449,8 @@
       if (charA !== charB) {
         let rankA = getHindiCharRank(charA);
         let rankB = getHindiCharRank(charB);
-        if (rankA !== 999 && rankB !== 999) {
-          if (rankA !== rankB) return rankA - rankB;
-        } else {
-          return charA.localeCompare(charB, 'hi');
-        }
+        if (rankA !== 999 && rankB !== 999) return rankA - rankB;
+        else return charA.localeCompare(charB, 'hi');
       }
     }
     return a.length - b.length;
@@ -523,7 +492,7 @@
   let undoStack = [];
   let redoStack = [];
 
-  // एडमिन लॉगिन स्टेटस
+  // एडमिन पासवर्ड व्यवस्था
   let adminSessionPass = sessionStorage.getItem('tent_admin_pass') || "";
 
   function updateAdminStatusUI() {
@@ -551,7 +520,7 @@
         adminSessionPass = p.trim();
         sessionStorage.setItem('tent_admin_pass', adminSessionPass);
         updateAdminStatusUI();
-        alert("✅ एडमिन पासवर्ड दर्ज कर दिया गया है!");
+        alert("✅ एडमिन पासवर्ड दर्ज हो गया!");
       }
     }
   }
@@ -575,11 +544,16 @@
     return dateStr;
   }
 
+  // बाईं तरफ के साइडबार को टॉगल करना
   function toggleSidebar() {
     let sb = document.getElementById('quickSidebar');
     let btn = document.getElementById('sbToggleBtn');
+    let cnt = document.getElementById('mainContainer');
+    
     sb.classList.toggle('collapsed');
     btn.classList.toggle('collapsed');
+    cnt.classList.toggle('full-width');
+
     btn.innerText = sb.classList.contains('collapsed') ? '▶ साइडबार' : '◀ साइडबार';
   }
 
@@ -589,6 +563,12 @@
     renderTentBadges();
     renderReceipt();
     alert(`✅ ${name} सूची में जोड़ दिया गया!`);
+  }
+
+  // लाइव एक्टिविटी इंडिकेटर अपडेट करना
+  function setActiveSessionInfo(dayNumber, dateStr, sessionTitle) {
+    let info = `[ दिन ${dayNumber} ] | 📅 तारीख: ${formatDisplayDate(dateStr)} | ⏱️ सत्र: ${sessionTitle}`;
+    document.getElementById('currentActiveInfo').innerText = info;
   }
 
   function getCurrentSnapshot() {
@@ -628,15 +608,13 @@
 
   function undoAction() {
     if (undoStack.length === 0) { alert("Undo के लिए पिछला रिकॉर्ड नहीं है!"); return; }
-    let current = getCurrentSnapshot();
-    redoStack.push(current);
+    redoStack.push(getCurrentSnapshot());
     applySnapshot(undoStack.pop());
   }
 
   function redoAction() {
     if (redoStack.length === 0) { alert("Redo के लिए कोई रिकॉर्ड नहीं है!"); return; }
-    let current = getCurrentSnapshot();
-    undoStack.push(current);
+    undoStack.push(getCurrentSnapshot());
     applySnapshot(redoStack.pop());
   }
 
@@ -711,7 +689,7 @@
     renderDaysUI();
   }
 
-  // नया सत्र जोड़ना (स्क्रॉल सपोर्ट के साथ)
+  // नया सत्र जोड़ना
   function addNextSession(dayId, shouldScroll = true) {
     saveState();
     let day = schedule.find(d => d.id === dayId);
@@ -727,15 +705,18 @@
     });
     renderDaysUI();
 
+    let dIdx = schedule.findIndex(d => d.id === dayId);
+    setActiveSessionInfo(dIdx + 1, day.date, template.title);
+
     if (shouldScroll) {
       setTimeout(() => {
         let el = document.getElementById("box_" + newSessId);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
+      }, 120);
     }
   }
 
-  // हेडर से नया सत्र जोड़ना (तुरंत काम करेगा)
+  // हेडर से नया सत्र जोड़ना
   function addNextSessionFromSticky() {
     let sel = document.getElementById('stickyDaySelect');
     if (!sel || !sel.value) { 
@@ -782,7 +763,6 @@
       if (d.id === cur) opt.selected = true;
       sel.appendChild(opt);
 
-      // साइडबार तारीख लिंक्स
       if (sbList) {
         sbList.innerHTML += `
           <button class="sidebar-btn" onclick="document.getElementById('day_card_${d.id}').scrollIntoView({behavior:'smooth', block:'start'})">
@@ -941,7 +921,7 @@
       let dHtml = `
         <div class="day-header">
           <div style="display:flex; align-items:center; gap:8px;">
-            <span style="background:var(--maroon); color:white; padding:4px 8px; border-radius:4px; font-size:13px; font-weight:bold;">दिन ${dIdx + 1}</span>
+            <span style="background:var(--maroon); color:white; padding:4px 9px; border-radius:4px; font-size:13px; font-weight:bold;">दिन ${dIdx + 1}</span>
             <strong>📅 तारीख:</strong>
             <input type="date" value="${day.date}" style="width:160px; font-weight:bold;" onchange="saveState(); schedule[${dIdx}].date = this.value; renderDaysUI(); renderReceipt();">
             <span style="font-size:14px; font-weight:bold; color:var(--maroon);">[ ${displayDateText} ]</span>
@@ -973,9 +953,9 @@
         }).join("");
 
         dHtml += `
-          <div class="session-box" id="box_${sess.id}">
+          <div class="session-box" id="box_${sess.id}" onclick="setActiveSessionInfo(${dIdx + 1}, '${day.date}', '${sess.title}')">
             
-            <!-- 🚩 बड़ा स्पष्ट तारीख बैनर जो हमेशा सामने रहेगा -->
+            <!-- 🚩 बड़ा स्पष्ट तारीख बैनर -->
             <div class="session-date-banner">
               <span>👉 आप भर रहे हैं: <strong>दिन ${dIdx + 1}</strong> | तारीख: <span style="font-size:14px; text-decoration:underline;">${displayDateText}</span> | (${sess.title})</span>
               <button class="btn btn-danger" style="font-size:10px; padding:2px 6px;" onclick="removeSession('${day.id}', '${sess.id}')">सत्र हटाएं ✖</button>
@@ -983,7 +963,7 @@
 
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
               <label style="margin:0;">सत्र नाम:</label>
-              <input type="text" value="${sess.title}" style="width:160px; font-weight:bold;" oninput="schedule[${dIdx}].sessions[${sIdx}].title = this.value; renderReceipt();">
+              <input type="text" value="${sess.title}" style="width:160px; font-weight:bold;" onfocus="setActiveSessionInfo(${dIdx + 1}, '${day.date}', this.value)" oninput="schedule[${dIdx}].sessions[${sIdx}].title = this.value; renderReceipt();">
               <label style="margin:0;">आदमी (Pax):</label>
               <input type="text" placeholder="उदा. 250" value="${sess.pax}" style="width:110px;" oninput="schedule[${dIdx}].sessions[${sIdx}].pax = this.value; renderReceipt();">
               
@@ -1005,7 +985,7 @@
             </div>
 
             <div class="action-row">
-              <span style="font-size:12px; font-weight:bold; color:var(--maroon);">✍️ नया व्यंजन लिखें (वैकल्पिक):</span>
+              <span style="font-size:12px; font-weight:bold; color:var(--maroon);">✍️ नया व्यंजन लिखें:</span>
               <input type="text" id="custom_item_${sess.id}" placeholder="व्यंजन नाम" style="width:220px;">
               <input type="number" id="qty_${sess.id}" placeholder="मात्रा" style="width:95px;">
               <select id="unit_${sess.id}" style="width:95px;">
@@ -1115,21 +1095,41 @@
     document.getElementById('outTentBody').innerHTML = tentRows || "<tr><td colspan='2' style='color:#888;'>कोई टेंट सामान दर्ज नहीं किया गया।</td></tr>";
   }
 
-  // ==========================================
-  // ☁️ सुरक्षित GOOGLE DRIVE ऑपरेशन्स
-  // ==========================================
-  async function saveToGoogleDrive() {
+  // =================================================================
+  // ☁️ 100% कार्यशील GOOGLE DRIVE JSONP ENGINE (Never Blocks on GitHub)
+  // =================================================================
+  function executeGoogleScript(params, callback) {
+    let cbName = "drive_cb_" + Date.now() + Math.floor(Math.random()*1000);
+    params.callback = cbName;
+
+    let query = Object.keys(params).map(k => encodeURIComponent(k) + "=" + encodeURIComponent(params[k])).join('&');
+    let script = document.createElement('script');
+    script.src = `${GOOGLE_SCRIPT_URL}?${query}`;
+    script.id = cbName;
+
+    window[cbName] = function(res) {
+      delete window[cbName];
+      let s = document.getElementById(cbName);
+      if(s) s.parentNode.removeChild(s);
+      callback(res);
+    };
+
+    script.onerror = function() {
+      alert("❌ गूगल ड्राइव से संपर्क नहीं हो पाया! कृपया इंटरनेट या स्क्रिप्ट URL जांचें।");
+    };
+
+    document.body.appendChild(script);
+  }
+
+  // ड्राइव में सुरक्षित सेव
+  function saveToGoogleDrive() {
     let cName = document.getElementById('custName').value.trim();
     if (!cName) { alert("कृपया ग्राहक का नाम लिखें!"); return; }
 
     let pass = getAdminPassword();
-    if (!pass) {
-      alert("⚠️ सुरक्षा चेतावनी: बिना एडमिन पासवर्ड के Google Drive में सेव नहीं किया जा सकता!");
-      return;
-    }
+    if (!pass) return;
 
     let orderData = {
-      adminPass: pass,
       custName: cName,
       custPhone: document.getElementById('custPhone').value,
       address: document.getElementById('eventAddress').value,
@@ -1141,35 +1141,24 @@
       tentList: tentList
     };
 
-    try {
-      let res = await fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(orderData)
-      });
-      let jsonRes = await res.json();
-
-      if (jsonRes.status === "error") {
-        adminSessionPass = "";
-        sessionStorage.removeItem('tent_admin_pass');
-        updateAdminStatusUI();
-        alert(jsonRes.message);
-        return;
+    executeGoogleScript({
+      action: "save",
+      pass: pass,
+      payload: JSON.stringify(orderData)
+    }, function(res) {
+      if (res.status === "success") {
+        alert(`✅ बधाई! "${cName}" का पूरा आर्डर Google Drive के 'Tent_House_Orders' फ़ोल्डर में सुरक्षित सेव हो गया है!`);
+        saveOrderToBrowserStorage();
+      } else {
+        alert("❌ एरर: " + res.message);
       }
-
-      alert(`✅ बधाई! "${cName}" का आर्डर Google Drive के 'Tent_House_Orders' फ़ोल्डर में सुरक्षित हो गया है!`);
-      saveOrderToBrowserStorage();
-    } catch(err) {
-      alert("❌ सेव करने में समस्या: " + err.message);
-    }
+    });
   }
 
-  async function openGoogleDriveList() {
+  // ड्राइव फाइलों की सूची
+  function openGoogleDriveList() {
     let pass = getAdminPassword();
-    if (!pass) {
-      alert("⚠️ सुरक्षा चेतावनी: ड्राइव फ़ाइलें देखने के लिए एडमिन पासवर्ड अनिवार्य है!");
-      return;
-    }
+    if (!pass) return;
 
     let card = document.getElementById('driveListCard');
     let body = document.getElementById('driveFilesBody');
@@ -1179,30 +1168,27 @@
     body.innerHTML = "";
     loading.style.display = 'block';
 
-    try {
-      let res = await fetch(`${GOOGLE_SCRIPT_URL}?pass=${encodeURIComponent(pass)}`);
-      let list = await res.json();
+    executeGoogleScript({
+      action: "list",
+      pass: pass
+    }, function(res) {
       loading.style.display = 'none';
 
-      if (list.error) {
-        adminSessionPass = "";
-        sessionStorage.removeItem('tent_admin_pass');
-        updateAdminStatusUI();
-        alert(list.error);
+      if (res.status !== "success") {
+        alert(res.message);
         card.style.display = 'none';
         return;
       }
 
-      if (!list || list.length === 0) {
+      if (!res.list || res.list.length === 0) {
         body.innerHTML = "<tr><td colspan='3' align='center'>Google Drive में अभी कोई आर्डर नहीं मिला।</td></tr>";
         return;
       }
 
-      list.forEach(f => {
-        let cleanName = f.name.replace("_Order.tent", "");
+      res.list.forEach(f => {
         body.innerHTML += `
           <tr>
-            <td><strong>${cleanName}</strong></td>
+            <td><strong>${f.name}</strong></td>
             <td>${f.date}</td>
             <td>
               <button class="btn btn-green" style="font-size:11px; padding:3px 8px;" onclick="loadFromGoogleDrive('${f.id}')">✏️ Drive से खोलें</button>
@@ -1210,34 +1196,27 @@
           </tr>
         `;
       });
-    } catch(err) {
-      loading.style.display = 'none';
-      alert("Google Drive से फ़ाइल सूची लाने में समस्या हुई। कृपया इंटरनेट जांचें!");
-    }
+    });
   }
 
-  async function loadFromGoogleDrive(fileId) {
+  // ड्राइव से सीधे फाइल खोलना
+  function loadFromGoogleDrive(fileId) {
     let pass = getAdminPassword();
     if (!pass) return;
 
-    try {
-      let res = await fetch(`${GOOGLE_SCRIPT_URL}?fileId=${fileId}&pass=${encodeURIComponent(pass)}`);
-      let text = await res.text();
-      
-      let o;
-      try {
-        o = JSON.parse(text);
-      } catch(parseErr) {
-        alert("फ़ाइल लोड नहीं हो सकी या डेटा रिक्त है!");
+    executeGoogleScript({
+      action: "load",
+      pass: pass,
+      fileId: fileId
+    }, function(res) {
+      if (res.status !== "success") {
+        alert("फ़ाइल लोड नहीं हो सकी: " + res.message);
         return;
       }
 
-      if (o.error) {
-        alert("सुरक्षा एरर: " + o.error);
-        return;
-      }
-
+      let o = res.data;
       saveState();
+
       document.getElementById('custName').value = o.custName || "";
       document.getElementById('custPhone').value = o.custPhone || "";
       document.getElementById('eventAddress').value = o.address || "";
@@ -1252,13 +1231,11 @@
       renderReceipt();
       document.getElementById('driveListCard').style.display = 'none';
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      alert(`🎉 Google Drive से "${o.custName}" का रिकॉर्ड सफलतापूर्वक खुल गया!`);
-    } catch(err) {
-      alert("फ़ाइल खोलने में समस्या: " + err.message);
-    }
+      alert(`🎉 Google Drive से "${o.custName}" का रिकॉर्ड खुल गया है!`);
+    });
   }
 
-  // फोटो व वर्ड डाउनलोड
+  // डाउनलोड फ़ंक्शन
   function downloadImage() {
     renderReceipt();
     let cName = document.getElementById('custName').value.trim() || "Tent_Order";
@@ -1284,7 +1261,6 @@
     a.click();
   }
 
-  // लोकल ब्राउज़र स्टोरेज
   function saveOrderToBrowserStorage() {
     let cName = document.getElementById('custName').value.trim() || "अज्ञात_ग्राहक";
     let all = JSON.parse(localStorage.getItem('my_tent_history_v4') || '[]');
