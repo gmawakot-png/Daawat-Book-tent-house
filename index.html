@@ -9,7 +9,7 @@
   <style>
     :root { --maroon: #8b0000; --dark: #2c3e50; }
     * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-    body { background-color: #f4f6f9; margin: 0; padding: 12px; padding-top: 110px; }
+    body { background-color: #f4f6f9; margin: 0; padding: 12px; padding-top: 120px; }
     .container { max-width: 1200px; margin-left: 270px; transition: margin-left 0.3s; }
     .container.full-width { margin-left: auto; margin-right: auto; }
 
@@ -48,29 +48,42 @@
       gap: 6px;
     }
 
-    /* 🚩 वर्तमान एक्टिव कार्य-तारीख का लाइव बैनर */
+    /* वर्तमान एक्टिव कार्य-तारीख का बड़ा एवं चमकदार लाइव बैनर */
     .live-date-indicator {
       position: fixed;
       top: 48px;
       left: 0;
       right: 0;
-      background: #fff3cd;
-      border-bottom: 2px solid #ffeeba;
-      color: #856404;
-      padding: 5px 16px;
-      font-size: 13px;
-      font-weight: bold;
+      background: linear-gradient(90deg, #fff3cd, #ffe89e, #fff3cd);
+      border-bottom: 2.5px solid #e0a800;
+      box-shadow: 0 3px 8px rgba(224, 168, 0, 0.35);
+      color: #533f03;
+      padding: 7px 16px;
+      font-size: 14.5px;
+      font-weight: 800;
       z-index: 9998;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      letter-spacing: 0.2px;
+    }
+    .live-badge-glow {
+      background: #8b0000;
+      color: #ffffff !important;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      box-shadow: 0 0 10px rgba(139, 0, 0, 0.45);
+      display: inline-block;
+      margin-left: 5px;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
 
-    /* 🚩 बाईं तरफ का साइडबार */
+    /* बाईं तरफ का साइडबार */
     #quickSidebar {
       position: fixed;
       left: 0;
-      top: 85px;
+      top: 92px;
       bottom: 0;
       width: 260px;
       background: #ffffff;
@@ -86,7 +99,7 @@
     .sidebar-toggle-btn {
       position: fixed;
       left: 260px;
-      top: 88px;
+      top: 95px;
       background: var(--maroon);
       color: white;
       border: none;
@@ -108,6 +121,7 @@
     /* सत्र व दिन डिब्बे */
     .day-box { border: 2px solid #8b0000; border-radius: 8px; padding: 12px; margin-bottom: 20px; background: #fffcfc; }
     .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #8b0000; padding: 8px 12px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; background: #ffebee; border-radius: 5px; }
+    .day-bottom-actions { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; margin-top: 10px; background: #fff1f3; border: 1px dashed #e57373; border-radius: 6px; }
     .session-box { background: white; border: 1px solid #ddd; border-left: 6px solid var(--maroon); border-radius: 6px; padding: 12px; margin-bottom: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.04); transition: border-color 0.3s; }
     
     .session-date-banner {
@@ -225,10 +239,10 @@
   </div>
 </div>
 
-<!-- लाइव एक्टिव डेट बैनर -->
+<!-- लाइव एक्टिव डेट बैनर (बड़ा, चमकदार और ऑटोमैटिक ट्रैकिंग) -->
 <div class="live-date-indicator no-print" id="liveDateIndicator">
-  <span>👉 वर्तमान कार्य स्थिति: <span id="currentActiveInfo" style="color:#b71c1c;">तारीख 1 का मेन्यू तैयार हो रहा है</span></span>
-  <span style="font-size:11px; color:#555;">💡 सत्र पर क्लिक करने पर उसकी सटीक तारीख यहाँ दिखाई देगी</span>
+  <span>👉 वर्तमान कार्य स्थिति: <span id="currentActiveInfo" class="live-badge-glow">[ दिन 1 ] | 📅 तारीख: -- | ⏱️ सत्र: --</span></span>
+  <span style="font-size:12px; color:#6d5204; font-weight:bold;">⚡ ऑटो-ट्रैकिंग सक्रिय (स्क्रॉल करने पर स्वचालित अपडेट)</span>
 </div>
 
 <div class="container" id="mainContainer">
@@ -282,7 +296,7 @@
   <div class="card no-print">
     <div style="margin-bottom: 10px;">
       <h3 style="margin-bottom:2px;">🍲 भोजन एवं नाश्ता व्यवस्था (तारीख वार मेन्यू)</h3>
-      <small style="color:#555;">💡 जिस भी तारीख में सत्र जोड़ना हो, ऊपर हेडर में तारीख चुनकर <strong>"+ नया सत्र"</strong> दबाएं।</small>
+      <small style="color:#555;">💡 जिस भी तारीख में सत्र जोड़ना हो, उस तारीख के <strong>ऊपर या नीचे दिए गए बटन</strong> या हेडर से <strong>"+ नया सत्र"</strong> दबाएं। किसी सत्र का मेन्यू कॉपी करके किसी अन्य सत्र में पेस्ट भी कर सकते हैं।</small>
     </div>
     <div id="daysWrapper"></div>
   </div>
@@ -357,9 +371,9 @@
     <div id="tentBadges" style="min-height:30px; background:white; border:1px solid #ddd; padding:6px; border-radius:4px;"></div>
   </div>
 
-  <!-- सुरक्षित इतिहास बटन -->
-  <div class="card no-print" style="text-align:center;">
-    <button class="btn btn-secondary" onclick="toggleHistory()">🔒 ब्राउज़र का पुराना लोकल इतिहास देखें</button>
+  <!-- 🔒 केवल एडमिन लॉगिन होने पर ही दिखने वाला एरिया -->
+  <div class="card no-print" id="adminHistoryBtnCard" style="text-align:center; display:none;">
+    <button class="btn btn-secondary" onclick="toggleHistory()">📂 ब्राउज़र का पुराना लोकल इतिहास देखें</button>
   </div>
 
   <!-- Google Drive फाइलों की सूची -->
@@ -435,15 +449,30 @@
   // 🔗 Google Apps Script URL
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZTfOU_8emrIKCofGcCHB9O-r-9ik8AgXlINxNBcfVIQgi7oANBoRu-_GJMgU4AEnH/exec";
 
-  // डिफ़ॉल्ट पासवर्ड 2050
-  const DEFAULT_ADMIN_PASS = "2050";
-
-  function getStoredAdminPass() {
-    return localStorage.getItem('tent_app_master_pass') || DEFAULT_ADMIN_PASS;
+  // SHA-256 हैशिंग
+  async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  function setStoredAdminPass(newPass) {
-    localStorage.setItem('tent_app_master_pass', newPass);
+  const DEFAULT_HASH = "81bb870f7d54020a5976b92a54330ff2c92a95c9600e1cc8c8e1e7f33d7494f6";
+
+  async function verifyPassword(inputPass) {
+    let storedHash = localStorage.getItem('tent_app_pass_hash') || DEFAULT_HASH;
+    let inputHash = await sha256(inputPass);
+    return inputHash === storedHash;
+  }
+
+  async function updatePasswordHash(newPass) {
+    let newHash = await sha256(newPass);
+    localStorage.setItem('tent_app_pass_hash', newHash);
+    localStorage.setItem('tent_active_plain_pass', newPass);
+  }
+
+  function getActivePlainPass() {
+    return localStorage.getItem('tent_active_plain_pass') || "2050";
   }
 
   const hindiAlphabetOrder = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः','क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह','क्ष','त्र','ज्ञ'];
@@ -506,78 +535,97 @@
   let undoStack = [];
   let redoStack = [];
 
-  // सत्र आधारित लॉगिन स्थिति
+  let sessionClipboard = null;
   let isLoggedIn = sessionStorage.getItem('tent_is_logged_in') === 'true';
+
+  // IntersectionObserver के लिए रेफरेंस
+  let sessionObserver = null;
 
   function updateAdminStatusUI() {
     let el = document.getElementById('adminStatusDisplay');
+    let hCardBtn = document.getElementById('adminHistoryBtnCard');
     if (isLoggedIn) {
       el.className = "admin-badge admin-logged-in";
       el.innerText = "🔓 Admin Logged In (Logout)";
+      hCardBtn.style.display = "block";
     } else {
       el.className = "admin-badge admin-logged-out";
       el.innerText = "🔒 Admin Login";
+      hCardBtn.style.display = "none";
+      document.getElementById('historyCard').style.display = 'none';
+      document.getElementById('driveListCard').style.display = 'none';
     }
   }
 
-  function handleAdminLogin() {
+  async function handleAdminLogin() {
     if (isLoggedIn) {
       if (confirm("क्या आप एडमिन से लॉगआउट करना चाहते हैं?")) {
         isLoggedIn = false;
         sessionStorage.removeItem('tent_is_logged_in');
         updateAdminStatusUI();
-        document.getElementById('historyCard').style.display = 'none';
-        document.getElementById('driveListCard').style.display = 'none';
         alert("आप सफलतापूर्वक लॉगआउट हो चुके हैं।");
       }
     } else {
-      let p = prompt("🔐 एडमिन पासवर्ड दर्ज करें:");
+      let p = prompt("🔐 पासवर्ड दर्ज करें:");
       if (p !== null) {
-        if (p.trim() === getStoredAdminPass()) {
+        let valid = await verifyPassword(p.trim());
+        if (valid) {
           isLoggedIn = true;
           sessionStorage.setItem('tent_is_logged_in', 'true');
           updateAdminStatusUI();
           alert("✅ एडमिन लॉगिन सफल!");
         } else {
-          alert("❌ गलत पासवर्ड! कृपया सही पासवर्ड दर्ज करें।");
+          alert("❌ गलत पासवर्ड!");
         }
       }
     }
   }
 
-  function ensureAdminLogin() {
+  async function ensureAdminLogin() {
     if (isLoggedIn) return true;
-    let p = prompt("🔐 कृपया एडमिन पासवर्ड दर्ज करें (डिफ़ॉल्ट: 2050):");
-    if (p !== null && p.trim() === getStoredAdminPass()) {
-      isLoggedIn = true;
-      sessionStorage.setItem('tent_is_logged_in', 'true');
-      updateAdminStatusUI();
-      return true;
-    } else {
-      if(p !== null) alert("❌ गलत पासवर्ड! अनुमति अस्वीकृत।");
-      return false;
+    let p = prompt("🔐 पासवर्ड दर्ज करें:");
+    if (p !== null) {
+      let valid = await verifyPassword(p.trim());
+      if (valid) {
+        isLoggedIn = true;
+        sessionStorage.setItem('tent_is_logged_in', 'true');
+        updateAdminStatusUI();
+        return true;
+      } else {
+        alert("❌ गलत पासवर्ड!");
+        return false;
+      }
     }
+    return false;
   }
 
-  // 🔑 नया पासवर्ड सेट करने का सीधा व सुरक्षित फ़ंक्शन
-  function changeAdminPasswordPrompt() {
-    if (!ensureAdminLogin()) return;
+  async function changeAdminPasswordPrompt() {
+    let authed = await ensureAdminLogin();
+    if (!authed) return;
 
-    let newPass = prompt("🔑 नया पासवर्ड दर्ज करें (उदा. 2050):");
+    let oldP = prompt("🔐 पुराना पासवर्ड दर्ज करें:");
+    if (!oldP) return;
+    let valid = await verifyPassword(oldP.trim());
+    if (!valid) {
+      alert("❌ पुराना पासवर्ड गलत है!");
+      return;
+    }
+
+    let newPass = prompt("🔑 नया पासवर्ड दर्ज करें:");
     if (!newPass || !newPass.trim()) {
       alert("पासवर्ड खाली नहीं हो सकता!");
       return;
     }
     newPass = newPass.trim();
 
-    let confirmNew = prompt("🔑 नए पासवर्ड की पुष्टि करें:");
+    let confirmNew = prompt("🔑 नया पासवर्ड पुनः दर्ज करें:");
     if (newPass !== (confirmNew ? confirmNew.trim() : "")) {
-      alert("❌ दोनों पासवर्ड आपस में मेल नहीं खाते! पासवर्ड नहीं बदला गया।");
+      alert("❌ दोनों पासवर्ड आपस में मेल नहीं खाते!");
       return;
     }
 
-    setStoredAdminPass(newPass);
-    alert(`🎉 बधाई! आपका पासवर्ड बदलकर "${newPass}" सुरक्षित कर दिया गया है!`);
+    await updatePasswordHash(newPass);
+    alert("🎉 बधाई! आपका पासवर्ड बदल दिया गया है!");
   }
 
   function formatDisplayDate(dateStr) {
@@ -602,12 +650,49 @@
     tentList.push({ name: name, size: '', qty: qty, unit: '' });
     renderTentBadges();
     renderReceipt();
-    alert(`✅ ${name} सूची में जोड़ दिया गया!`);
   }
 
-  function setActiveSessionInfo(dayNumber, dateStr, sessionTitle) {
+  function setActiveSessionInfo(dayNumber, dateStr, sessionTitle, dayId = null) {
     let info = `[ दिन ${dayNumber} ] | 📅 तारीख: ${formatDisplayDate(dateStr)} | ⏱️ सत्र: ${sessionTitle}`;
-    document.getElementById('currentActiveInfo').innerText = info;
+    let el = document.getElementById('currentActiveInfo');
+    if (el) el.innerText = info;
+
+    if (dayId) {
+      let sel = document.getElementById('stickyDaySelect');
+      if (sel && sel.value !== dayId) {
+        sel.value = dayId;
+      }
+    }
+  }
+
+  function setupScrollSpy() {
+    if (sessionObserver) {
+      sessionObserver.disconnect();
+    }
+
+    let options = {
+      root: null,
+      rootMargin: "-120px 0px -45% 0px",
+      threshold: [0, 0.2, 0.5]
+    };
+
+    sessionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          let dayNum = entry.target.getAttribute('data-daynum');
+          let dateStr = entry.target.getAttribute('data-date');
+          let sessTitle = entry.target.getAttribute('data-title');
+          let dayId = entry.target.getAttribute('data-dayid');
+          if (dayNum && dateStr && sessTitle) {
+            setActiveSessionInfo(dayNum, dateStr, sessTitle, dayId);
+          }
+        }
+      });
+    }, options);
+
+    document.querySelectorAll('.session-box').forEach(el => {
+      sessionObserver.observe(el);
+    });
   }
 
   function getCurrentSnapshot() {
@@ -745,7 +830,7 @@
     renderDaysUI();
 
     let dIdx = schedule.findIndex(d => d.id === dayId);
-    setActiveSessionInfo(dIdx + 1, day.date, template.title);
+    setActiveSessionInfo(dIdx + 1, day.date, template.title, dayId);
 
     let sel = document.getElementById('stickyDaySelect');
     if (sel) sel.value = dayId;
@@ -758,7 +843,6 @@
     }
   }
 
-  // ✅ शीर्ष हेडर के सिंक ड्रॉपडाउन से सत्र जोड़ना
   function addNextSessionFromSticky() {
     let sel = document.getElementById('stickyDaySelect');
     if (!sel || !sel.value) { 
@@ -772,22 +856,43 @@
     addNextSession(sel.value, true);
   }
 
-  function cloneSessionToTarget(sourceDayId, sourceSessId, targetDayId) {
-    if (!targetDayId) return;
-    saveState();
-    let srcDay = schedule.find(d => d.id === sourceDayId);
-    let srcSess = srcDay ? srcDay.sessions.find(s => s.id === sourceSessId) : null;
-    let tgtDay = schedule.find(d => d.id === targetDayId);
-    if (!srcSess || !tgtDay) return;
+  function copySessionItems(dayId, sessId) {
+    let day = schedule.find(d => d.id === dayId);
+    let sess = day ? day.sessions.find(s => s.id === sessId) : null;
+    if (!sess) return;
+    if (sess.items.length === 0) {
+      alert("⚠️ इस सत्र में अभी कोई सामान नहीं है!");
+      return;
+    }
+    sessionClipboard = {
+      fromSession: sess.title,
+      items: JSON.parse(JSON.stringify(sess.items))
+    };
+    alert(`📋 "${sess.title}" के (${sess.items.length}) सामान कॉपी हो गए!`);
+  }
 
-    tgtDay.sessions.push({
-      id: "s_" + Date.now() + Math.floor(Math.random()*1000),
-      title: srcSess.title,
-      pax: srcSess.pax,
-      items: JSON.parse(JSON.stringify(srcSess.items))
+  function pasteSessionItems(targetDayId, targetSessId) {
+    if (!sessionClipboard || !sessionClipboard.items || sessionClipboard.items.length === 0) {
+      alert("⚠️ पहले किसी सत्र का सामान '📋 कॉपी मेन्यू' करें!");
+      return;
+    }
+    saveState();
+    let day = schedule.find(d => d.id === targetDayId);
+    let sess = day ? day.sessions.find(s => s.id === targetSessId) : null;
+    if (!sess) return;
+
+    let addedCount = 0;
+    sessionClipboard.items.forEach(copiedItem => {
+      let exists = sess.items.some(it => it.name === copiedItem.name && it.isNv === copiedItem.isNv);
+      if (!exists) {
+        sess.items.push(JSON.parse(JSON.stringify(copiedItem)));
+        addedCount++;
+      }
     });
+
     renderDaysUI();
-    alert(`✅ "${srcSess.title}" को तारीख ${formatDisplayDate(tgtDay.date)} में कॉपी कर दिया गया!`);
+    renderReceipt();
+    alert(`📥 ${addedCount} नए व्यंजन इस सत्र में जोड़ दिए गए!`);
   }
 
   function updateStickyDaySelect() {
@@ -807,7 +912,7 @@
 
       if (sbList) {
         let sessLinks = d.sessions.map((s) => `
-          <button class="sidebar-btn sidebar-session-link" onclick="document.getElementById('box_${s.id}').scrollIntoView({behavior:'smooth', block:'center'}); setActiveSessionInfo(${i+1}, '${d.date}', '${s.title}');">
+          <button class="sidebar-btn sidebar-session-link" onclick="document.getElementById('box_${s.id}').scrollIntoView({behavior:'smooth', block:'center'}); setActiveSessionInfo(${i+1}, '${d.date}', '${s.title}', '${d.id}');">
             ⏱️ ${s.title} (${s.items.length} सामान)
           </button>
         `).join("");
@@ -1005,13 +1110,13 @@
         let nvKeys = ['nvSnacks', 'nvMain'];
         let nvDropCols = nvKeys.map(k => generateMultiSelectHTML(sess.id, k, true)).join("");
 
-        let copyOptions = schedule.map((d, idx) => {
-          let isSame = d.id === day.id;
-          return `<option value="${d.id}">${isSame ? 'इसी तारीख में' : 'दिन '+(idx+1)+': '+formatDisplayDate(d.date)}</option>`;
-        }).join("");
-
         dHtml += `
-          <div class="session-box" id="box_${sess.id}" onclick="setActiveSessionInfo(${dIdx + 1}, '${day.date}', '${sess.title}'); document.getElementById('stickyDaySelect').value='${day.id}';">
+          <div class="session-box" id="box_${sess.id}" 
+               data-daynum="${dIdx + 1}" 
+               data-date="${day.date}" 
+               data-title="${sess.title}" 
+               data-dayid="${day.id}"
+               onclick="setActiveSessionInfo(${dIdx + 1}, '${day.date}', '${sess.title}', '${day.id}');">
             
             <div class="session-date-banner">
               <span>👉 आप भर रहे हैं: <strong>दिन ${dIdx + 1}</strong> | तारीख: <span style="font-size:14px; text-decoration:underline;">${displayDateText}</span> | (${sess.title})</span>
@@ -1020,14 +1125,13 @@
 
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
               <label style="margin:0;">सत्र नाम:</label>
-              <input type="text" value="${sess.title}" style="width:160px; font-weight:bold;" onfocus="setActiveSessionInfo(${dIdx + 1}, '${day.date}', this.value); document.getElementById('stickyDaySelect').value='${day.id}';" oninput="schedule[${dIdx}].sessions[${sIdx}].title = this.value; renderReceipt();">
+              <input type="text" value="${sess.title}" style="width:160px; font-weight:bold;" onfocus="setActiveSessionInfo(${dIdx + 1}, '${day.date}', this.value, '${day.id}');" oninput="schedule[${dIdx}].sessions[${sIdx}].title = this.value; document.getElementById('box_${sess.id}').setAttribute('data-title', this.value); renderReceipt();">
               <label style="margin:0;">आदमी (Pax):</label>
               <input type="text" placeholder="उदा. 250" value="${sess.pax}" style="width:110px;" oninput="schedule[${dIdx}].sessions[${sIdx}].pax = this.value; renderReceipt();">
               
               <div style="display:inline-flex; align-items:center; gap:4px; margin-left:auto; background:#f0f4f8; padding:3px 6px; border-radius:4px; border:1px solid #c8d3de;">
-                <span style="font-size:11px; font-weight:bold;">📋 सत्र कॉपी करें:</span>
-                <select id="copy_tgt_${sess.id}" style="width:145px; font-size:11px; padding:3px;">${copyOptions}</select>
-                <button class="btn btn-purple" style="font-size:11px; padding:3px 7px;" onclick="cloneSessionToTarget('${day.id}', '${sess.id}', document.getElementById('copy_tgt_${sess.id}').value)">कॉपी करें</button>
+                <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="copySessionItems('${day.id}', '${sess.id}')" title="इस सत्र के व्यंजन कॉपी करें">📋 कॉपी मेन्यू</button>
+                <button class="btn btn-purple" style="font-size:11px; padding:4px 8px;" onclick="pasteSessionItems('${day.id}', '${sess.id}')" title="कॉपी किया हुआ मेन्यू इसी सत्र में जोड़ें">📥 यहाँ पेस्ट करें</button>
               </div>
             </div>
 
@@ -1068,6 +1172,18 @@
         `;
       });
 
+      // दिन के नीचे भी सत्र जोड़ने का बटन
+      dHtml += `
+        <div class="day-bottom-actions">
+          <span style="font-size:12.5px; font-weight:bold; color:var(--maroon);">
+            📅 दिन ${dIdx + 1} (${displayDateText}) में नया सत्र जोड़ें:
+          </span>
+          <button class="btn btn-blue" style="font-size:12px; padding:6px 14px;" onclick="addNextSession('${day.id}', true)">
+            ⏱️ + इस दिन में सत्र जोड़ें (नीचे)
+          </button>
+        </div>
+      `;
+
       dayBox.innerHTML = dHtml;
       wrap.appendChild(dayBox);
     });
@@ -1077,6 +1193,7 @@
       document.getElementById('stickyDaySelect').value = prevSelectedSticky;
     }
     renderReceipt();
+    setupScrollSpy();
   }
 
   function toggleCustomTent(sel) {
@@ -1155,7 +1272,7 @@
     document.getElementById('outTentBody').innerHTML = tentRows || "<tr><td colspan='2' style='color:#888;'>कोई टेंट सामान दर्ज नहीं किया गया।</td></tr>";
   }
 
-  // ☁️ सुरक्षित GOOGLE DRIVE ऑपरेशन्स
+  // ☁️ Google Drive
   async function callDriveAPI(bodyData) {
     try {
       let response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -1177,7 +1294,8 @@
   }
 
   async function saveToGoogleDrive() {
-    if (!ensureAdminLogin()) return;
+    let authed = await ensureAdminLogin();
+    if (!authed) return;
 
     let cName = document.getElementById('custName').value.trim();
     if (!cName) { alert("कृपया ग्राहक का नाम लिखें!"); return; }
@@ -1200,7 +1318,7 @@
     try {
       let res = await callDriveAPI({
         action: "save",
-        pass: getStoredAdminPass(),
+        pass: getActivePlainPass(),
         payload: orderData
       });
 
@@ -1219,7 +1337,8 @@
   }
 
   async function openGoogleDriveList() {
-    if (!ensureAdminLogin()) return;
+    let authed = await ensureAdminLogin();
+    if (!authed) return;
 
     let card = document.getElementById('driveListCard');
     let body = document.getElementById('driveFilesBody');
@@ -1232,7 +1351,7 @@
     try {
       let res = await callDriveAPI({
         action: "list",
-        pass: getStoredAdminPass()
+        pass: getActivePlainPass()
       });
 
       loading.style.display = 'none';
@@ -1266,12 +1385,13 @@
   }
 
   async function loadFromGoogleDrive(fileId) {
-    if (!ensureAdminLogin()) return;
+    let authed = await ensureAdminLogin();
+    if (!authed) return;
 
     try {
       let res = await callDriveAPI({
         action: "load",
-        pass: getStoredAdminPass(),
+        pass: getActivePlainPass(),
         fileId: fileId
       });
 
@@ -1349,9 +1469,9 @@
     localStorage.setItem('my_tent_history_v4', JSON.stringify(all));
   }
 
-  // 🔒 बिना लॉगिन के इतिहास नहीं दिखेगा
-  function toggleHistory() {
-    if (!ensureAdminLogin()) return;
+  async function toggleHistory() {
+    let authed = await ensureAdminLogin();
+    if (!authed) return;
 
     let card = document.getElementById('historyCard');
     card.style.display = (card.style.display === "none") ? "block" : "none";
@@ -1380,8 +1500,9 @@
     });
   }
 
-  function loadOrder(id) {
-    if (!ensureAdminLogin()) return;
+  async function loadOrder(id) {
+    let authed = await ensureAdminLogin();
+    if (!authed) return;
     let all = JSON.parse(localStorage.getItem('my_tent_history_v4') || '[]');
     let o = all.find(x => x.id === id);
     if (!o) return;
@@ -1400,8 +1521,9 @@
     alert("✅ " + o.custName + " का लोकल रिकॉर्ड लोड हो गया!");
   }
 
-  function deleteOrder(id) {
-    if (!ensureAdminLogin()) return;
+  async function deleteOrder(id) {
+    let authed = await ensureAdminLogin();
+    if (!authed) return;
     if(!confirm("क्या आप इस रिकॉर्ड को हटाना चाहते हैं?")) return;
     let all = JSON.parse(localStorage.getItem('my_tent_history_v4') || '[]');
     all = all.filter(x => x.id !== id);
