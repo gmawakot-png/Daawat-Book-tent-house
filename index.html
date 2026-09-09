@@ -297,7 +297,7 @@
   </div>
 </div>
 
-<!-- लाइव एक्टिव डेट बैनर (बड़ा, चमकदार और ऑटोमैटिक ट्रैकिंग) -->
+<!-- लाइव एक्टिव डेट बैनर -->
 <div class="live-date-indicator no-print" id="liveDateIndicator">
   <span>👉 वर्तमान कार्य स्थिति: <span id="currentActiveInfo" class="live-badge-glow">[ दिन 1 ] | 📅 तारीख: -- | ⏱️ सत्र: --</span></span>
   <span style="font-size:12px; color:#6d5204; font-weight:bold;">⚡ ऑटो-ट्रैकिंग सक्रिय (स्क्रॉल करने पर स्वचालित अपडेट)</span>
@@ -507,14 +507,18 @@
   // 🔗 Google Apps Script URL
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZTfOU_8emrIKCofGcCHB9O-r-9ik8AgXlINxNBcfVIQgi7oANBoRu-_GJMgU4AEnH/exec";
 
-  // पासवर्ड मैनेजमेंट
+  // पासवर्ड मैनेजमेंट - डिफ़ॉल्ट 2050
   function getActivePlainPass() {
-    return localStorage.getItem('tent_active_plain_pass') || "2050";
+    let p = localStorage.getItem('tent_active_plain_pass');
+    if (!p) {
+      p = "2050";
+      localStorage.setItem('tent_active_plain_pass', "2050");
+    }
+    return p;
   }
 
   function verifyPassword(inputPass) {
-    let currentPass = getActivePlainPass();
-    return inputPass === currentPass;
+    return inputPass === getActivePlainPass();
   }
 
   function updatePassword(newPass) {
@@ -584,7 +588,7 @@
   const rawCategoryMaster = {
     chaat: { title: "🥟 चाट, समोसा व आलू गुटके", items: ["आलू के गुटके (पहाड़ी स्टाइल)", "समोसा", "टिक्की चाट", "पानी बतासा (गोलगप्पा)", "पापड़ी चाट", "दही भल्ला", "मिक्स पकोड़ी", "पनीर पकोड़ा", "आलूबोंडा", "छोला भटूरा", "पाव भाजी", "मूंगफली चाट", "चना मसाला (चाट)"] },
     chinese: { title: "🍜 चाइनीज व फास्ट-फूड", items: ["चाउमिन (Chowmein)", "वेज हक्का नूडल्स", "वेज मोमोज़ (स्टीम)", "वेज मोमोज़ (फ्राई / कुरकुरे)", "स्प्रिंग रोल", "वेज मंचूरियन (ड्राई)", "वेज मंचूरियन (ग्रेवी)", "फ्रेंच फ्राइज", "चिल्ली पोटैटो", "हनी चिल्ली पोटैटो", "पास्ता (रेड सॉस)", "पास्ता (व्हाइट सॉस)", "डोसा", "इडली सांभर"] },
-    starters: { title: "🍢 टिक्क, कबाब व स्टार्टर्स", items: ["पनीर टिक्का (ड्राई)", "मलाई पनीर टिक्का", "सोया टिक्का", "सोया मलाई चाप", "वेज कबाब", "मसाला कबाब", "हरियाली कबाब", "दही के कबाब", "सीक कबाब (वेज)", "कटलेट", "चीजबोल"] },
+    starters: { title: "🍢 टिक्का, कबाब व स्टार्टर्स", items: ["पनीर टिक्का (ड्राई)", "मलाई पनीर टिक्का", "सोया टिक्का", "सोया मलाई चाप", "वेज कबाब", "मसाला कबाब", "हरियाली कबाब", "दही के कबाब", "सीक कबाब (वेज)", "कटलेट", "चीजबोल"] },
     liquids: { title: "☕ पेय, चाय व सूप", items: ["चाय", "मसाला चाय", "कॉफी (Hot Coffee)", "कोल्ड कॉफी (Cold Coffee)", "टोमैटो सूप (Tomato Soup)", "वेज मंचाउ सूप", "स्वीट कॉर्न सूप", "हॉट बादाम मिल्क", "दूध (गर्म/मसाला)", "कोल्ड्रिंक", "मॉकटेल", "शिकंजी", "जलजीरा", "छाछ / लस्सी", "ठंडाई", "मिनरल वाटर (बोतल)", "पानी कैंपर", "सोडा पानी"] },
     dal: { title: "🍲 दालें, फाणु व चैंसू", items: ["दाल फ्राई (Dal Fry)", "दाल तड़का", "कंडाली फाणु", "दाल फाणु", "चैंसू (उड़द/भट्ट)", "दाल मखनी", "राजमा दाल (पंजाबी)", "उड़द दाल (फ्राई/तड़का)", "अरहर मसूर दाल (तड़का)", "कढ़ी पकोड़ा", "चना दाल फ्राई", "दाल पंचमेल"] },
     sabzi: { title: "🥦 सब्जी व पनीर", items: ["मटर पनीर", "शाही पनीर", "कढ़ाई पनीर", "पनीर टिक्का मसाला", "पनीर बटर मसाला", "पालक पनीर", "खोया पनीर", "छोला (पिंडी/मसाला)", "चना मसाला", "मिक्स सब्जी", "आलू की सब्जी (भंडारे वाली)", "आलू गोभी मटर", "सोया चाप मसाला", "मटर मशरूम", "दम आलू", "भिंडी मसाला", "बैंगन भर्ता", "वेज कोफ्ता"] },
@@ -646,7 +650,7 @@
         alert("आप सफलतापूर्वक लॉगआउट हो चुके हैं।");
       }
     } else {
-      let p = await askPassword("🔐 एडमिन लॉगिन", "डिफ़ॉल्ट पासवर्ड 2050 है:");
+      let p = await askPassword("🔐 एडमिन लॉगिन", "पासवर्ड दर्ज करें (डिफ़ॉल्ट 2050):");
       if (p !== null) {
         if (verifyPassword(p.trim())) {
           isLoggedIn = true;
@@ -662,7 +666,7 @@
 
   async function ensureAdminLogin() {
     if (isLoggedIn) return true;
-    let p = await askPassword("🔐 सत्यापन आवश्यक", "डिफ़ॉल्ट पासवर्ड 2050 है:");
+    let p = await askPassword("🔐 सत्यापन आवश्यक", "पासवर्ड दर्ज करें (डिफ़ॉल्ट 2050):");
     if (p !== null) {
       if (verifyPassword(p.trim())) {
         isLoggedIn = true;
@@ -772,7 +776,6 @@
     });
   }
 
-  // सत्र को छिपाने (Collapse) और दिखाने (Expand) का फंक्शन
   function toggleSessionDetails(sessId) {
     let details = document.getElementById('details_' + sessId);
     let btn = document.getElementById('tgl_btn_' + sessId);
@@ -787,7 +790,6 @@
     }
   }
 
-  // किसी दिन के सभी सत्रों को एक साथ छिपाना या खोलना
   function toggleAllSessionsInDay(dayId, expand = true) {
     let day = schedule.find(d => d.id === dayId);
     if (!day) return;
@@ -1228,7 +1230,6 @@
                data-dayid="${day.id}"
                onclick="setActiveSessionInfo(${dIdx + 1}, '${day.date}', '${sess.title}', '${day.id}');">
             
-            <!-- सत्र की हेडर पट्टी (हमेशा दिखाई देगी) -->
             <div class="session-date-banner">
               <span>👉 <strong>दिन ${dIdx + 1}</strong> | तारीख: <span style="font-size:14px; text-decoration:underline;">${displayDateText}</span> | (${sess.title}) - <small style="color:#28a745;">[${sess.items.length} सामान जुड़ा]</small></span>
               <div style="display:flex; gap:6px; align-items:center;">
@@ -1237,7 +1238,6 @@
               </div>
             </div>
 
-            <!-- सत्र का विस्तृत हिस्सा जिसे छिपाया और खोला जा सकता है -->
             <div id="details_${sess.id}">
               <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
                 <label style="margin:0;">सत्र नाम:</label>
@@ -1290,7 +1290,6 @@
         `;
       });
 
-      // दिन के नीचे भी सत्र जोड़ने का बटन
       dHtml += `
         <div class="day-bottom-actions">
           <span style="font-size:12.5px; font-weight:bold; color:var(--maroon);">
@@ -1390,25 +1389,40 @@
     document.getElementById('outTentBody').innerHTML = tentRows || "<tr><td colspan='2' style='color:#888;'>कोई टेंट सामान दर्ज नहीं किया गया।</td></tr>";
   }
 
-  // ☁️ Google Drive
+  // ☁️ Google Drive सुरक्षित API कॉल (ऑटो री-ट्राई पासवर्ड के साथ)
   async function callDriveAPI(bodyData) {
+    let currentPass = bodyData.pass || getActivePlainPass();
+    bodyData.pass = currentPass;
+
+    let response = await fetch(GOOGLE_SCRIPT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(bodyData)
+    });
+    let resText = await response.text();
+    let resJson;
     try {
-      let response = await fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(bodyData)
-      });
-      let resText = await response.text();
-      let resJson;
-      try {
-        resJson = JSON.parse(resText);
-      } catch(e) {
-        throw new Error("गूगल से अमान्य उत्तर: " + resText.substring(0, 100));
-      }
-      return resJson;
-    } catch(err) {
-      throw err;
+      resJson = JSON.parse(resText);
+    } catch(e) {
+      throw new Error("गूगल से अमान्य उत्तर: " + resText.substring(0, 100));
     }
+
+    // अगर ड्राइव स्क्रिप्ट ने पासवर्ड गलत बताया, तो यहीं सही पासवर्ड मांगकर री-ट्राई करें
+    if (resJson.status !== "success" && resJson.message && resJson.message.includes("पासवर्ड")) {
+      let correctPass = await askPassword("🔐 Google Drive पासवर्ड आवश्यक", "Google Drive का पासवर्ड दर्ज करें (डिफ़ॉल्ट 2050):");
+      if (correctPass) {
+        updatePassword(correctPass.trim());
+        bodyData.pass = correctPass.trim();
+        let retryResp = await fetch(GOOGLE_SCRIPT_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify(bodyData)
+        });
+        return JSON.parse(await retryResp.text());
+      }
+    }
+
+    return resJson;
   }
 
   async function saveToGoogleDrive() {
@@ -1431,6 +1445,7 @@
     };
 
     let btn = event ? event.target : null;
+    let originalText = btn ? btn.innerText : "";
     if(btn) btn.innerText = "⏳ सेव हो रहा है...";
 
     try {
@@ -1440,7 +1455,7 @@
         payload: orderData
       });
 
-      if(btn) btn.innerText = "☁️ Drive में सेव";
+      if(btn) btn.innerText = originalText;
 
       if (res.status === "success") {
         alert(`✅ बधाई! "${cName}" का पूरा आर्डर Google Drive में सुरक्षित सेव हो गया है!`);
@@ -1449,7 +1464,7 @@
         alert("❌ " + res.message);
       }
     } catch(err) {
-      if(btn) btn.innerText = "☁️ Drive में सेव";
+      if(btn) btn.innerText = originalText;
       alert("❌ सेव करने में समस्या: " + err.message);
     }
   }
@@ -1475,7 +1490,7 @@
       loading.style.display = 'none';
 
       if (res.status !== "success") {
-        alert(res.message);
+        alert("❌ " + res.message);
         card.style.display = 'none';
         return;
       }
