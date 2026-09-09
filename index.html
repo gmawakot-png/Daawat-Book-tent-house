@@ -66,7 +66,7 @@
       align-items: center;
     }
 
-    /* 🚩 बाईं तरफ का साइडबार (Left Sidebar) */
+    /* 🚩 बाईं तरफ का साइडबार */
     #quickSidebar {
       position: fixed;
       left: 0;
@@ -146,7 +146,7 @@
     .item-badge { background: #e9f5ff; color: #0056b3; padding: 4px 9px; border-radius: 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; margin: 3px; border: 1px solid #bee5eb; }
     .item-badge-nonveg { background: #ffebee; color: #b71c1c; border: 1px solid #ffcdd2; }
 
-    /* रसीद (Print) */
+    /* रसीद */
     #billReceipt { background: white; padding: 25px; border: 2px solid #222; margin-top: 20px; }
     .bill-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 10px; }
     .bill-table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 12px; }
@@ -170,7 +170,7 @@
 <!-- बाईं तरफ का साइडबार टॉगल बटन -->
 <button class="sidebar-toggle-btn no-print" id="sbToggleBtn" onclick="toggleSidebar()">◀ साइडबार</button>
 
-<!-- 🚩 बाईं तरफ का साइडबार (Left Sidebar) -->
+<!-- बाईं तरफ का साइडबार -->
 <div id="quickSidebar" class="no-print">
   <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--maroon); padding-bottom:6px; margin-bottom:10px;">
     <h4 style="margin:0; font-size:14px;">⚡ क्विक नेविगेशन</h4>
@@ -213,10 +213,10 @@
     <button class="btn btn-secondary" onclick="redoAction()">↪️ Redo</button>
   </div>
 
-  <!-- सुरक्षित एडमिन, पासवर्ड चेंज व एक्सपोर्ट बटन्स -->
+  <!-- सुरक्षित एडमिन, पासवर्ड व एक्सपोर्ट बटन्स -->
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
     <span id="adminStatusDisplay" class="admin-badge admin-logged-out" onclick="handleAdminLogin()">🔒 Admin Login</span>
-    <button class="btn btn-secondary" style="font-size:11px;" onclick="changeAdminPasswordPrompt()" title="Google Drive पासवर्ड बदलें">🔑 पासवर्ड बदलें</button>
+    <button class="btn btn-secondary" style="font-size:11px;" onclick="changeAdminPasswordPrompt()" title="पासवर्ड बदलें">🔑 पासवर्ड बदलें</button>
     <button class="btn btn-green" onclick="saveToGoogleDrive()">☁️ Drive में सेव</button>
     <button class="btn btn-purple" onclick="openGoogleDriveList()">📂 Drive फाइलें</button>
     <button class="btn btn-yellow" onclick="downloadImage()">🖼️ JPEG फोटो</button>
@@ -225,7 +225,7 @@
   </div>
 </div>
 
-<!-- 🚩 हमेशा दिखने वाला लाइव एक्टिव डेट बैनर -->
+<!-- लाइव एक्टिव डेट बैनर -->
 <div class="live-date-indicator no-print" id="liveDateIndicator">
   <span>👉 वर्तमान कार्य स्थिति: <span id="currentActiveInfo" style="color:#b71c1c;">तारीख 1 का मेन्यू तैयार हो रहा है</span></span>
   <span style="font-size:11px; color:#555;">💡 सत्र पर क्लिक करने पर उसकी सटीक तारीख यहाँ दिखाई देगी</span>
@@ -282,7 +282,7 @@
   <div class="card no-print">
     <div style="margin-bottom: 10px;">
       <h3 style="margin-bottom:2px;">🍲 भोजन एवं नाश्ता व्यवस्था (तारीख वार मेन्यू)</h3>
-      <small style="color:#555;">💡 जिस भी तारीख में सत्र जोड़ना हो, शीर्ष हेडर में ड्रॉपडाउन से तारीख चुनकर <strong>"+ नया सत्र"</strong> दबाएं।</small>
+      <small style="color:#555;">💡 जिस भी तारीख में सत्र जोड़ना हो, ऊपर हेडर में तारीख चुनकर <strong>"+ नया सत्र"</strong> दबाएं।</small>
     </div>
     <div id="daysWrapper"></div>
   </div>
@@ -357,11 +357,12 @@
     <div id="tentBadges" style="min-height:30px; background:white; border:1px solid #ddd; padding:6px; border-radius:4px;"></div>
   </div>
 
+  <!-- सुरक्षित इतिहास बटन -->
   <div class="card no-print" style="text-align:center;">
-    <button class="btn btn-secondary" onclick="toggleHistory()">📂 ब्राउज़र का पुराना लोकल इतिहास देखें</button>
+    <button class="btn btn-secondary" onclick="toggleHistory()">🔒 ब्राउज़र का पुराना लोकल इतिहास देखें</button>
   </div>
 
-  <!-- Google Drive सुरक्षित फाइलों की सूची -->
+  <!-- Google Drive फाइलों की सूची -->
   <div class="card no-print" id="driveListCard" style="display:none; border:2px solid #6f42c1;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
       <h3 style="margin:0; color:#6f42c1;">☁️ Google Drive सुरक्षित फाइलें</h3>
@@ -378,11 +379,11 @@
     </div>
   </div>
 
-  <!-- ब्राउज़र इतिहास -->
-  <div class="card no-print" id="historyCard" style="display:none;">
+  <!-- सुरक्षित ब्राउज़र इतिहास -->
+  <div class="card no-print" id="historyCard" style="display:none; border:2px solid var(--maroon);">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-      <h3 style="margin:0;">📋 स्थानीय ब्राउज़र इतिहास</h3>
-      <button class="btn btn-danger" style="font-size:11px;" onclick="toggleHistory()">बंद करें ✖</button>
+      <h3 style="margin:0; color:var(--maroon);">📋 सुरक्षित स्थानीय ब्राउज़र इतिहास</h3>
+      <button class="btn btn-danger" style="font-size:11px;" onclick="document.getElementById('historyCard').style.display='none'">बंद करें ✖</button>
     </div>
     <div style="overflow-x:auto;">
       <table style="width:100%; border-collapse:collapse;" border="1" cellpadding="6">
@@ -394,7 +395,7 @@
     </div>
   </div>
 
-  <!-- 5. रसीद / पर्ची (Printable Output Area) -->
+  <!-- 5. रसीद / बिल पर्ची -->
   <div id="billReceipt">
     <div class="bill-header">
       <h1 id="outFirmName" style="margin:0; color:var(--maroon); font-size:22px;">टेंट हाउस एवं कैटरर्स</h1>
@@ -431,10 +432,20 @@
 </div>
 
 <script>
-  // 🔗 Google Apps Script Web App URL
+  // 🔗 Google Apps Script URL
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZTfOU_8emrIKCofGcCHB9O-r-9ik8AgXlINxNBcfVIQgi7oANBoRu-_GJMgU4AEnH/exec";
 
-  // हिंदी वर्णमाला क्रमबद्धता
+  // डिफ़ॉल्ट पासवर्ड 2050
+  const DEFAULT_ADMIN_PASS = "2050";
+
+  function getStoredAdminPass() {
+    return localStorage.getItem('tent_app_master_pass') || DEFAULT_ADMIN_PASS;
+  }
+
+  function setStoredAdminPass(newPass) {
+    localStorage.setItem('tent_app_master_pass', newPass);
+  }
+
   const hindiAlphabetOrder = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः','क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह','क्ष','त्र','ज्ञ'];
 
   function getHindiCharRank(char) {
@@ -495,12 +506,12 @@
   let undoStack = [];
   let redoStack = [];
 
-  // एडमिन पासवर्ड व्यवस्था
-  let adminSessionPass = sessionStorage.getItem('tent_admin_pass') || "";
+  // सत्र आधारित लॉगिन स्थिति
+  let isLoggedIn = sessionStorage.getItem('tent_is_logged_in') === 'true';
 
   function updateAdminStatusUI() {
     let el = document.getElementById('adminStatusDisplay');
-    if (adminSessionPass) {
+    if (isLoggedIn) {
       el.className = "admin-badge admin-logged-in";
       el.innerText = "🔓 Admin Logged In (Logout)";
     } else {
@@ -510,74 +521,63 @@
   }
 
   function handleAdminLogin() {
-    if (adminSessionPass) {
+    if (isLoggedIn) {
       if (confirm("क्या आप एडमिन से लॉगआउट करना चाहते हैं?")) {
-        adminSessionPass = "";
-        sessionStorage.removeItem('tent_admin_pass');
+        isLoggedIn = false;
+        sessionStorage.removeItem('tent_is_logged_in');
         updateAdminStatusUI();
-        alert("आप लॉगआउट हो चुके हैं।");
+        document.getElementById('historyCard').style.display = 'none';
+        document.getElementById('driveListCard').style.display = 'none';
+        alert("आप सफलतापूर्वक लॉगआउट हो चुके हैं।");
       }
     } else {
       let p = prompt("🔐 एडमिन पासवर्ड दर्ज करें:");
-      if (p) {
-        adminSessionPass = p.trim();
-        sessionStorage.setItem('tent_admin_pass', adminSessionPass);
-        updateAdminStatusUI();
-        alert("✅ एडमिन पासवर्ड दर्ज हो गया!");
+      if (p !== null) {
+        if (p.trim() === getStoredAdminPass()) {
+          isLoggedIn = true;
+          sessionStorage.setItem('tent_is_logged_in', 'true');
+          updateAdminStatusUI();
+          alert("✅ एडमिन लॉगिन सफल!");
+        } else {
+          alert("❌ गलत पासवर्ड! कृपया सही पासवर्ड दर्ज करें।");
+        }
       }
     }
   }
 
-  function getAdminPassword() {
-    if (!adminSessionPass) {
-      let p = prompt("🔐 कृपया अपनी ड्राइव एक्सेस करने के लिए एडमिन पासवर्ड दर्ज करें:");
-      if (p) {
-        adminSessionPass = p.trim();
-        sessionStorage.setItem('tent_admin_pass', adminSessionPass);
-        updateAdminStatusUI();
-      }
+  function ensureAdminLogin() {
+    if (isLoggedIn) return true;
+    let p = prompt("🔐 कृपया एडमिन पासवर्ड दर्ज करें (डिफ़ॉल्ट: 2050):");
+    if (p !== null && p.trim() === getStoredAdminPass()) {
+      isLoggedIn = true;
+      sessionStorage.setItem('tent_is_logged_in', 'true');
+      updateAdminStatusUI();
+      return true;
+    } else {
+      if(p !== null) alert("❌ गलत पासवर्ड! अनुमति अस्वीकृत।");
+      return false;
     }
-    return adminSessionPass;
   }
 
-  // 🔑 पासवर्ड बदलने की प्रक्रिया
-  async function changeAdminPasswordPrompt() {
-    let oldPass = getAdminPassword();
-    if (!oldPass) {
-      alert("पासवर्ड बदलने के लिए वर्तमान पासवर्ड आवश्यक है!");
-      return;
-    }
-    let newPass = prompt("🔑 नया पासवर्ड दर्ज करें:");
+  // 🔑 नया पासवर्ड सेट करने का सीधा व सुरक्षित फ़ंक्शन
+  function changeAdminPasswordPrompt() {
+    if (!ensureAdminLogin()) return;
+
+    let newPass = prompt("🔑 नया पासवर्ड दर्ज करें (उदा. 2050):");
     if (!newPass || !newPass.trim()) {
-      alert("नया पासवर्ड खाली नहीं हो सकता!");
+      alert("पासवर्ड खाली नहीं हो सकता!");
       return;
     }
     newPass = newPass.trim();
 
-    let confirmNew = prompt("🔑 नया पासवर्ड दोबारा दर्ज करें (पुष्टि हेतु):");
+    let confirmNew = prompt("🔑 नए पासवर्ड की पुष्टि करें:");
     if (newPass !== (confirmNew ? confirmNew.trim() : "")) {
-      alert("❌ दोनों पासवर्ड मेल नहीं खाते! पासवर्ड नहीं बदला गया।");
+      alert("❌ दोनों पासवर्ड आपस में मेल नहीं खाते! पासवर्ड नहीं बदला गया।");
       return;
     }
 
-    try {
-      let res = await callDriveAPI({
-        action: "changePass",
-        pass: oldPass,
-        newPass: newPass
-      });
-
-      if (res.status === "success") {
-        adminSessionPass = newPass;
-        sessionStorage.setItem('tent_admin_pass', newPass);
-        updateAdminStatusUI();
-        alert("🎉 बधाई! आपका एडमिन पासवर्ड सफलतापूर्वक बदल दिया गया है!");
-      } else {
-        alert("❌ पासवर्ड बदलने में समस्या: " + res.message);
-      }
-    } catch (err) {
-      alert("❌ सर्वर से संपर्क नहीं हो सका: " + err.message);
-    }
+    setStoredAdminPass(newPass);
+    alert(`🎉 बधाई! आपका पासवर्ड बदलकर "${newPass}" सुरक्षित कर दिया गया है!`);
   }
 
   function formatDisplayDate(dateStr) {
@@ -719,7 +719,6 @@
     schedule.push({ id: dayId, date: targetDateStr, sessions: [] });
     addNextSession(dayId, false);
     renderDaysUI();
-    // ड्रॉपडाउन में नई तारीख तुरंत चुन लें
     let sel = document.getElementById('stickyDaySelect');
     if (sel) sel.value = dayId;
   }
@@ -748,7 +747,6 @@
     let dIdx = schedule.findIndex(d => d.id === dayId);
     setActiveSessionInfo(dIdx + 1, day.date, template.title);
 
-    // ड्रॉपडाउन को भी इसी तारीख पर सेट रखें
     let sel = document.getElementById('stickyDaySelect');
     if (sel) sel.value = dayId;
 
@@ -792,7 +790,6 @@
     alert(`✅ "${srcSess.title}" को तारीख ${formatDisplayDate(tgtDay.date)} में कॉपी कर दिया गया!`);
   }
 
-  // 🚩 साइडबार में हर तारीख के सत्रों को लाइव दिखाना
   function updateStickyDaySelect() {
     let sel = document.getElementById('stickyDaySelect');
     let sbList = document.getElementById('sidebarDateList');
@@ -1016,7 +1013,6 @@
         dHtml += `
           <div class="session-box" id="box_${sess.id}" onclick="setActiveSessionInfo(${dIdx + 1}, '${day.date}', '${sess.title}'); document.getElementById('stickyDaySelect').value='${day.id}';">
             
-            <!-- 🚩 स्पष्ट तारीख बैनर -->
             <div class="session-date-banner">
               <span>👉 आप भर रहे हैं: <strong>दिन ${dIdx + 1}</strong> | तारीख: <span style="font-size:14px; text-decoration:underline;">${displayDateText}</span> | (${sess.title})</span>
               <button class="btn btn-danger" style="font-size:10px; padding:2px 6px;" onclick="removeSession('${day.id}', '${sess.id}')">सत्र हटाएं ✖</button>
@@ -1159,9 +1155,7 @@
     document.getElementById('outTentBody').innerHTML = tentRows || "<tr><td colspan='2' style='color:#888;'>कोई टेंट सामान दर्ज नहीं किया गया।</td></tr>";
   }
 
-  // ==========================================
   // ☁️ सुरक्षित GOOGLE DRIVE ऑपरेशन्स
-  // ==========================================
   async function callDriveAPI(bodyData) {
     try {
       let response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -1183,11 +1177,10 @@
   }
 
   async function saveToGoogleDrive() {
+    if (!ensureAdminLogin()) return;
+
     let cName = document.getElementById('custName').value.trim();
     if (!cName) { alert("कृपया ग्राहक का नाम लिखें!"); return; }
-
-    let pass = getAdminPassword();
-    if (!pass) return;
 
     let orderData = {
       custName: cName,
@@ -1207,7 +1200,7 @@
     try {
       let res = await callDriveAPI({
         action: "save",
-        pass: pass,
+        pass: getStoredAdminPass(),
         payload: orderData
       });
 
@@ -1226,8 +1219,7 @@
   }
 
   async function openGoogleDriveList() {
-    let pass = getAdminPassword();
-    if (!pass) return;
+    if (!ensureAdminLogin()) return;
 
     let card = document.getElementById('driveListCard');
     let body = document.getElementById('driveFilesBody');
@@ -1240,7 +1232,7 @@
     try {
       let res = await callDriveAPI({
         action: "list",
-        pass: pass
+        pass: getStoredAdminPass()
       });
 
       loading.style.display = 'none';
@@ -1274,13 +1266,12 @@
   }
 
   async function loadFromGoogleDrive(fileId) {
-    let pass = getAdminPassword();
-    if (!pass) return;
+    if (!ensureAdminLogin()) return;
 
     try {
       let res = await callDriveAPI({
         action: "load",
-        pass: pass,
+        pass: getStoredAdminPass(),
         fileId: fileId
       });
 
@@ -1312,7 +1303,6 @@
     }
   }
 
-  // डाउनलोड फ़ंक्शन
   function downloadImage() {
     renderReceipt();
     let cName = document.getElementById('custName').value.trim() || "Tent_Order";
@@ -1359,10 +1349,15 @@
     localStorage.setItem('my_tent_history_v4', JSON.stringify(all));
   }
 
+  // 🔒 बिना लॉगिन के इतिहास नहीं दिखेगा
   function toggleHistory() {
+    if (!ensureAdminLogin()) return;
+
     let card = document.getElementById('historyCard');
     card.style.display = (card.style.display === "none") ? "block" : "none";
-    renderHistory();
+    if (card.style.display === "block") {
+      renderHistory();
+    }
   }
 
   function renderHistory() {
@@ -1386,6 +1381,7 @@
   }
 
   function loadOrder(id) {
+    if (!ensureAdminLogin()) return;
     let all = JSON.parse(localStorage.getItem('my_tent_history_v4') || '[]');
     let o = all.find(x => x.id === id);
     if (!o) return;
@@ -1405,6 +1401,7 @@
   }
 
   function deleteOrder(id) {
+    if (!ensureAdminLogin()) return;
     if(!confirm("क्या आप इस रिकॉर्ड को हटाना चाहते हैं?")) return;
     let all = JSON.parse(localStorage.getItem('my_tent_history_v4') || '[]');
     all = all.filter(x => x.id !== id);
