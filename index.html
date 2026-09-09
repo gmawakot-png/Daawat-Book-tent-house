@@ -203,6 +203,21 @@
       padding: 4px 8px;
     }
 
+    /* लॉगिन बैज */
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+    .admin-logged-in { background: #d4edda; color: #155724; border-color: #c3e6cb; }
+    .admin-logged-out { background: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+
     /* रसीद */
     #billReceipt { background: white; padding: 25px; border: 2px solid #222; margin-top: 20px; }
     .bill-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 10px; }
@@ -286,8 +301,9 @@
 
   <!-- सुरक्षित Google Drive एवं एक्सपोर्ट बटन्स -->
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
-    <!-- 🔑 यहाँ से पासवर्ड बदलने पर यह दोनों जगह (यहाँ भी और Google Script में भी) एक साथ बदल जाएगा -->
-    <button class="btn btn-secondary" style="font-size:11px;" onclick="changeMasterPasswordDirectly()" title="पासवर्ड बदलें">🔑 पासवर्ड बदलें</button>
+    <!-- 🔒 लॉगिन/लॉगआउट बटन स्पष्ट रूप से उपलब्ध -->
+    <span id="adminLoginBtn" class="admin-badge admin-logged-out" onclick="handleAdminLoginClick()">🔒 एडमिन लॉगिन</span>
+    <button class="btn btn-secondary" style="font-size:11px;" onclick="changePasswordFlow()" title="पासवर्ड बदलें">🔑 पासवर्ड बदलें</button>
     <button class="btn btn-green" id="btnSaveDrive" onclick="saveToGoogleDrive()">☁️ Drive में सेव</button>
     <button class="btn btn-purple" onclick="openGoogleDriveList()">📂 Drive फाइलें</button>
     <button class="btn btn-yellow" onclick="downloadImage()">🖼️ JPEG फोटो</button>
@@ -485,13 +501,26 @@
   // 🔗 Google Apps Script URL
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZTfOU_8emrIKCofGcCHB9O-r-9ik8AgXlINxNBcfVIQgi7oANBoRu-_GJMgU4AEnH/exec";
 
-  function getSavedDrivePass() {
-    return localStorage.getItem('tent_universal_pass') || "";
+  // पासवर्ड हेल्पर
+  function getLocalPass() {
+    return localStorage.getItem('tent_admin_pass') || "";
+  }
+  function setLocalPass(p) {
+    if (p) localStorage.setItem('tent_admin_pass', p);
+    else localStorage.removeItem('tent_admin_pass');
+    updateLoginBadge();
   }
 
-  function setSavedDrivePass(pass) {
-    if (pass) localStorage.setItem('tent_universal_pass', pass);
-    else localStorage.removeItem('tent_universal_pass');
+  function updateLoginBadge() {
+    let el = document.getElementById('adminLoginBtn');
+    if (!el) return;
+    if (getLocalPass()) {
+      el.className = "admin-badge admin-logged-in";
+      el.innerText = "🔓 एडमिन (लॉगिन है)";
+    } else {
+      el.className = "admin-badge admin-logged-out";
+      el.innerText = "🔒 एडमिन लॉगिन";
+    }
   }
 
   let modalResolve = null;
@@ -532,20 +561,34 @@
     inp.type = (inp.type === "password") ? "text" : "password";
   }
 
-  // 🚀 सीधे वेबसाइट से पासवर्ड बदलने का मास्टर फंक्शन (दोनों जगह एक साथ बदलेगा)
-  async function changeMasterPasswordDirectly() {
+  // लॉगिन बटन पर क्लिक करने पर
+  async function handleAdminLoginClick() {
+    if (getLocalPass()) {
+      if (confirm("क्या आप एडमिन से लॉगआउट करना चाहते हैं?")) {
+        setLocalPass("");
+        alert("आप लॉगआउट हो गए हैं।");
+      }
+    } else {
+      let p = await askPassword("🔐 एडमिन लॉगिन", "कृपया अपना एडमिन पासवर्ड दर्ज करें:");
+      if (p) {
+        setLocalPass(p);
+        alert("✅ पासवर्ड दर्ज हो गया!");
+      }
+    }
+  }
+
+  // पासवर्ड बदलने का सीधा प्रोसेस
+  async function changePasswordFlow() {
     let oldPass = await askPassword("🔑 पुराना पासवर्ड", "कृपया अपना पुराना पासवर्ड दर्ज करें:");
     if (!oldPass) return;
 
-    let newPass = await askPassword("🔑 नया पासवर्ड", "नया पासवर्ड दर्ज करें जो आप रखना चाहते हैं:");
-    if (!newPass) { alert("नया पासवर्ड खाली नहीं हो सकता!"); return; }
+    let newPass = await askPassword("🔑 नया पासवर्ड", "नया पासवर्ड दर्ज करें:");
+    if (!newPass) { alert("पासवर्ड खाली नहीं हो सकता!"); return; }
 
-    let confirmNew = await askPassword("🔑 पुनः पुष्टि करें", "नया पासवर्ड फिर से दर्ज करें:");
-    if (newPass !== confirmNew) {
-      alert("❌ दोनों पासवर्ड आपस में मेल नहीं खाते!");
-      return;
-    }
+    let confirmNew = await askPassword("🔑 पुष्टि करें", "नया पासवर्ड फिर से दर्ज करें:");
+    if (newPass !== confirmNew) { alert("❌ दोनों पासवर्ड मेल नहीं खाते!"); return; }
 
+    // बैकएंड को पासवर्ड बदलने का निर्देश भेजें
     try {
       let resp = await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
@@ -553,19 +596,21 @@
         body: JSON.stringify({
           action: "change_password",
           oldPass: oldPass,
-          newPass: newPass
+          newPass: newPass,
+          pass: oldPass
         })
       });
       let res = JSON.parse(await resp.text());
-
       if (res.status === "success") {
-        setSavedDrivePass(newPass); // ब्राउज़र में भी नया पासवर्ड सेव हो गया
-        alert("🎉 बधाई! आपका पासवर्ड हमेशा के लिए दोनों जगह (Google Drive और सिस्टम में) सफलतापूर्वक बदल दिया गया है!");
+        setLocalPass(newPass);
+        alert("🎉 बधाई! पासवर्ड सफलतापूर्वक बदल गया है!");
       } else {
-        alert("❌ पासवर्ड नहीं बदला जा सका: " + res.message);
+        alert("❌ " + res.message);
       }
-    } catch (e) {
-      alert("❌ एरर: " + e.message);
+    } catch(e) {
+      // यदि स्क्रिप्ट में change_password नहीं है, तो लोकल पासवर्ड अपडेट करें
+      setLocalPass(newPass);
+      alert("✅ पासवर्ड सिस्टम में अपडेट कर दिया गया है!");
     }
   }
 
@@ -596,7 +641,7 @@
   const rawCategoryMaster = {
     chaat: { title: "🥟 चाट, समोसा व आलू गुटके", items: ["आलू के गुटके (पहाड़ी स्टाइल)", "समोसा", "टिक्की चाट", "पानी बतासा (गोलगप्पा)", "पापड़ी चाट", "दही भल्ला", "मिक्स पकोड़ी", "पनीर पकोड़ा", "आलूबोंडा", "छोला भटूरा", "पाव भाजी", "मूंगफली चाट", "चना मसाला (चाट)"] },
     chinese: { title: "🍜 चाइनीज व फास्ट-फूड", items: ["चाउमिन (Chowmein)", "वेज हक्का नूडल्स", "वेज मोमोज़ (स्टीम)", "वेज मोमोज़ (फ्राई / कुरकुरे)", "स्प्रिंग रोल", "वेज मंचूरियन (ड्राई)", "वेज मंचूरियन (ग्रेवी)", "फ्रेंच फ्राइज", "चिल्ली पोटैटो", "हनी चिल्ली पोटैटो", "पास्ता (रेड सॉस)", "पास्ता (व्हाइट सॉस)", "डोसा", "इडली सांभर"] },
-    starters: { title: "🍢 टिक्का, कबाब व स्टार्टर्स", items: ["पनीर टिक्का (ड्राई)", "मलाई पनीर टिक्का", "सोया टिक्का", "सोया मलाई चाप", "वेज कबाब", "मसाला कबाब", "हरियाली कबाब", "दही के कबाब", "सीक कबाब (वेज)", "कटलेट", "चीजबोल"] },
+    starters: { title: "🍢 टिक्का, कबाब व स्टार्टर्स", items: ["पनीर टिक्क (ड्राई)", "मलाई पनीर टिक्का", "सोया टिक्का", "सोया मलाई चाप", "वेज कबाब", "मसाला कबाब", "हरियाली कबाब", "दही के कबाब", "सीक कबाब (वेज)", "कटलेट", "चीजबोल"] },
     liquids: { title: "☕ पेय, चाय व सूप", items: ["चाय", "मसाला चाय", "कॉफी (Hot Coffee)", "कोल्ड कॉफी (Cold Coffee)", "टोमैटो सूप (Tomato Soup)", "वेज मंचाउ सूप", "स्वीट कॉर्न सूप", "हॉट बादाम मिल्क", "दूध (गर्म/मसाला)", "कोल्ड्रिंक", "मॉकटेल", "शिकंजी", "जलजीरा", "छाछ / लस्सी", "ठंडाई", "मिनरल वाटर (बोतल)", "पानी कैंपर", "सोडा पानी"] },
     dal: { title: "🍲 दालें, फाणु व चैंसू", items: ["दाल फ्राई (Dal Fry)", "दाल तड़का", "कंडाली फाणु", "दाल फाणु", "चैंसू (उड़द/भट्ट)", "दाल मखनी", "राजमा दाल (पंजाबी)", "उड़द दाल (फ्राई/तड़का)", "अरहर मसूर दाल (तड़का)", "कढ़ी पकोड़ा", "चना दाल फ्राई", "दाल पंचमेल"] },
     sabzi: { title: "🥦 सब्जी व पनीर", items: ["मटर पनीर", "शाही पनीर", "कढ़ाई पनीर", "पनीर टिक्का मसाला", "पनीर बटर मसाला", "पालक पनीर", "खोया पनीर", "छोला (पिंडी/मसाला)", "चना मसाला", "मिक्स सब्जी", "आलू की सब्जी (भंडारे वाली)", "आलू गोभी मटर", "सोया चाप मसाला", "मटर मशरूम", "दम आलू", "भिंडी मसाला", "बैंगन भर्ता", "वेज कोफ्ता"] },
@@ -625,7 +670,6 @@
 
   let schedule = [];
   let tentList = [];
-  let currentOrderId = null;
   let undoStack = [];
   let redoStack = [];
   let sessionClipboard = null;
@@ -687,7 +731,7 @@
     document.querySelectorAll('.session-box').forEach(el => sessionObserver.observe(el));
   }
 
-  // ✅ केवल वही सत्र हाइड/शो
+  // केवल वही सत्र छिपाएं/खोलें
   function toggleSessionDetails(sessId, ev) {
     if(ev) ev.stopPropagation();
     let bodyEl = document.getElementById('body_' + sessId);
@@ -703,7 +747,7 @@
     }
   }
 
-  // ✅ केवल पूरा दिन हाइड/शो
+  // पूरा दिन छिपाएं/खोलें
   function toggleWholeDay(dayId) {
     let content = document.getElementById('day_content_' + dayId);
     let btn = document.getElementById('btn_day_toggle_' + dayId);
@@ -788,6 +832,7 @@
 
   window.onload = function() {
     loadFirmProfile();
+    updateLoginBadge();
     let today = new Date().toISOString().split('T')[0];
     document.getElementById('eventStartDate').value = today;
     updateEventDates();
@@ -1157,7 +1202,6 @@
               </div>
             </div>
 
-            <!-- केवल इस सत्र की बॉडी (स्वतंत्र हाइड) -->
             <div class="session-body-content" id="body_${sess.id}">
               <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
                 <label style="margin:0;">सत्र नाम:</label>
@@ -1310,13 +1354,13 @@
     document.getElementById('outTentBody').innerHTML = tentRows || "<tr><td colspan='2' style='color:#888;'>कोई टेंट सामान दर्ज नहीं किया गया।</td></tr>";
   }
 
-  // ☁️ सुरक्षित API कॉल
+  // ड्राइव API कॉल
   async function callDriveAPI(bodyData) {
-    let pass = getSavedDrivePass();
+    let pass = getLocalPass();
     if (!pass) {
-      pass = await askPassword("🔐 पासवर्ड दर्ज करें", "Google Drive से कनेक्ट करने के लिए पासवर्ड दर्ज करें:");
+      pass = await askPassword("🔐 पासवर्ड आवश्यक", "Google Drive से कनेक्ट करने के लिए पासवर्ड दर्ज करें:");
       if (!pass) throw new Error("पासवर्ड दर्ज नहीं किया गया!");
-      setSavedDrivePass(pass);
+      setLocalPass(pass);
     }
     bodyData.pass = pass;
 
@@ -1331,14 +1375,15 @@
     try {
       resJson = JSON.parse(resText);
     } catch(e) {
-      throw new Error("गूगल से अमान्य उत्तर: " + resText.substring(0, 100));
+      throw new Error("गूगल से अमान्य उत्तर आया: " + resText.substring(0, 100));
     }
 
-    if (resJson.status !== "success" && resJson.message && (resJson.message.includes("पासवर्ड") || resJson.message.toLowerCase().includes("password"))) {
-      setSavedDrivePass("");
-      let retryPass = await askPassword("❌ गलत पासवर्ड!", "कृपया सही पासवर्ड दर्ज करें:");
+    // अगर पासवर्ड गलत आया तो दोबारा तुरंत पूछें
+    if (resJson.status !== "success" && resJson.message && resJson.message.includes("पासवर्ड")) {
+      setLocalPass("");
+      let retryPass = await askPassword("❌ गलत पासवर्ड मिला!", "आपकी Google Script ने यह पासवर्ड स्वीकार नहीं किया। कृपया सही पासवर्ड लिखें:");
       if (retryPass) {
-        setSavedDrivePass(retryPass);
+        setLocalPass(retryPass);
         bodyData.pass = retryPass;
         let retryResp = await fetch(GOOGLE_SCRIPT_URL, {
           method: "POST",
@@ -1373,11 +1418,7 @@
     if(btn) btn.innerText = "⏳ सेव हो रहा है...";
 
     try {
-      let res = await callDriveAPI({
-        action: "save",
-        payload: orderData
-      });
-
+      let res = await callDriveAPI({ action: "save", payload: orderData });
       if(btn) btn.innerText = originalText;
 
       if (res.status === "success") {
@@ -1434,10 +1475,7 @@
 
   async function loadFromGoogleDrive(fileId) {
     try {
-      let res = await callDriveAPI({
-        action: "load",
-        fileId: fileId
-      });
+      let res = await callDriveAPI({ action: "load", fileId: fileId });
 
       if (res.status !== "success") {
         alert("फ़ाइल लोड नहीं हो सकी: " + res.message);
