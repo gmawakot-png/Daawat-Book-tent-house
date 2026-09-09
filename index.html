@@ -225,7 +225,7 @@
 <!-- 🚩 हमेशा दिखने वाला लाइव एक्टिव डेट बैनर -->
 <div class="live-date-indicator no-print" id="liveDateIndicator">
   <span>👉 वर्तमान कार्य स्थिति: <span id="currentActiveInfo" style="color:#b71c1c;">तारीख 1 का मेन्यू तैयार हो रहा है</span></span>
-  <span style="font-size:11px; color:#555;">💡 जिस सत्र पर क्लिक करेंगे, उसकी तारीख यहाँ दिखाई देगी</span>
+  <span style="font-size:11px; color:#555;">💡 जिस सत्र पर काम करेंगे, उसकी तारीख यहाँ दिखाई देगी</span>
 </div>
 
 <div class="container" id="mainContainer">
@@ -279,7 +279,7 @@
   <div class="card no-print">
     <div style="margin-bottom: 10px;">
       <h3 style="margin-bottom:2px;">🍲 भोजन एवं नाश्ता व्यवस्था (तारीख वार मेन्यू)</h3>
-      <small style="color:#555;">💡 <strong>ध्यान दें:</strong> हर सत्र के डिब्बे के ऊपर और स्क्रीन के सबसे ऊपर पीले बैनर में लाइव तारीख दिखती रहेगी।</small>
+      <small style="color:#555;">💡 <strong>सुविधा:</strong> हर सत्र के ऊपर और शीर्ष पीले बैनर में लाइव तारीख साफ़ दिखाई देगी।</small>
     </div>
     <div id="daysWrapper"></div>
   </div>
@@ -428,8 +428,8 @@
 </div>
 
 <script>
-  // 🔗 आपका Google Apps Script Web App URL
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyt4jnpMWLRND8pYlIjpqUkFm-h6iPf_3C89MvTBu3vZf6E6Xw1L4pARwQQnjHMEm8/exec";
+  // 🔗 आपका नया Google Apps Script Web App URL
+  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZTfOU_8emrIKCofGcCHB9O-r-9ik8AgXlINxNBcfVIQgi7oANBoRu-_GJMgU4AEnH/exec";
 
   // हिंदी वर्णमाला क्रमबद्धता
   const hindiAlphabetOrder = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः','क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह','क्ष','त्र','ज्ञ'];
@@ -544,16 +544,13 @@
     return dateStr;
   }
 
-  // बाईं तरफ के साइडबार को टॉगल करना
   function toggleSidebar() {
     let sb = document.getElementById('quickSidebar');
     let btn = document.getElementById('sbToggleBtn');
     let cnt = document.getElementById('mainContainer');
-    
     sb.classList.toggle('collapsed');
     btn.classList.toggle('collapsed');
     cnt.classList.toggle('full-width');
-
     btn.innerText = sb.classList.contains('collapsed') ? '▶ साइडबार' : '◀ साइडबार';
   }
 
@@ -565,7 +562,6 @@
     alert(`✅ ${name} सूची में जोड़ दिया गया!`);
   }
 
-  // लाइव एक्टिविटी इंडिकेटर अपडेट करना
   function setActiveSessionInfo(dayNumber, dateStr, sessionTitle) {
     let info = `[ दिन ${dayNumber} ] | 📅 तारीख: ${formatDisplayDate(dateStr)} | ⏱️ सत्र: ${sessionTitle}`;
     document.getElementById('currentActiveInfo').innerText = info;
@@ -590,7 +586,6 @@
     document.getElementById('custPhone').value = state.custPhone || "";
     document.getElementById('eventStartDate').value = state.eventDate || "";
     document.getElementById('eventAddress').value = state.address || "";
-    
     updateEventDates();
     renderDaysUI();
     renderTentBadges();
@@ -689,7 +684,6 @@
     renderDaysUI();
   }
 
-  // नया सत्र जोड़ना
   function addNextSession(dayId, shouldScroll = true) {
     saveState();
     let day = schedule.find(d => d.id === dayId);
@@ -716,7 +710,6 @@
     }
   }
 
-  // हेडर से नया सत्र जोड़ना
   function addNextSessionFromSticky() {
     let sel = document.getElementById('stickyDaySelect');
     if (!sel || !sel.value) { 
@@ -1095,34 +1088,30 @@
     document.getElementById('outTentBody').innerHTML = tentRows || "<tr><td colspan='2' style='color:#888;'>कोई टेंट सामान दर्ज नहीं किया गया।</td></tr>";
   }
 
-  // =================================================================
-  // ☁️ 100% कार्यशील GOOGLE DRIVE JSONP ENGINE (Never Blocks on GitHub)
-  // =================================================================
-  function executeGoogleScript(params, callback) {
-    let cbName = "drive_cb_" + Date.now() + Math.floor(Math.random()*1000);
-    params.callback = cbName;
-
-    let query = Object.keys(params).map(k => encodeURIComponent(k) + "=" + encodeURIComponent(params[k])).join('&');
-    let script = document.createElement('script');
-    script.src = `${GOOGLE_SCRIPT_URL}?${query}`;
-    script.id = cbName;
-
-    window[cbName] = function(res) {
-      delete window[cbName];
-      let s = document.getElementById(cbName);
-      if(s) s.parentNode.removeChild(s);
-      callback(res);
-    };
-
-    script.onerror = function() {
-      alert("❌ गूगल ड्राइव से संपर्क नहीं हो पाया! कृपया इंटरनेट या स्क्रिप्ट URL जांचें।");
-    };
-
-    document.body.appendChild(script);
+  // ==========================================
+  // ☁️ सुरक्षित GOOGLE DRIVE ऑपरेशन्स
+  // ==========================================
+  async function callDriveAPI(bodyData) {
+    try {
+      let response = await fetch(GOOGLE_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(bodyData)
+      });
+      let resText = await response.text();
+      let resJson;
+      try {
+        resJson = JSON.parse(resText);
+      } catch(e) {
+        throw new Error("गूगल से अमान्य उत्तर: " + resText.substring(0, 100));
+      }
+      return resJson;
+    } catch(err) {
+      throw err;
+    }
   }
 
-  // ड्राइव में सुरक्षित सेव
-  function saveToGoogleDrive() {
+  async function saveToGoogleDrive() {
     let cName = document.getElementById('custName').value.trim();
     if (!cName) { alert("कृपया ग्राहक का नाम लिखें!"); return; }
 
@@ -1141,22 +1130,31 @@
       tentList: tentList
     };
 
-    executeGoogleScript({
-      action: "save",
-      pass: pass,
-      payload: JSON.stringify(orderData)
-    }, function(res) {
+    let btn = event ? event.target : null;
+    if(btn) btn.innerText = "⏳ सेव हो रहा है...";
+
+    try {
+      let res = await callDriveAPI({
+        action: "save",
+        pass: pass,
+        payload: orderData
+      });
+
+      if(btn) btn.innerText = "☁️ Drive में सेव";
+
       if (res.status === "success") {
-        alert(`✅ बधाई! "${cName}" का पूरा आर्डर Google Drive के 'Tent_House_Orders' फ़ोल्डर में सुरक्षित सेव हो गया है!`);
+        alert(`✅ बधाई! "${cName}" का पूरा आर्डर Google Drive में सुरक्षित सेव हो गया है!`);
         saveOrderToBrowserStorage();
       } else {
-        alert("❌ एरर: " + res.message);
+        alert("❌ " + res.message);
       }
-    });
+    } catch(err) {
+      if(btn) btn.innerText = "☁️ Drive में सेव";
+      alert("❌ सेव करने में समस्या: " + err.message);
+    }
   }
 
-  // ड्राइव फाइलों की सूची
-  function openGoogleDriveList() {
+  async function openGoogleDriveList() {
     let pass = getAdminPassword();
     if (!pass) return;
 
@@ -1168,10 +1166,12 @@
     body.innerHTML = "";
     loading.style.display = 'block';
 
-    executeGoogleScript({
-      action: "list",
-      pass: pass
-    }, function(res) {
+    try {
+      let res = await callDriveAPI({
+        action: "list",
+        pass: pass
+      });
+
       loading.style.display = 'none';
 
       if (res.status !== "success") {
@@ -1196,19 +1196,23 @@
           </tr>
         `;
       });
-    });
+    } catch(err) {
+      loading.style.display = 'none';
+      alert("❌ ड्राइव फाइलें लोड नहीं हो सकीं: " + err.message);
+    }
   }
 
-  // ड्राइव से सीधे फाइल खोलना
-  function loadFromGoogleDrive(fileId) {
+  async function loadFromGoogleDrive(fileId) {
     let pass = getAdminPassword();
     if (!pass) return;
 
-    executeGoogleScript({
-      action: "load",
-      pass: pass,
-      fileId: fileId
-    }, function(res) {
+    try {
+      let res = await callDriveAPI({
+        action: "load",
+        pass: pass,
+        fileId: fileId
+      });
+
       if (res.status !== "success") {
         alert("फ़ाइल लोड नहीं हो सकी: " + res.message);
         return;
@@ -1231,8 +1235,10 @@
       renderReceipt();
       document.getElementById('driveListCard').style.display = 'none';
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      alert(`🎉 Google Drive से "${o.custName}" का रिकॉर्ड खुल गया है!`);
-    });
+      alert(`🎉 Google Drive से "${o.custName}" का रिकॉर्ड खुल गया!`);
+    } catch(err) {
+      alert("❌ फ़ाइल खोलने में त्रुटि: " + err.message);
+    }
   }
 
   // डाउनलोड फ़ंक्शन
