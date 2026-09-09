@@ -160,6 +160,46 @@
     .item-badge { background: #e9f5ff; color: #0056b3; padding: 4px 9px; border-radius: 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; margin: 3px; border: 1px solid #bee5eb; }
     .item-badge-nonveg { background: #ffebee; color: #b71c1c; border: 1px solid #ffcdd2; }
 
+    /* पासवर्ड मोडल (पॉपअप) */
+    .custom-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 100000;
+      justify-content: center;
+      align-items: center;
+    }
+    .custom-modal {
+      background: #ffffff;
+      padding: 22px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 380px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+      border-top: 5px solid var(--maroon);
+    }
+    .pass-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin: 12px 0 16px 0;
+    }
+    .pass-input-wrapper input {
+      padding-right: 40px;
+      font-size: 16px;
+      letter-spacing: 1px;
+    }
+    .eye-btn {
+      position: absolute;
+      right: 6px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px 8px;
+    }
+
     /* रसीद */
     #billReceipt { background: white; padding: 25px; border: 2px solid #222; margin-top: 20px; }
     .bill-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 10px; }
@@ -180,6 +220,24 @@
   </style>
 </head>
 <body>
+
+<!-- पासवर्ड इनपुट मोडल (आँख वाले बटन के साथ) -->
+<div id="passwordModal" class="custom-modal-overlay">
+  <div class="custom-modal">
+    <h3 id="modalTitle" style="color:var(--maroon); margin-top:0; font-size:16px;">🔐 एडमिन पासवर्ड दर्ज करें</h3>
+    <p id="modalMsg" style="font-size:12px; color:#555; margin-bottom:8px;">आगे बढ़ने के लिए पासवर्ड दर्ज करें:</p>
+    
+    <div class="pass-input-wrapper">
+      <input type="password" id="modalPassInput" placeholder="पासवर्ड लिखें...">
+      <button type="button" class="eye-btn" onclick="togglePasswordEye()" title="पासवर्ड दिखाएं/छुपाएं">👁️</button>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn btn-secondary" onclick="closePasswordModal(false)">रद्द करें</button>
+      <button class="btn btn-green" onclick="closePasswordModal(true)">पुष्टि करें (OK)</button>
+    </div>
+  </div>
+</div>
 
 <!-- बाईं तरफ का साइडबार टॉगल बटन -->
 <button class="sidebar-toggle-btn no-print" id="sbToggleBtn" onclick="toggleSidebar()">◀ साइडबार</button>
@@ -449,30 +507,55 @@
   // 🔗 Google Apps Script URL
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZTfOU_8emrIKCofGcCHB9O-r-9ik8AgXlINxNBcfVIQgi7oANBoRu-_GJMgU4AEnH/exec";
 
-  // SHA-256 हैशिंग
-  async function sha256(message) {
-    const msgBuffer = new TextEncoder().encode(message);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  // पासवर्ड मैनेजमेंट (सीधा और सुरक्षित)
+  function getActivePlainPass() {
+    return localStorage.getItem('tent_active_plain_pass') || "2050";
   }
 
-  const DEFAULT_HASH = "81bb870f7d54020a5976b92a54330ff2c92a95c9600e1cc8c8e1e7f33d7494f6";
-
-  async function verifyPassword(inputPass) {
-    let storedHash = localStorage.getItem('tent_app_pass_hash') || DEFAULT_HASH;
-    let inputHash = await sha256(inputPass);
-    return inputHash === storedHash;
+  function verifyPassword(inputPass) {
+    let currentPass = getActivePlainPass();
+    return inputPass === currentPass;
   }
 
-  async function updatePasswordHash(newPass) {
-    let newHash = await sha256(newPass);
-    localStorage.setItem('tent_app_pass_hash', newHash);
+  function updatePassword(newPass) {
     localStorage.setItem('tent_active_plain_pass', newPass);
   }
 
-  function getActivePlainPass() {
-    return localStorage.getItem('tent_active_plain_pass') || "2050";
+  // कस्टम पासवर्ड मोडल प्रॉमिस लॉजिक
+  let modalResolve = null;
+
+  function askPassword(title, msg) {
+    return new Promise((resolve) => {
+      modalResolve = resolve;
+      let modal = document.getElementById('passwordModal');
+      let inp = document.getElementById('modalPassInput');
+      document.getElementById('modalTitle').innerText = title || "🔐 एडमिन पासवर्ड दर्ज करें";
+      document.getElementById('modalMsg').innerText = msg || "आगे बढ़ने के लिए पासवर्ड दर्ज करें:";
+      inp.value = "";
+      inp.type = "password";
+      modal.style.display = "flex";
+      inp.focus();
+
+      inp.onkeydown = function(e) {
+        if (e.key === "Enter") closePasswordModal(true);
+        if (e.key === "Escape") closePasswordModal(false);
+      };
+    });
+  }
+
+  function closePasswordModal(confirmed) {
+    let modal = document.getElementById('passwordModal');
+    let val = document.getElementById('modalPassInput').value;
+    modal.style.display = "none";
+    if (modalResolve) {
+      modalResolve(confirmed ? val : null);
+      modalResolve = null;
+    }
+  }
+
+  function togglePasswordEye() {
+    let inp = document.getElementById('modalPassInput');
+    inp.type = (inp.type === "password") ? "text" : "password";
   }
 
   const hindiAlphabetOrder = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः','क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह','क्ष','त्र','ज्ञ'];
@@ -537,8 +620,6 @@
 
   let sessionClipboard = null;
   let isLoggedIn = sessionStorage.getItem('tent_is_logged_in') === 'true';
-
-  // IntersectionObserver के लिए रेफरेंस
   let sessionObserver = null;
 
   function updateAdminStatusUI() {
@@ -566,16 +647,15 @@
         alert("आप सफलतापूर्वक लॉगआउट हो चुके हैं।");
       }
     } else {
-      let p = prompt("🔐 पासवर्ड दर्ज करें:");
+      let p = await askPassword("🔐 एडमिन लॉगिन", "डिफ़ॉल्ट पासवर्ड 2050 है:");
       if (p !== null) {
-        let valid = await verifyPassword(p.trim());
-        if (valid) {
+        if (verifyPassword(p.trim())) {
           isLoggedIn = true;
           sessionStorage.setItem('tent_is_logged_in', 'true');
           updateAdminStatusUI();
           alert("✅ एडमिन लॉगिन सफल!");
         } else {
-          alert("❌ गलत पासवर्ड!");
+          alert("❌ गलत पासवर्ड! (डिफ़ॉल्ट पासवर्ड 2050 दर्ज करें)");
         }
       }
     }
@@ -583,16 +663,15 @@
 
   async function ensureAdminLogin() {
     if (isLoggedIn) return true;
-    let p = prompt("🔐 पासवर्ड दर्ज करें:");
+    let p = await askPassword("🔐 सत्यापन आवश्यक", "डिफ़ॉल्ट पासवर्ड 2050 है:");
     if (p !== null) {
-      let valid = await verifyPassword(p.trim());
-      if (valid) {
+      if (verifyPassword(p.trim())) {
         isLoggedIn = true;
         sessionStorage.setItem('tent_is_logged_in', 'true');
         updateAdminStatusUI();
         return true;
       } else {
-        alert("❌ गलत पासवर्ड!");
+        alert("❌ गलत पासवर्ड! (डिफ़ॉल्ट पासवर्ड 2050 है)");
         return false;
       }
     }
@@ -603,29 +682,28 @@
     let authed = await ensureAdminLogin();
     if (!authed) return;
 
-    let oldP = prompt("🔐 पुराना पासवर्ड दर्ज करें:");
+    let oldP = await askPassword("🔑 पुराना पासवर्ड", "कृपया अपना पुराना पासवर्ड दर्ज करें:");
     if (!oldP) return;
-    let valid = await verifyPassword(oldP.trim());
-    if (!valid) {
+    if (!verifyPassword(oldP.trim())) {
       alert("❌ पुराना पासवर्ड गलत है!");
       return;
     }
 
-    let newPass = prompt("🔑 नया पासवर्ड दर्ज करें:");
+    let newPass = await askPassword("🔑 नया पासवर्ड", "नया पासवर्ड दर्ज करें:");
     if (!newPass || !newPass.trim()) {
       alert("पासवर्ड खाली नहीं हो सकता!");
       return;
     }
     newPass = newPass.trim();
 
-    let confirmNew = prompt("🔑 नया पासवर्ड पुनः दर्ज करें:");
+    let confirmNew = await askPassword("🔑 पुनः पुष्टि करें", "नया पासवर्ड फिर से दर्ज करें:");
     if (newPass !== (confirmNew ? confirmNew.trim() : "")) {
       alert("❌ दोनों पासवर्ड आपस में मेल नहीं खाते!");
       return;
     }
 
-    await updatePasswordHash(newPass);
-    alert("🎉 बधाई! आपका पासवर्ड बदल दिया गया है!");
+    updatePassword(newPass);
+    alert("🎉 बधाई! आपका पासवर्ड सफलतापूर्वक बदल दिया गया है!");
   }
 
   function formatDisplayDate(dateStr) {
