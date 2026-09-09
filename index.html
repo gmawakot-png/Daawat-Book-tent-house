@@ -1329,25 +1329,21 @@
   }
 
   // ☁️ सुरक्षित API कॉल
-  // वेबसाइट का लॉगिन और Google Apps Script का एडमिन पासवर्ड अलग हैं।
-  // पासवर्ड केवल backend से सफल verification के बाद browser में सेव होगा।
+  // पहले बिना अलग Drive पासवर्ड के अनुरोध भेजा जाता है।
+  // यदि Google Script पहले से लॉगिन/अधिकृत सत्र को स्वीकार करती है तो दोबारा पासवर्ड नहीं माँगा जाएगा।
+  // केवल तभी पासवर्ड पूछा जाएगा जब Google Script वास्तव में उसे आवश्यक बताए।
   async function callDriveAPI(bodyData) {
-    let pass = getSavedDrivePass();
+    const savedPass = getSavedDrivePass();
 
-    if (!pass) {
-      pass = await askPassword(
-        "🔐 Google Drive पासवर्ड",
-        "Drive में सेव/खोलने के लिए Apps Script का एडमिन पासवर्ड दर्ज करें:"
-      );
-      if (!pass) throw new Error("पासवर्ड दर्ज नहीं किया गया!");
-    }
+    async function sendRequest(passValue = "") {
+      const requestData = { ...bodyData };
+      if (passValue) requestData.pass = passValue;
+      else delete requestData.pass;
 
-    async function sendWithPass() {
-      bodyData.pass = pass;
       const response = await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(bodyData)
+        body: JSON.stringify(requestData)
       });
       const resText = await response.text();
       try {
@@ -1357,30 +1353,39 @@
       }
     }
 
-    let resJson = await sendWithPass();
-    const msg = String(resJson.message || "");
-    const isPasswordError =
-      resJson.status !== "success" &&
-      (msg.includes("पासवर्ड") || msg.toLowerCase().includes("password"));
+    const isPasswordError = (resJson) => {
+      const msg = String(resJson && resJson.message || "");
+      return resJson && resJson.status !== "success" &&
+        (msg.includes("पासवर्ड") || msg.toLowerCase().includes("password"));
+    };
 
-    if (isPasswordError) {
-      setSavedDrivePass("");
-      pass = await askPassword(
-        "❌ गलत एडमिन पासवर्ड",
-        "Apps Script में सेट किया गया सही एडमिन पासवर्ड दर्ज करें:"
-      );
-      if (!pass) throw new Error("सही पासवर्ड दर्ज नहीं किया गया!");
+    // 1) पहले बिना पासवर्ड प्रयास — लॉगिन/अधिकृत सत्र होने पर यही सफल होगा।
+    let resJson = await sendRequest("");
+    if (resJson.status === "success") return resJson;
 
-      resJson = await sendWithPass();
-
+    // 2) यदि backend ने password माँगा और browser में पहले से saved password है, तो उसे आजमाएँ।
+    if (isPasswordError(resJson) && savedPass) {
+      resJson = await sendRequest(savedPass);
       if (resJson.status === "success") {
-        setSavedDrivePass(pass);
+        setSavedDrivePass(savedPass);
+        return resJson;
       }
-      return resJson;
     }
 
-    if (resJson.status === "success") {
-      setSavedDrivePass(pass);
+    // 3) केवल वास्तविक password requirement/error होने पर ही password popup दिखाएँ।
+    if (isPasswordError(resJson)) {
+      const pass = await askPassword(
+        "🔐 Google Drive पासवर्ड",
+        "Google Script ने Save के लिए Admin Password माँगा है।"
+      );
+      if (!pass) throw new Error("पासवर्ड दर्ज नहीं किया गया!");
+
+      resJson = await sendRequest(pass);
+      if (resJson.status === "success") {
+        setSavedDrivePass(pass);
+      } else if (isPasswordError(resJson)) {
+        setSavedDrivePass("");
+      }
     }
 
     return resJson;
