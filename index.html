@@ -9,7 +9,7 @@
   <style>
     :root { --maroon: #8b0000; --dark: #2c3e50; }
     * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-    body { background-color: #f4f6f9; margin: 0; padding: 12px; padding-top: 120px; }
+    body { background-color: #f4f6f9; margin: 0; padding: 12px; padding-top: 125px; }
     .container { max-width: 1200px; margin-left: 270px; transition: margin-left 0.3s; }
     .container.full-width { margin-left: auto; margin-right: auto; }
 
@@ -19,7 +19,7 @@
     label { font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px; color: #333; }
     input, select { width: 100%; padding: 7px 9px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
     
-    .btn { padding: 7px 11px; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: 0.2s; }
+    .btn { padding: 7px 12px; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: 0.2s; }
     .btn-maroon { background: var(--maroon); color: white; }
     .btn-green { background: #28a745; color: white; }
     .btn-blue { background: #007bff; color: white; }
@@ -28,7 +28,7 @@
     .btn-danger { background: #dc3545; color: white; }
     .btn-secondary { background: #6c757d; color: white; }
     .btn-purple { background: #6f42c1; color: white; }
-    .btn-dark { background: #343a40; color: white; }
+    .btn-dark { background: #1a252f; color: white; }
     .btn:hover { opacity: 0.88; }
 
     /* शीर्ष एक्शन बार */
@@ -40,7 +40,7 @@
       background: #ffffff;
       border-bottom: 3px solid var(--maroon);
       box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-      padding: 6px 14px;
+      padding: 8px 14px;
       z-index: 9999;
       display: flex;
       justify-content: space-between;
@@ -49,10 +49,21 @@
       gap: 6px;
     }
 
+    /* एडमिन बॉक्स */
+    .admin-zone {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 3px 8px;
+      border-radius: 5px;
+    }
+
     /* वर्तमान एक्टिव कार्य-तारीख का लाइव बैनर */
     .live-date-indicator {
       position: fixed;
-      top: 48px;
+      top: 52px;
       left: 0;
       right: 0;
       background: linear-gradient(90deg, #fff3cd, #ffe89e, #fff3cd);
@@ -66,7 +77,6 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      letter-spacing: 0.2px;
     }
     .live-badge-glow {
       background: #8b0000;
@@ -77,14 +87,13 @@
       box-shadow: 0 0 10px rgba(139, 0, 0, 0.45);
       display: inline-block;
       margin-left: 5px;
-      text-shadow: 0 1px 2px rgba(0,0,0,0.3);
     }
 
     /* साइडबार */
     #quickSidebar {
       position: fixed;
       left: 0;
-      top: 92px;
+      top: 96px;
       bottom: 0;
       width: 260px;
       background: #ffffff;
@@ -100,7 +109,7 @@
     .sidebar-toggle-btn {
       position: fixed;
       left: 260px;
-      top: 95px;
+      top: 100px;
       background: var(--maroon);
       color: white;
       border: none;
@@ -116,15 +125,11 @@
     .sidebar-section { margin-bottom: 14px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
     .sidebar-btn { width: 100%; text-align: left; margin-bottom: 5px; font-size: 11px; padding: 6px 8px; border-radius: 4px; border: 1px solid #ddd; background: #fafafa; cursor: pointer; }
     .sidebar-btn:hover { background: #eef2f7; border-color: #007bff; }
-    .sidebar-session-link { margin-left: 12px; width: calc(100% - 12px); border-left: 3px solid var(--maroon); background: #fdfefe; margin-bottom: 3px; }
-    .sidebar-session-link:hover { background: #fff8e1; }
 
     /* दिन व सत्र बॉक्स */
     .day-box { border: 2px solid #8b0000; border-radius: 8px; padding: 12px; margin-bottom: 20px; background: #fffcfc; }
     .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #8b0000; padding: 8px 12px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; background: #ffebee; border-radius: 5px; }
     .day-content-area { transition: all 0.3s ease; }
-    .day-bottom-actions { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; margin-top: 10px; background: #fff1f3; border: 1px dashed #e57373; border-radius: 6px; }
-    
     .session-box { background: white; border: 1px solid #ddd; border-left: 6px solid var(--maroon); border-radius: 6px; padding: 12px; margin-bottom: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
     
     .session-date-banner {
@@ -141,11 +146,6 @@
       align-items: center;
       margin-bottom: 8px;
     }
-
-    .session-body-content { display: block; margin-top: 8px; }
-    .menu-panel { border-radius: 6px; padding: 10px; margin-top: 8px; }
-    .veg-panel { background: #f4fbf4; border: 1px solid #c3e6cb; }
-    .nonveg-panel { background: #fff5f5; border: 1px solid #f5c6cb; }
 
     .category-line { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; align-items: flex-start; }
     .cat-box { display: flex; flex-direction: column; position: relative; }
@@ -204,17 +204,6 @@
       padding: 4px 8px;
     }
 
-    /* एडमिन बार हाइलाइट */
-    .admin-controls-group {
-      display: none;
-      align-items: center;
-      gap: 5px;
-      background: #e8f5e9;
-      padding: 2px 6px;
-      border-radius: 5px;
-      border: 1px solid #a5d6a7;
-    }
-
     /* रसीद */
     #billReceipt { background: white; padding: 25px; border: 2px solid #222; margin-top: 20px; }
     .bill-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 10px; }
@@ -235,8 +224,8 @@
 <!-- पासवर्ड मोडल -->
 <div id="passwordModal" class="custom-modal-overlay">
   <div class="custom-modal">
-    <h3 id="modalTitle" style="color:var(--maroon); margin-top:0; font-size:16px;">🔐 पासवर्ड दर्ज करें</h3>
-    <p id="modalMsg" style="font-size:12.5px; color:#444; margin-bottom:8px; line-height:1.4;"></p>
+    <h3 id="modalTitle" style="color:var(--maroon); margin-top:0; font-size:16px;">🔐 एडमिन पासवर्ड दर्ज करें</h3>
+    <p id="modalMsg" style="font-size:13px; color:#444; margin-bottom:8px; line-height:1.4;"></p>
     
     <div class="pass-input-wrapper">
       <input type="password" id="modalPassInput" placeholder="यहाँ पासवर्ड लिखें...">
@@ -266,19 +255,13 @@
   </div>
 
   <div class="sidebar-section">
-    <div style="font-size:12px; font-weight:bold; color:var(--maroon); margin-bottom:6px;">⚡ आवश्यक सामान (1-Click Add):</div>
+    <div style="font-size:12px; font-weight:bold; color:var(--maroon); margin-bottom:6px;">⚡ आवश्यक सामान:</div>
     <button class="sidebar-btn" onclick="quickAddTent('पानी कैंपर (20L)', '10 नग')">💧 पानी कैंपर (20L)</button>
     <button class="sidebar-btn" onclick="quickAddTent('मिनरल वाटर बोतल', '5 पेटी')">🍾 मिनरल वाटर बोतल</button>
     <button class="sidebar-btn" onclick="quickAddTent('डिस्पोजल प्लेट व गिलास', '1 सेट')">🍽️ डिस्पोजल सेट</button>
     <button class="sidebar-btn" onclick="quickAddTent('जनरेटर (साउंड प्रूफ)', '1 नग')">⚡ साइलेंट जनरेटर</button>
     <button class="sidebar-btn" onclick="quickAddTent('वेटर (सर्विस स्टाफ)', '5 आदमी')">🤵 वेटर स्टाफ</button>
     <button class="sidebar-btn" onclick="quickAddTent('हलवाई (कारीगर टीम)', '1 सेट')">👨‍🍳 हलवाई टीम</button>
-  </div>
-
-  <div class="sidebar-section">
-    <div style="font-size:12px; font-weight:bold; color:var(--maroon); margin-bottom:6px;">📋 पेज नेविगेशन:</div>
-    <button class="sidebar-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆️ सबसे ऊपर जाएं</button>
-    <button class="sidebar-btn" onclick="document.getElementById('billReceipt').scrollIntoView({behavior:'smooth'})">📄 बिल पर्ची पर जाएं</button>
   </div>
 </div>
 
@@ -296,18 +279,19 @@
     <button class="btn btn-secondary" onclick="redoAction()">↪️ Redo</button>
   </div>
 
-  <!-- सुरक्षित एडमिन व एक्सपोर्ट बटन्स -->
+  <!-- सुरक्षित एडमिन जोन (लॉगिन से नियंत्रित) -->
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
-    <!-- केवल एडमिन लॉगिन बटन (शुरू में सिर्फ यह दिखेगा) -->
-    <button class="btn btn-dark" id="btnAdminLogin" onclick="handleAdminLogin()">🔐 एडमिन लॉगिन</button>
+    
+    <!-- जब तक लॉगिन नहीं होगा, केवल यह लॉगिन बटन दिखेगा -->
+    <button class="btn btn-dark" id="btnLoginAdmin" onclick="doAdminLogin()" style="border: 2px solid #ffc107;">🔐 एडमिन लॉगिन</button>
 
-    <!-- एडमिन कंट्रोल्स (लॉगिन के बाद ही दिखाई देंगे) -->
-    <div class="admin-controls-group" id="adminControlsArea">
-      <span style="font-size:11px; font-weight:bold; color:#2e7d32;">👑 एडमिन सक्रिय</span>
+    <!-- लॉगिन होने के बाद यह एडमिन पैनल दिखेगा -->
+    <div id="adminPanelArea" style="display:none;" class="admin-zone">
+      <span style="font-size:11px; font-weight:bold; color:#856404;">👑 एडमिन सक्रिय</span>
       <button class="btn btn-green" id="btnSaveDrive" onclick="saveToGoogleDriveDirect()">☁️ Drive में सेव</button>
       <button class="btn btn-purple" onclick="openGoogleDriveList()">📂 Drive फाइलें</button>
-      <button class="btn btn-secondary" style="font-size:11px;" onclick="changeMasterPasswordDirectly()" title="पासवर्ड बदलें">🔑 पासवर्ड बदलें</button>
-      <button class="btn btn-danger" style="font-size:11px;" onclick="handleAdminLogout()" title="लॉगआउट">🚪 लॉगआउट</button>
+      <button class="btn btn-secondary" style="font-size:11px;" onclick="changeMasterPasswordDirectly()">🔑 पासवर्ड बदलें</button>
+      <button class="btn btn-danger" style="font-size:11px;" onclick="doAdminLogout()">लॉगआउट</button>
     </div>
 
     <button class="btn btn-yellow" onclick="downloadImage()">🖼️ JPEG फोटो</button>
@@ -324,7 +308,7 @@
 
 <div class="container" id="mainContainer">
 
-  <!-- 1. प्रोफाइल सेटिंग्स -->
+  <!-- प्रोफाइल सेटिंग्स -->
   <div class="card no-print" style="border-top: 4px solid var(--maroon);">
     <div style="display:flex; justify-content:space-between; align-items:center;">
       <h3>🎪 टेंट हाउस प्रोफाइल</h3>
@@ -346,7 +330,7 @@
     </div>
   </div>
 
-  <!-- 2. ग्राहक विवरण -->
+  <!-- ग्राहक विवरण -->
   <div class="card no-print">
     <h3>👤 ग्राहक एवं बुकिंग विवरण</h3>
     <div class="grid">
@@ -369,7 +353,7 @@
     </div>
   </div>
 
-  <!-- 3. भोजन मीनू व्यवस्था -->
+  <!-- भोजन मीनू व्यवस्था -->
   <div class="card no-print">
     <div style="margin-bottom: 10px;">
       <h3 style="margin-bottom:2px;">🍲 भोजन एवं नाश्ता व्यवस्था (तारीख वार मेन्यू)</h3>
@@ -378,7 +362,7 @@
     <div id="daysWrapper"></div>
   </div>
 
-  <!-- 4. टेंट सामान -->
+  <!-- टेंट सामान -->
   <div class="card no-print">
     <h3>⛺ टेंट, पांडाल, स्टेज व लाइट का सामान</h3>
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:10px; background:#f8f9fa; padding:12px; border-radius:5px; margin-bottom:10px;">
@@ -505,40 +489,41 @@
   // 🔗 Google Apps Script URL
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZTfOU_8emrIKCofGcCHB9O-r-9ik8AgXlINxNBcfVIQgi7oANBoRu-_GJMgU4AEnH/exec";
 
-  let adminAuthPassword = localStorage.getItem('tent_admin_auth_pass') || "";
+  // एडमिन ऑथेंटिकेशन व्यवस्था
+  let currentAdminToken = sessionStorage.getItem('admin_session_pass') || "";
 
-  function checkAdminStatus() {
-    let loginBtn = document.getElementById('btnAdminLogin');
-    let controls = document.getElementById('adminControlsArea');
-    if (adminAuthPassword) {
-      if (loginBtn) loginBtn.style.display = "none";
-      if (controls) controls.style.display = "inline-flex";
+  function renderAdminUI() {
+    let btnLogin = document.getElementById('btnLoginAdmin');
+    let adminArea = document.getElementById('adminPanelArea');
+    if (currentAdminToken) {
+      if (btnLogin) btnLogin.style.display = 'none';
+      if (adminArea) adminArea.style.display = 'inline-flex';
     } else {
-      if (loginBtn) loginBtn.style.display = "inline-flex";
-      if (controls) controls.style.display = "none";
+      if (btnLogin) btnLogin.style.display = 'inline-flex';
+      if (adminArea) adminArea.style.display = 'none';
     }
   }
 
-  async function handleAdminLogin() {
-    let enteredPass = await askPassword("🔐 एडमिन लॉगिन", "एडमिन टूल्स (Drive Save, Files, Password) खोलने के लिए एडमिन पासवर्ड डालें:");
-    if (!enteredPass) return;
+  async function doAdminLogin() {
+    let pass = await askPassword("🔐 एडमिन लॉगिन", "एडमिन टूल्स और गूगल ड्राइव सेव के लिए पासवर्ड डालें (डिफ़ॉल्ट: admin123):");
+    if (!pass) return;
 
-    let res = await callBackendDirect({ action: "verify_login", pass: enteredPass });
+    let res = await apiCall({ action: "login", pass: pass });
     if (res.status === "success") {
-      adminAuthPassword = enteredPass;
-      localStorage.setItem('tent_admin_auth_pass', enteredPass);
-      checkAdminStatus();
-      alert("🎉 एडमिन लॉगिन सफल! अब आप एक क्लिक में बिना किसी पासवर्ड के सीधे गूगल ड्राइव में सेव कर सकते हैं।");
+      currentAdminToken = pass;
+      sessionStorage.setItem('admin_session_pass', pass);
+      renderAdminUI();
+      alert("🎉 एडमिन लॉगिन सफल! अब आप एक क्लिक में बिना किसी रोक-टोक के Google Drive में सेव कर सकते हैं।");
     } else {
       alert("❌ " + res.message);
     }
   }
 
-  function handleAdminLogout() {
-    if (confirm("क्या आप एडमिन पैनल से लॉगआउट करना चाहते हैं?")) {
-      adminAuthPassword = "";
-      localStorage.removeItem('tent_admin_auth_pass');
-      checkAdminStatus();
+  function doAdminLogout() {
+    if (confirm("क्या आप एडमिन पैनल से लॉगआउट होना चाहते हैं?")) {
+      currentAdminToken = "";
+      sessionStorage.removeItem('admin_session_pass');
+      renderAdminUI();
       document.getElementById('driveListCard').style.display = 'none';
       alert("🚪 आप सफलतापूर्वक लॉगआउट हो गए हैं।");
     }
@@ -582,60 +567,29 @@
     inp.type = (inp.type === "password") ? "text" : "password";
   }
 
-  // सीधे बैकएंड कॉल हेल्पर
-  async function callBackendDirect(bodyData) {
+  // कॉमन API कॉलर
+  async function apiCall(payloadObj) {
     try {
       let resp = await fetch(GOOGLE_SCRIPT_URL, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(bodyData)
+        body: JSON.stringify(payloadObj)
       });
       let text = await resp.text();
       try {
         return JSON.parse(text);
       } catch (err) {
-        return { status: "error", message: "Google Script से अमान्य उत्तर: " + text.substring(0, 150) };
+        return { status: "error", message: "Google Apps Script एरर: " + text.substring(0, 150) };
       }
     } catch (e) {
       return { status: "error", message: "इंटरनेट या सर्वर एरर: " + e.message };
     }
   }
 
-  // पासवर्ड बदलने का कार्य
-  async function changeMasterPasswordDirectly() {
-    if (!adminAuthPassword) {
-      alert("कृपया पहले एडमिन लॉगिन करें!");
-      return;
-    }
-
-    let newPass = await askPassword("🔑 नया पासवर्ड", "नया एडमिन पासवर्ड दर्ज करें जो आप रखना चाहते हैं:");
-    if (!newPass) { alert("नया पासवर्ड खाली नहीं हो सकता!"); return; }
-
-    let confirmNew = await askPassword("🔑 पुनः पुष्टि करें", "नया पासवर्ड फिर से दर्ज करें:");
-    if (newPass !== confirmNew) {
-      alert("❌ दोनों पासवर्ड आपस में मेल नहीं खाते!");
-      return;
-    }
-
-    let res = await callBackendDirect({
-      action: "change_password",
-      oldPass: adminAuthPassword,
-      newPass: newPass
-    });
-
-    if (res.status === "success") {
-      adminAuthPassword = newPass;
-      localStorage.setItem('tent_admin_auth_pass', newPass);
-      alert("🎉 बधाई! आपका पासवर्ड हमेशा के लिए Google Drive और सिस्टम दोनों जगह बदल गया है!");
-    } else {
-      alert("❌ पासवर्ड नहीं बदला जा सका: " + res.message);
-    }
-  }
-
-  // 1-Click डायरेक्ट ड्राइव सेव (बिना किसी पासवर्ड पॉपअप के)
+  // 1-क्लिक डायरेक्ट सेव (कोई पासवर्ड नहीं पूछेगा)
   async function saveToGoogleDriveDirect() {
-    if (!adminAuthPassword) {
-      alert("❌ सुरक्षित सेव करने के लिए कृपया पहले '🔐 एडमिन लॉगिन' करें!");
+    if (!currentAdminToken) {
+      alert("❌ पहले '🔐 एडमिन लॉगिन' करें!");
       return;
     }
 
@@ -655,31 +609,61 @@
     };
 
     let btn = document.getElementById('btnSaveDrive');
-    let originalText = btn ? btn.innerText : "☁️ Drive में सेव";
-    if (btn) btn.innerText = "⏳ सेव हो रहा है...";
+    let orig = btn.innerText;
+    btn.innerText = "⏳ सेव हो रहा है...";
 
-    let res = await callBackendDirect({
+    let res = await apiCall({
       action: "save",
-      pass: adminAuthPassword,
+      pass: currentAdminToken,
       payload: orderData
     });
 
-    if (btn) btn.innerText = originalText;
+    btn.innerText = orig;
 
     if (res.status === "success") {
-      alert(`✅ सफलता! "${cName}" का पूरा रिकॉर्ड सीधे Google Drive में सुरक्षित सेव हो गया है!`);
+      alert(`✅ सफलता! "${cName}" का पूरा रिकॉर्ड Google Drive में सुरक्षित सेव हो गया है!`);
     } else {
       alert("❌ सेव नहीं हुआ: " + res.message);
       if (res.message.includes("पासवर्ड")) {
-        adminAuthPassword = "";
-        localStorage.removeItem('tent_admin_auth_pass');
-        checkAdminStatus();
+        currentAdminToken = "";
+        sessionStorage.removeItem('admin_session_pass');
+        renderAdminUI();
       }
     }
   }
 
+  async function changeMasterPasswordDirectly() {
+    if (!currentAdminToken) {
+      alert("कृपया पहले एडमिन लॉगिन करें!");
+      return;
+    }
+
+    let newPass = await askPassword("🔑 नया पासवर्ड", "नया एडमिन पासवर्ड दर्ज करें:");
+    if (!newPass) { alert("नया पासवर्ड खाली नहीं हो सकता!"); return; }
+
+    let confirmNew = await askPassword("🔑 पुनः पुष्टि करें", "नया पासवर्ड फिर से दर्ज करें:");
+    if (newPass !== confirmNew) {
+      alert("❌ दोनों पासवर्ड आपस में मेल नहीं खाते!");
+      return;
+    }
+
+    let res = await apiCall({
+      action: "change_password",
+      oldPass: currentAdminToken,
+      newPass: newPass
+    });
+
+    if (res.status === "success") {
+      currentAdminToken = newPass;
+      sessionStorage.setItem('admin_session_pass', newPass);
+      alert("🎉 बधाई! आपका एडमिन पासवर्ड हमेशा के लिए बदल गया है!");
+    } else {
+      alert("❌ " + res.message);
+    }
+  }
+
   async function openGoogleDriveList() {
-    if (!adminAuthPassword) {
+    if (!currentAdminToken) {
       alert("❌ ड्राइव फाइलें देखने के लिए पहले एडमिन लॉगिन करें!");
       return;
     }
@@ -692,7 +676,7 @@
     body.innerHTML = "";
     loading.style.display = 'block';
 
-    let res = await callBackendDirect({ action: "list", pass: adminAuthPassword });
+    let res = await apiCall({ action: "list", pass: currentAdminToken });
     loading.style.display = 'none';
 
     if (res.status !== "success") {
@@ -720,9 +704,9 @@
   }
 
   async function loadFromGoogleDrive(fileId) {
-    let res = await callBackendDirect({
+    let res = await apiCall({
       action: "load",
-      pass: adminAuthPassword,
+      pass: currentAdminToken,
       fileId: fileId
     });
 
@@ -748,7 +732,7 @@
     renderReceipt();
     document.getElementById('driveListCard').style.display = 'none';
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    alert(`🎉 Google Drive से "${o.custName}" का रिकॉर्ड सफलतापूर्वक खुल गया!`);
+    alert(`🎉 Google Drive से "${o.custName}" का रिकॉर्ड खुल गया!`);
   }
 
   const hindiAlphabetOrder = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः','क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह','क्ष','त्र','ज्ञ'];
@@ -979,7 +963,7 @@
 
   window.onload = function() {
     loadFirmProfile();
-    checkAdminStatus();
+    renderAdminUI();
     let today = new Date().toISOString().split('T')[0];
     document.getElementById('eventStartDate').value = today;
     updateEventDates();
@@ -1134,7 +1118,7 @@
 
       if (sbList) {
         let sessLinks = d.sessions.map((s) => `
-          <button class="sidebar-btn sidebar-session-link" onclick="document.getElementById('box_${s.id}').scrollIntoView({behavior:'smooth', block:'center'}); setActiveSessionInfo(${i+1}, '${d.date}', '${s.title}', '${d.id}');">
+          <button class="sidebar-btn" style="margin-left:12px; width:calc(100% - 12px); border-left:3px solid var(--maroon);" onclick="document.getElementById('box_${s.id}').scrollIntoView({behavior:'smooth', block:'center'}); setActiveSessionInfo(${i+1}, '${d.date}', '${s.title}', '${d.id}');">
             ⏱️ ${s.title} (${s.items.length} सामान)
           </button>
         `).join("");
@@ -1363,12 +1347,12 @@
                 </div>
               </div>
 
-              <div class="menu-panel veg-panel">
+              <div class="menu-panel" style="background:#f4fbf4; border:1px solid #c3e6cb; border-radius:6px; padding:10px; margin-top:8px;">
                 <div style="font-weight:bold; font-size:12px; color:green; margin-bottom:6px;">🥬 शाकाहारी मेन्यू (${displayDateText} के लिए):</div>
                 <div class="category-line">${vegDropCols}</div>
               </div>
 
-              <div class="menu-panel nonveg-panel">
+              <div class="menu-panel" style="background:#fff5f5; border:1px solid #f5c6cb; border-radius:6px; padding:10px; margin-top:8px;">
                 <div style="font-weight:bold; font-size:12px; color:#b22222; margin-bottom:6px;">🍗 मांसाहारी मेन्यू (Non-Veg - ${displayDateText}):</div>
                 <div class="category-line" style="grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));">${nvDropCols}</div>
               </div>
@@ -1404,7 +1388,7 @@
 
       dHtml += `
         </div>
-        <div class="day-bottom-actions">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; margin-top:10px; background:#fff1f3; border:1px dashed #e57373; border-radius:6px;">
           <span style="font-size:12.5px; font-weight:bold; color:var(--maroon);">
             📅 दिन ${dIdx + 1} (${displayDateText}) में नया सत्र जोड़ें:
           </span>
