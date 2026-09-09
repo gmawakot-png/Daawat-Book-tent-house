@@ -11,7 +11,7 @@
     :root { --maroon: #8b0000; --dark: #2c3e50; --veg-color: #28a745; --nonveg-color: #b22222; }
     * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
     body { background-color: #f4f6f9; margin: 0; padding: 12px; padding-top: 85px; }
-    .container { max-width: 1250px; margin: auto; }
+    .container { max-width: 1280px; margin: auto; transition: margin-right 0.3s; }
     .card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 16px; }
     h2, h3, h4 { color: var(--maroon); margin-top: 0; margin-bottom: 8px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
@@ -49,22 +49,24 @@
     }
 
     /* सत्र और तारीख व्यवस्था */
-    .day-box { border: 2px solid #bbb; border-radius: 6px; padding: 12px; margin-bottom: 16px; background: #fafafa; }
-    .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ccc; padding-bottom: 8px; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
-    .session-box { background: white; border: 1px solid #ddd; border-left: 5px solid var(--maroon); border-radius: 6px; padding: 12px; margin-bottom: 12px; }
+    .day-box { border: 2px solid #8b0000; border-radius: 8px; padding: 14px; margin-bottom: 22px; background: #fffcfc; }
+    .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #8b0000; padding-bottom: 8px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; background: #ffebee; padding: 8px 12px; border-radius: 5px; }
+    .session-box { background: white; border: 1px solid #ddd; border-left: 6px solid var(--maroon); border-radius: 6px; padding: 12px; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
     
-    /* तारीख इंडिकेटर बैज जो हमेशा सत्र के साथ दिखेगा */
-    .session-date-indicator {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: #e8f0fe;
-      color: #1a73e8;
-      border: 1px solid #c2e7ff;
-      padding: 3px 8px;
+    /* प्रत्येक सत्र के ऊपर विशेष स्पष्ट तारीख बैनर */
+    .session-date-banner {
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-left: 4px solid #f57f17;
+      padding: 5px 10px;
       border-radius: 4px;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: bold;
+      color: #b71c1c;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
     }
 
     .menu-panel { border-radius: 6px; padding: 10px; margin-top: 8px; }
@@ -80,7 +82,7 @@
     .cat-box { display: flex; flex-direction: column; position: relative; }
     .cat-box label { font-size: 12px; margin-bottom: 3px; color: #222; }
 
-    /* मल्टी-सलेक्ट चेकबॉक्स ड्रॉपडाउन स्टाइलिंग */
+    /* मल्टी-सलेक्ट चेकबॉक्स मेन्यू */
     .multiselect-container { position: relative; width: 100%; }
     .multiselect-btn {
       width: 100%;
@@ -93,10 +95,8 @@
       align-items: center;
       cursor: pointer;
       font-size: 12px;
-      transition: 0.2s;
       text-align: left;
     }
-    .multiselect-btn:hover { border-color: #888; }
     .ms-badge {
       background: #28a745;
       color: white;
@@ -123,25 +123,8 @@
       z-index: 1050;
       padding: 6px;
     }
-    .ms-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 4px;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 3px;
-    }
-    .ms-item {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 4px 6px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: background 0.1s;
-      margin-bottom: 2px;
-    }
+    .ms-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 3px; }
+    .ms-item { display: flex; align-items: center; gap: 7px; padding: 4px 6px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-bottom: 2px; }
     .ms-item:hover { background: #f0f4f8; }
     .ms-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; margin: 0; }
 
@@ -160,7 +143,42 @@
     .item-badge { background: #e9f5ff; color: #0056b3; padding: 4px 9px; border-radius: 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; margin: 3px; border: 1px solid #bee5eb; }
     .item-badge-nonveg { background: #ffebee; color: #b71c1c; border: 1px solid #ffcdd2; }
 
-    /* रसीद (Print View) */
+    /* 🚩 नया उपयोगी साइडबार (Sidebar) */
+    #quickSidebar {
+      position: fixed;
+      right: 0;
+      top: 85px;
+      bottom: 0;
+      width: 260px;
+      background: #ffffff;
+      border-left: 2px solid #8b0000;
+      box-shadow: -3px 0 10px rgba(0,0,0,0.1);
+      z-index: 9998;
+      padding: 12px;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+    #quickSidebar.collapsed { transform: translateX(100%); }
+    .sidebar-toggle-btn {
+      position: fixed;
+      right: 260px;
+      top: 92px;
+      background: var(--maroon);
+      color: white;
+      border: none;
+      border-radius: 5px 0 0 5px;
+      padding: 7px 10px;
+      cursor: pointer;
+      z-index: 9999;
+      font-size: 12px;
+      transition: right 0.3s ease;
+    }
+    .sidebar-toggle-btn.collapsed { right: 0; }
+    .sidebar-section { margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .sidebar-btn { width: 100%; text-align: left; margin-bottom: 4px; font-size: 11px; padding: 5px 8px; border-radius: 4px; border: 1px solid #ddd; background: #fdfdfd; cursor: pointer; }
+    .sidebar-btn:hover { background: #eef2f7; }
+
+    /* रसीद (Print Area) */
     #billReceipt { background: white; padding: 25px; border: 2px solid #222; margin-top: 20px; }
     .bill-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 10px; }
     .bill-table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 12px; }
@@ -168,26 +186,50 @@
     .bill-table th { background: #f0f0f0; }
 
     /* एडमिन लॉगिन स्टेटस बैज */
-    .admin-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: bold;
-    }
+    .admin-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
     .admin-logged-in { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
     .admin-logged-out { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
     @media print {
       body { background: white; padding: 0; }
-      .no-print, .sticky-action-bar { display: none !important; }
+      .no-print, .sticky-action-bar, #quickSidebar, .sidebar-toggle-btn { display: none !important; }
       #billReceipt { border: none; padding: 0; }
     }
   </style>
 </head>
 <body>
+
+<!-- साइडबार टॉगल बटन -->
+<button class="sidebar-toggle-btn no-print" id="sbToggleBtn" onclick="toggleSidebar()">◀ साइडबार</button>
+
+<!-- उपयोगी फ्लोटिंग साइडबार -->
+<div id="quickSidebar" class="no-print">
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--maroon); padding-bottom:6px; margin-bottom:10px;">
+    <h4 style="margin:0; font-size:14px;">⚡ क्विक साइडबार</h4>
+    <span onclick="toggleSidebar()" style="cursor:pointer; color:red; font-weight:bold;">✖</span>
+  </div>
+
+  <div class="sidebar-section">
+    <div style="font-size:12px; font-weight:bold; color:var(--maroon); margin-bottom:6px;">📅 तारीखों पर सीधे जाएं:</div>
+    <div id="sidebarDateList"><small style="color:#777;">कोई तारीख नहीं जुड़ी</small></div>
+  </div>
+
+  <div class="sidebar-section">
+    <div style="font-size:12px; font-weight:bold; color:var(--maroon); margin-bottom:6px;">⚡ जरूरी सामान (1-Click Add):</div>
+    <button class="sidebar-btn" onclick="quickAddTent('पानी कैंपर (20L)', '10 नग')">💧 पानी कैंपर (20L)</button>
+    <button class="sidebar-btn" onclick="quickAddTent('मिनरल वाटर बोतल', '5 पेटी')">🍾 मिनरल वाटर बोतल</button>
+    <button class="sidebar-btn" onclick="quickAddTent('डिस्पोजल गिलास व प्लेट', '1 सेट')">🍽️ डिस्पोजल सेट</button>
+    <button class="sidebar-btn" onclick="quickAddTent('जनरेटर (साउंड प्रूफ)', '1 नग')">⚡ साइलेंट जनरेटर</button>
+    <button class="sidebar-btn" onclick="quickAddTent('वेटर (सर्विस स्टाफ)', '5 आदमी')">🤵 वेटर स्टाफ</button>
+    <button class="sidebar-btn" onclick="quickAddTent('हलवाई (कारीगर टीम)', '1 सेट')">👨‍🍳 हलवाई टीम</button>
+  </div>
+
+  <div class="sidebar-section">
+    <div style="font-size:12px; font-weight:bold; color:var(--maroon); margin-bottom:6px;">📋 नेविगेशन:</div>
+    <button class="sidebar-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">⬆️ सबसे ऊपर जाएं</button>
+    <button class="sidebar-btn" onclick="document.getElementById('billReceipt').scrollIntoView({behavior:'smooth'})">📄 बिल पर्ची पर जाएं</button>
+  </div>
+</div>
 
 <!-- फ़्रीज़ किया हुआ फ्लोटिंग एक्शन बार -->
 <div class="sticky-action-bar no-print">
@@ -195,26 +237,26 @@
     <button class="btn btn-maroon" onclick="addNewDayNextDate()">📅 + नई तारीख</button>
     
     <div style="display:inline-flex; align-items:center; gap:3px; background:#eef2f7; padding:2px 5px; border-radius:4px; border:1px solid #ccd;">
-      <button class="btn btn-blue" style="padding:5px 8px;" onclick="addNextSessionFromSticky()">⏱️ + नया सत्र</button>
-      <select id="stickyDaySelect" style="width:135px; padding:4px; font-weight:bold; font-size:12px;" title="किस तारीख में सत्र जोड़ना है चुनें"></select>
+      <button class="btn btn-blue" style="padding:5px 9px;" onclick="addNextSessionFromSticky()">⏱️ + नया सत्र</button>
+      <select id="stickyDaySelect" style="width:140px; padding:4px; font-weight:bold; font-size:12px;" title="किस तारीख में सत्र जोड़ना है चुनें"></select>
     </div>
 
-    <button class="btn btn-secondary" onclick="undoAction()" title="Ctrl+Z दबाएं">↩️ Undo</button>
-    <button class="btn btn-secondary" onclick="redoAction()" title="Ctrl+Y दबाएं">↪️ Redo</button>
+    <button class="btn btn-secondary" onclick="undoAction()" title="Ctrl+Z">↩️ Undo</button>
+    <button class="btn btn-secondary" onclick="redoAction()" title="Ctrl+Y">↪️ Redo</button>
   </div>
 
   <!-- सुरक्षित एडमिन व डाउनलोड बटन्स -->
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
-    <span id="adminStatusDisplay" class="admin-badge admin-logged-out" onclick="handleAdminLogin()" style="cursor:pointer;" title="क्लिक करके लॉगिन या लॉगआउट करें">🔒 Admin Login</span>
-    <button class="btn btn-green" onclick="saveToGoogleDrive()" title="Google Drive में सुरक्षित करें">☁️ Drive में सेव</button>
-    <button class="btn btn-purple" onclick="openGoogleDriveList()" title="सुरक्षित फाइलें देखें">📂 Drive फाइलें</button>
+    <span id="adminStatusDisplay" class="admin-badge admin-logged-out" onclick="handleAdminLogin()" title="क्लिक करके पासवर्ड डालें">🔒 Admin Login</span>
+    <button class="btn btn-green" onclick="saveToGoogleDrive()">☁️ Drive में सेव</button>
+    <button class="btn btn-purple" onclick="openGoogleDriveList()">📂 Drive फाइलें</button>
     <button class="btn btn-yellow" onclick="downloadImage()">🖼️ JPEG फोटो</button>
     <button class="btn btn-blue" onclick="renderReceipt(); window.print();">🖨️ PDF / प्रिंट</button>
     <button class="btn btn-info" onclick="renderReceipt(); downloadWord();">📄 Word</button>
   </div>
 </div>
 
-<div class="container">
+<div class="container" id="mainContainer">
 
   <!-- 1. प्रोफाइल सेटिंग्स -->
   <div class="card no-print" style="border-top: 4px solid var(--maroon);">
@@ -264,8 +306,8 @@
   <!-- 3. भोजन एवं कैटरिंग व्यवस्था -->
   <div class="card no-print">
     <div style="margin-bottom: 10px;">
-      <h3 style="margin-bottom:2px;">🍲 भोजन एवं नाश्ता व्यवस्था (तारीख वार)</h3>
-      <small style="color:#555;">💡 <strong>सुविधा:</strong> प्रत्येक सत्र के साथ नीले रंग में स्पष्ट तारीख दिखेगी जिससे भ्रम न हो।</small>
+      <h3 style="margin-bottom:2px;">🍲 भोजन एवं नाश्ता व्यवस्था (तारीख वार मेन्यू)</h3>
+      <small style="color:#555;">💡 <strong>सुविधा:</strong> हर सत्र पर बड़े पीले-लाल बैनर में कार्य तारीख साफ दिखाई देगी ताकि 4-5 दिन के काम में कभी गलती न हो।</small>
     </div>
     <div id="daysWrapper"></div>
   </div>
@@ -417,7 +459,7 @@
   // 🔗 आपका Google Apps Script Web App URL
   const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyt4jnpMWLRND8pYlIjpqUkFm-h6iPf_3C89MvTBu3vZf6E6Xw1L4pARwQQnjHMEm8/exec";
 
-  // हिंदी वर्णमाला सॉर्टिंग
+  // हिंदी वर्णमाला क्रमबद्धता
   const hindiAlphabetOrder = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः','क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह','क्ष','त्र','ज्ञ'];
 
   function getHindiCharRank(char) {
@@ -481,9 +523,7 @@
   let undoStack = [];
   let redoStack = [];
 
-  // ==========================================
-  // 🔐 एडमिन लॉगिन व्यवस्था
-  // ==========================================
+  // एडमिन लॉगिन स्टेटस
   let adminSessionPass = sessionStorage.getItem('tent_admin_pass') || "";
 
   function updateAdminStatusUI() {
@@ -533,6 +573,22 @@
     let parts = dateStr.split('-');
     if(parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
     return dateStr;
+  }
+
+  function toggleSidebar() {
+    let sb = document.getElementById('quickSidebar');
+    let btn = document.getElementById('sbToggleBtn');
+    sb.classList.toggle('collapsed');
+    btn.classList.toggle('collapsed');
+    btn.innerText = sb.classList.contains('collapsed') ? '▶ साइडबार' : '◀ साइडबार';
+  }
+
+  function quickAddTent(name, qty) {
+    saveState();
+    tentList.push({ name: name, size: '', qty: qty, unit: '' });
+    renderTentBadges();
+    renderReceipt();
+    alert(`✅ ${name} सूची में जोड़ दिया गया!`);
   }
 
   function getCurrentSnapshot() {
@@ -645,7 +701,7 @@
     saveState();
     let dayId = "d_" + Date.now() + Math.floor(Math.random()*100);
     schedule.push({ id: dayId, date: targetDateStr, sessions: [] });
-    addNextSession(dayId);
+    addNextSession(dayId, false);
     renderDaysUI();
   }
 
@@ -655,25 +711,42 @@
     renderDaysUI();
   }
 
-  function addNextSession(dayId) {
+  // नया सत्र जोड़ना (स्क्रॉल सपोर्ट के साथ)
+  function addNextSession(dayId, shouldScroll = true) {
     saveState();
     let day = schedule.find(d => d.id === dayId);
     if (!day) return;
     let nextIdx = day.sessions.length % defaultSessions.length;
     let template = defaultSessions[nextIdx];
+    let newSessId = "s_" + Date.now() + Math.floor(Math.random()*100);
     day.sessions.push({
-      id: "s_" + Date.now() + Math.floor(Math.random()*100),
+      id: newSessId,
       title: template.title,
       pax: template.pax || "",
       items: []
     });
     renderDaysUI();
+
+    if (shouldScroll) {
+      setTimeout(() => {
+        let el = document.getElementById("box_" + newSessId);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
   }
 
+  // हेडर से नया सत्र जोड़ना (तुरंत काम करेगा)
   function addNextSessionFromSticky() {
     let sel = document.getElementById('stickyDaySelect');
-    if (!sel || !sel.value) { alert("कृपया पहले कोई तारीख जोड़ें!"); return; }
-    addNextSession(sel.value);
+    if (!sel || !sel.value) { 
+      if (schedule.length > 0) {
+        addNextSession(schedule[0].id, true);
+      } else {
+        alert("कृपया पहले '+ नई तारीख' बटन दबाकर एक तारीख जोड़ें!"); 
+      }
+      return; 
+    }
+    addNextSession(sel.value, true);
   }
 
   function cloneSessionToTarget(sourceDayId, sourceSessId, targetDayId) {
@@ -696,15 +769,27 @@
 
   function updateStickyDaySelect() {
     let sel = document.getElementById('stickyDaySelect');
+    let sbList = document.getElementById('sidebarDateList');
     if (!sel) return;
     let cur = sel.value;
     sel.innerHTML = "";
+    if(sbList) sbList.innerHTML = "";
+
     schedule.forEach((d, i) => {
       let opt = document.createElement('option');
       opt.value = d.id;
-      opt.innerText = `📅 ${formatDisplayDate(d.date)}`;
+      opt.innerText = `📅 दिन ${i+1}: ${formatDisplayDate(d.date)}`;
       if (d.id === cur) opt.selected = true;
       sel.appendChild(opt);
+
+      // साइडबार तारीख लिंक्स
+      if (sbList) {
+        sbList.innerHTML += `
+          <button class="sidebar-btn" onclick="document.getElementById('day_card_${d.id}').scrollIntoView({behavior:'smooth', block:'start'})">
+            📅 दिन ${i+1}: <strong>${formatDisplayDate(d.date)}</strong>
+          </button>
+        `;
+      }
     });
   }
 
@@ -849,19 +934,21 @@
     schedule.forEach((day, dIdx) => {
       let dayBox = document.createElement('div');
       dayBox.className = "day-box";
+      dayBox.id = `day_card_${day.id}`;
 
       let displayDateText = formatDisplayDate(day.date);
 
       let dHtml = `
         <div class="day-header">
           <div style="display:flex; align-items:center; gap:8px;">
-            <strong>📅 तारीख चुनें:</strong>
-            <input type="date" value="${day.date}" style="width:160px;" onchange="saveState(); schedule[${dIdx}].date = this.value; renderDaysUI(); renderReceipt();">
-            <span style="font-size:13px; font-weight:bold; color:var(--maroon);">[ ${displayDateText} ]</span>
+            <span style="background:var(--maroon); color:white; padding:4px 8px; border-radius:4px; font-size:13px; font-weight:bold;">दिन ${dIdx + 1}</span>
+            <strong>📅 तारीख:</strong>
+            <input type="date" value="${day.date}" style="width:160px; font-weight:bold;" onchange="saveState(); schedule[${dIdx}].date = this.value; renderDaysUI(); renderReceipt();">
+            <span style="font-size:14px; font-weight:bold; color:var(--maroon);">[ ${displayDateText} ]</span>
           </div>
           <div style="display:flex; gap:6px;">
-            <button class="btn btn-blue" style="font-size:11px; padding:4px 8px;" onclick="addNextSession('${day.id}')">+ नया सत्र जोड़ें</button>
-            <button class="btn btn-danger" style="font-size:11px; padding:4px 8px;" onclick="removeDay('${day.id}')">तारीख हटाएं</button>
+            <button class="btn btn-blue" style="font-size:11px; padding:4px 8px;" onclick="addNextSession('${day.id}', true)">+ इस दिन में सत्र जोड़ें</button>
+            <button class="btn btn-danger" style="font-size:11px; padding:4px 8px;" onclick="removeDay('${day.id}')">दिन हटाएं</button>
           </div>
         </div>
       `;
@@ -882,29 +969,27 @@
 
         let copyOptions = schedule.map((d, idx) => {
           let isSame = d.id === day.id;
-          return `<option value="${d.id}">${isSame ? 'इसी तारीख में' : formatDisplayDate(d.date)}</option>`;
+          return `<option value="${d.id}">${isSame ? 'इसी तारीख में' : 'दिन '+(idx+1)+': '+formatDisplayDate(d.date)}</option>`;
         }).join("");
 
         dHtml += `
-          <div class="session-box">
+          <div class="session-box" id="box_${sess.id}">
             
-            <!-- यहाँ प्रत्येक सत्र के ऊपर तारीख का साफ़ इंडिकेटर दिखेगा -->
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; border-bottom:1px dashed #ddd; padding-bottom:5px;">
-              <span class="session-date-indicator">
-                📅 कार्य तारीख: <strong>${displayDateText}</strong>
-              </span>
+            <!-- 🚩 बड़ा स्पष्ट तारीख बैनर जो हमेशा सामने रहेगा -->
+            <div class="session-date-banner">
+              <span>👉 आप भर रहे हैं: <strong>दिन ${dIdx + 1}</strong> | तारीख: <span style="font-size:14px; text-decoration:underline;">${displayDateText}</span> | (${sess.title})</span>
               <button class="btn btn-danger" style="font-size:10px; padding:2px 6px;" onclick="removeSession('${day.id}', '${sess.id}')">सत्र हटाएं ✖</button>
             </div>
 
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
-              <label style="margin:0;">सत्र:</label>
+              <label style="margin:0;">सत्र नाम:</label>
               <input type="text" value="${sess.title}" style="width:160px; font-weight:bold;" oninput="schedule[${dIdx}].sessions[${sIdx}].title = this.value; renderReceipt();">
               <label style="margin:0;">आदमी (Pax):</label>
               <input type="text" placeholder="उदा. 250" value="${sess.pax}" style="width:110px;" oninput="schedule[${dIdx}].sessions[${sIdx}].pax = this.value; renderReceipt();">
               
               <div style="display:inline-flex; align-items:center; gap:4px; margin-left:auto; background:#f0f4f8; padding:3px 6px; border-radius:4px; border:1px solid #c8d3de;">
                 <span style="font-size:11px; font-weight:bold;">📋 सत्र कॉपी करें:</span>
-                <select id="copy_tgt_${sess.id}" style="width:130px; font-size:11px; padding:3px;">${copyOptions}</select>
+                <select id="copy_tgt_${sess.id}" style="width:145px; font-size:11px; padding:3px;">${copyOptions}</select>
                 <button class="btn btn-purple" style="font-size:11px; padding:3px 7px;" onclick="cloneSessionToTarget('${day.id}', '${sess.id}', document.getElementById('copy_tgt_${sess.id}').value)">कॉपी करें</button>
               </div>
             </div>
@@ -921,7 +1006,7 @@
 
             <div class="action-row">
               <span style="font-size:12px; font-weight:bold; color:var(--maroon);">✍️ नया व्यंजन लिखें (वैकल्पिक):</span>
-              <input type="text" id="custom_item_${sess.id}" placeholder="व्यंजन का नाम खुद लिखें" style="width:220px;">
+              <input type="text" id="custom_item_${sess.id}" placeholder="व्यंजन नाम" style="width:220px;">
               <input type="number" id="qty_${sess.id}" placeholder="मात्रा" style="width:95px;">
               <select id="unit_${sess.id}" style="width:95px;">
                 <option value="kg">kg (किलो)</option>
@@ -1001,10 +1086,10 @@
     document.getElementById('outAddress').innerText = document.getElementById('eventAddress').value || "-";
 
     let foodHtml = "";
-    schedule.forEach(d => {
+    schedule.forEach((d, i) => {
       if(d.sessions.length > 0) {
         foodHtml += `<table class="bill-table">
-          <thead><tr style="background:#f0f0f0;"><th colspan="2">📅 दिनांक: ${formatDisplayDate(d.date)}</th></tr></thead><tbody>`;
+          <thead><tr style="background:#f0f0f0;"><th colspan="2">📅 दिन ${i+1}: दिनांक ${formatDisplayDate(d.date)}</th></tr></thead><tbody>`;
         
         d.sessions.forEach(s => {
           let itemsStr = s.items.map(it => `${it.name}${it.qty ? ' ('+it.qty+' '+it.unit+')' : ''}`).join(", ") || "—";
@@ -1167,7 +1252,7 @@
       renderReceipt();
       document.getElementById('driveListCard').style.display = 'none';
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      alert(`🎉 Google Drive से "${o.custName}" का रिकॉर्ड सफलतापूर्वक लोड हो गया!`);
+      alert(`🎉 Google Drive से "${o.custName}" का रिकॉर्ड सफलतापूर्वक खुल गया!`);
     } catch(err) {
       alert("फ़ाइल खोलने में समस्या: " + err.message);
     }
@@ -1199,7 +1284,7 @@
     a.click();
   }
 
-  // ब्राउज़र लोकल स्टोरेज इतिहास
+  // लोकल ब्राउज़र स्टोरेज
   function saveOrderToBrowserStorage() {
     let cName = document.getElementById('custName').value.trim() || "अज्ञात_ग्राहक";
     let all = JSON.parse(localStorage.getItem('my_tent_history_v4') || '[]');
