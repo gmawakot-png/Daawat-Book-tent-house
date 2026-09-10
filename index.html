@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>टेंट हाउस एवं कैटरिंग मैनेजमेंट सिस्टम (Firebase Cloud)</title>
+  <title>टेंट हाउस एवं कैटरिंग मैनेजमेंट सिस्टम</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   
   <style>
@@ -49,7 +49,6 @@
       gap: 6px;
     }
 
-    /* एडमिन बॉक्स */
     .admin-zone {
       display: flex;
       align-items: center;
@@ -60,7 +59,6 @@
       border-radius: 5px;
     }
 
-    /* वर्तमान एक्टिव कार्य-तारीख का लाइव बैनर */
     .live-date-indicator {
       position: fixed;
       top: 52px;
@@ -126,7 +124,7 @@
     .sidebar-btn { width: 100%; text-align: left; margin-bottom: 5px; font-size: 11px; padding: 6px 8px; border-radius: 4px; border: 1px solid #ddd; background: #fafafa; cursor: pointer; }
     .sidebar-btn:hover { background: #eef2f7; border-color: #007bff; }
 
-    /* दिन व सत्र बॉक्स */
+    /* दिन व सत्र */
     .day-box { border: 2px solid #8b0000; border-radius: 8px; padding: 12px; margin-bottom: 20px; background: #fffcfc; }
     .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #8b0000; padding: 8px 12px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; background: #ffebee; border-radius: 5px; }
     .day-content-area { transition: all 0.3s ease; }
@@ -164,7 +162,7 @@
     .item-badge { background: #e9f5ff; color: #0056b3; padding: 4px 9px; border-radius: 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; margin: 3px; border: 1px solid #bee5eb; }
     .item-badge-nonveg { background: #ffebee; color: #b71c1c; border: 1px solid #ffcdd2; }
 
-    /* पासवर्ड मोडल */
+    /* मोडल स्टाइल */
     .custom-modal-overlay {
       display: none;
       position: fixed;
@@ -179,7 +177,7 @@
       padding: 22px;
       border-radius: 10px;
       width: 90%;
-      max-width: 390px;
+      max-width: 400px;
       box-shadow: 0 5px 25px rgba(0,0,0,0.35);
       border-top: 5px solid var(--maroon);
     }
@@ -192,7 +190,6 @@
     .pass-input-wrapper input {
       padding-right: 40px;
       font-size: 16px;
-      letter-spacing: 1px;
     }
     .eye-btn {
       position: absolute;
@@ -221,26 +218,73 @@
 </head>
 <body>
 
-<!-- पासवर्ड मोडल -->
+<!-- 1. लॉगिन मोडल (यहाँ कोई पासवर्ड नहीं दिखेगा) -->
 <div id="passwordModal" class="custom-modal-overlay">
   <div class="custom-modal">
-    <h3 id="modalTitle" style="color:var(--maroon); margin-top:0; font-size:16px;">🔐 एडमिन पासवर्ड दर्ज करें</h3>
-    <p id="modalMsg" style="font-size:13px; color:#444; margin-bottom:8px; line-height:1.4;"></p>
+    <h3 id="modalTitle" style="color:var(--maroon); margin-top:0; font-size:16px;">🔐 एडमिन लॉगिन</h3>
+    <p id="modalMsg" style="font-size:13px; color:#444; margin-bottom:8px; line-height:1.4;">कृपया आगे बढ़ने के लिए अपना एडमिन पासवर्ड दर्ज करें:</p>
     
     <div class="pass-input-wrapper">
       <input type="password" id="modalPassInput" placeholder="यहाँ पासवर्ड लिखें...">
       <button type="button" class="eye-btn" onclick="togglePasswordEye()" title="पासवर्ड दिखाएं/छुपाएं">👁️</button>
     </div>
 
-    <div style="margin-bottom:12px; text-align:left;">
-      <a href="javascript:void(0);" onclick="triggerEmergencyReset()" style="color:#dc3545; font-size:11.5px; font-weight:bold; text-decoration:underline;">
-        ❓ पासवर्ड काम नहीं कर रहा या भूल गए? यहाँ रीसेट करें
+    <div style="margin-bottom:14px; text-align:left;">
+      <a href="javascript:void(0);" onclick="openForgotPinModal()" style="color:#dc3545; font-size:12px; font-weight:bold; text-decoration:underline;">
+        ❓ पासवर्ड भूल गए? गुप्त पिन से नया पासवर्ड बनाएं
       </a>
     </div>
 
     <div style="display:flex; justify-content:flex-end; gap:8px;">
       <button class="btn btn-secondary" onclick="closePasswordModal(false)">रद्द करें</button>
-      <button class="btn btn-green" onclick="closePasswordModal(true)">पुष्टि करें (OK)</button>
+      <button class="btn btn-green" onclick="closePasswordModal(true)">लॉगिन करें</button>
+    </div>
+  </div>
+</div>
+
+<!-- 2. पासवर्ड भूल गए? (पिन से रीसेट मोडल - यहाँ कोई 9999 नहीं दिखेगा) -->
+<div id="forgotModal" class="custom-modal-overlay">
+  <div class="custom-modal" style="border-top-color:#dc3545;">
+    <h3 style="color:#dc3545; margin-top:0; font-size:16px;">🚨 पासवर्ड रीसेट (सुरक्षा पिन द्वारा)</h3>
+    <p style="font-size:12.5px; color:#555; margin-bottom:8px;">अपना गुप्त 4-अंकों का सुरक्षा पिन दर्ज करें और नया पासवर्ड सेट करें:</p>
+    
+    <label>गुप्त सुरक्षा पिन (Security PIN):</label>
+    <input type="password" id="resetPinInput" placeholder="अपना गुप्त पिन यहाँ दर्ज करें" style="margin-bottom:10px;">
+
+    <label>नया पासवर्ड बनाएं:</label>
+    <input type="password" id="resetNewPass" placeholder="नया पासवर्ड लिखें" style="margin-bottom:10px;">
+
+    <label>नए पासवर्ड की पुष्टि करें:</label>
+    <input type="password" id="resetConfirmPass" placeholder="नया पासवर्ड दोबारा लिखें" style="margin-bottom:14px;">
+
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn btn-secondary" onclick="document.getElementById('forgotModal').style.display='none'">रद्द करें</button>
+      <button class="btn btn-danger" onclick="submitPasswordResetWithPin()">नया पासवर्ड सेट करें</button>
+    </div>
+  </div>
+</div>
+
+<!-- 3. पासवर्ड व पिन बदलने का सेटिंग मोडल (लॉगिन के बाद) -->
+<div id="changeSecurityModal" class="custom-modal-overlay">
+  <div class="custom-modal" style="border-top-color:#28a745;">
+    <h3 style="color:#28a745; margin-top:0; font-size:16px;">🔑 सुरक्षा सेटिंग्स (पासवर्ड व गुप्त पिन बदलें)</h3>
+    <p style="font-size:12px; color:#666; margin-bottom:10px;">आप यहाँ से अपना एडमिन पासवर्ड और इमरजेंसी रिकवरी पिन बदल सकते हैं:</p>
+
+    <div style="background:#f8f9fa; padding:10px; border-radius:6px; margin-bottom:12px; border:1px solid #ddd;">
+      <label style="color:var(--maroon);">🔐 1. नया एडमिन पासवर्ड दर्ज करें:</label>
+      <input type="text" id="settingNewPass" placeholder="उदा. mysecret@123" style="margin-bottom:6px;">
+      <small style="color:#777;">(लॉगिन करते समय यह पासवर्ड लगेगा)</small>
+    </div>
+
+    <div style="background:#f8f9fa; padding:10px; border-radius:6px; margin-bottom:14px; border:1px solid #ddd;">
+      <label style="color:#d9534f;">🛡️ 2. नया गुप्त सुरक्षा पिन (Recovery PIN) दर्ज करें:</label>
+      <input type="text" id="settingNewPin" placeholder="उदा. 8844 या अपना मोबाइल नंबर" style="margin-bottom:6px;">
+      <small style="color:#777;">(पासवर्ड भूलने पर केवल इसी पिन से नया पासवर्ड बन पाएगा)</small>
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn btn-secondary" onclick="document.getElementById('changeSecurityModal').style.display='none'">रद्द करें</button>
+      <button class="btn btn-green" onclick="saveSecuritySettings()">सुरक्षित सेव करें</button>
     </div>
   </div>
 </div>
@@ -293,7 +337,7 @@
       <span style="font-size:11px; font-weight:bold; color:#856404;">👑 एडमिन सक्रिय</span>
       <button class="btn btn-green" id="btnSaveCloud" onclick="saveToCloudDirect()">☁️ क्लाउड में सेव</button>
       <button class="btn btn-purple" onclick="openCloudOrdersList()">📂 क्लाउड ऑर्डर्स</button>
-      <button class="btn btn-secondary" style="font-size:11px;" onclick="changeMasterPasswordDirectly()">🔑 पासवर्ड बदलें</button>
+      <button class="btn btn-secondary" style="font-size:11px;" onclick="openSecuritySettingsModal()">🔑 पासवर्ड व पिन बदलें</button>
       <button class="btn btn-danger" style="font-size:11px;" onclick="doAdminLogout()">लॉगआउट</button>
     </div>
 
@@ -438,7 +482,7 @@
   <!-- Firebase क्लाउड फाइलों की सूची -->
   <div class="card no-print" id="cloudListCard" style="display:none; border:2px solid #6f42c1;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-      <h3 style="margin:0; color:#6f42c1;">☁️ Firebase Cloud सुरक्षित ऑर्डर्स</h3>
+      <h3 style="margin:0; color:#6f42c1;">☁️ सुरक्षित क्लाउड ऑर्डर्स</h3>
       <button class="btn btn-danger" style="font-size:11px;" onclick="document.getElementById('cloudListCard').style.display='none'">बंद करें ✖</button>
     </div>
     <div id="cloudLoading" style="display:none; color:#0056b3; padding:8px; font-weight:bold;">⏳ क्लाउड से ऑर्डर्स लोड हो रहे हैं...</div>
@@ -491,7 +535,6 @@
 <script>
   // 🔗 आपका Firebase Realtime Database URL
   const FIREBASE_DB_URL = "https://tent-house-76ec2-default-rtdb.firebaseio.com";
-  const EMERGENCY_SECURITY_PIN = "9999"; // आपातकालीन पिन जो कभी नहीं बदलेगा
 
   let currentAdminToken = sessionStorage.getItem('admin_session_pass') || "";
 
@@ -507,9 +550,9 @@
     }
   }
 
-  // 100% विश्वसनीय लॉगिन फ़ंक्शन (लोकल + क्लाउड सिंक)
+  // लॉगिन फंक्शन
   async function doAdminLogin() {
-    let pass = await askPassword("🔐 एडमिन लॉगिन", "एडमिन टूल्स और क्लाउड सेव के लिए पासवर्ड डालें (डिफ़ॉल्ट: admin123):");
+    let pass = await askPassword("🔐 एडमिन लॉगिन", "सुरक्षित एडमिन पैनल खोलने के लिए पासवर्ड दर्ज करें:");
     if (!pass) return;
 
     let savedMasterPass = localStorage.getItem('master_admin_pass') || "admin123";
@@ -518,11 +561,10 @@
       currentAdminToken = pass;
       sessionStorage.setItem('admin_session_pass', pass);
       renderAdminUI();
-      alert("🎉 एडमिन लॉगिन सफल! Firebase Cloud सक्रिय है।");
+      alert("🎉 एडमिन लॉगिन सफल!");
       return;
     }
 
-    // यदि लोकल नहीं मिला, तो Firebase में चेक करें
     try {
       let resp = await fetch(`${FIREBASE_DB_URL}/settings/adminPass.json`);
       let cloudPass = await resp.json();
@@ -534,9 +576,9 @@
         alert("🎉 एडमिन लॉगिन सफल!");
         return;
       }
-    } catch(e) { console.log(e); }
+    } catch(e) {}
 
-    alert("❌ गलत पासवर्ड! कृपया सही पासवर्ड दर्ज करें। (डिफ़ॉल्ट: admin123)");
+    alert("❌ गलत पासवर्ड! कृपया सही पासवर्ड दर्ज करें।");
   }
 
   function doAdminLogout() {
@@ -557,8 +599,8 @@
       let modal = document.getElementById('passwordModal');
       let inp = document.getElementById('modalPassInput');
       
-      document.getElementById('modalTitle').innerText = title || "🔐 पासवर्ड दर्ज करें";
-      document.getElementById('modalMsg').innerText = msg || "आगे बढ़ने के लिए पासवर्ड दर्ज करें:";
+      document.getElementById('modalTitle').innerText = title || "🔐 एडमिन लॉगिन";
+      document.getElementById('modalMsg').innerText = msg || "कृपया पासवर्ड दर्ज करें:";
       inp.value = "";
       inp.type = "password";
       modal.style.display = "flex";
@@ -587,37 +629,86 @@
     inp.type = (inp.type === "password") ? "text" : "password";
   }
 
-  // 🚨 आपातकालीन पासवर्ड रीसेट
-  async function triggerEmergencyReset() {
-    let pin = prompt("🚨 इमरजेंसी रीसेट:\nअपना 4 अंकों का सुरक्षा पिन दर्ज करें (डिफ़ॉल्ट पिन: 9999):");
-    if (!pin) return;
+  // --- पासवर्ड रीसेट (पिन द्वारा) लॉजिक ---
+  function openForgotPinModal() {
+    closePasswordModal(false);
+    document.getElementById('resetPinInput').value = "";
+    document.getElementById('resetNewPass').value = "";
+    document.getElementById('resetConfirmPass').value = "";
+    document.getElementById('forgotModal').style.display = "flex";
+  }
 
-    if (pin.trim() === EMERGENCY_SECURITY_PIN) {
-      localStorage.setItem('master_admin_pass', 'admin123');
-      currentAdminToken = "admin123";
-      sessionStorage.setItem('admin_session_pass', "admin123");
+  async function submitPasswordResetWithPin() {
+    let enteredPin = document.getElementById('resetPinInput').value.trim();
+    let newPass = document.getElementById('resetNewPass').value.trim();
+    let confirmPass = document.getElementById('resetConfirmPass').value.trim();
+
+    if (!enteredPin) { alert("कृपया अपना गुप्त सुरक्षा पिन दर्ज करें!"); return; }
+    if (!newPass) { alert("कृपया नया पासवर्ड लिखें!"); return; }
+    if (newPass !== confirmPass) { alert("❌ दोनों पासवर्ड आपस में मेल नहीं खाते!"); return; }
+
+    let actualPin = localStorage.getItem('master_security_pin') || "9999";
+
+    // क्लाउड से भी पिन चेक करें
+    try {
+      let resp = await fetch(`${FIREBASE_DB_URL}/settings/securityPin.json`);
+      let cloudPin = await resp.json();
+      if(cloudPin) actualPin = cloudPin;
+    } catch(e) {}
+
+    if (enteredPin === actualPin) {
+      localStorage.setItem('master_admin_pass', newPass);
+      currentAdminToken = newPass;
+      sessionStorage.setItem('admin_session_pass', newPass);
 
       try {
         await fetch(`${FIREBASE_DB_URL}/settings/adminPass.json`, {
           method: 'PUT',
-          body: JSON.stringify("admin123")
+          body: JSON.stringify(newPass)
         });
       } catch(e) {}
 
-      closePasswordModal(false);
+      document.getElementById('forgotModal').style.display = "none";
       renderAdminUI();
-      alert("✅ पासवर्ड सफलतापूर्वक रीसेट हो गया है!\n\nअब आपका पासवर्ड वापस 'admin123' हो गया है।");
+      alert("🎉 बधाई! आपका नया पासवर्ड सफलतापूर्वक सेट हो गया है और आप लॉगिन हो चुके हैं!");
     } else {
-      alert("❌ गलत सुरक्षा पिन! पासवर्ड रीसेट नहीं किया जा सका।");
+      alert("❌ गलत सुरक्षा पिन! पासवर्ड नहीं बदला जा सका।");
     }
+  }
+
+  // --- सुरक्षा सेटिंग्स (पासवर्ड व पिन बदलने का विकल्प) ---
+  function openSecuritySettingsModal() {
+    let curPass = localStorage.getItem('master_admin_pass') || "admin123";
+    let curPin = localStorage.getItem('master_security_pin') || "9999";
+    document.getElementById('settingNewPass').value = curPass;
+    document.getElementById('settingNewPin').value = curPin;
+    document.getElementById('changeSecurityModal').style.display = "flex";
+  }
+
+  async function saveSecuritySettings() {
+    let p = document.getElementById('settingNewPass').value.trim();
+    let pin = document.getElementById('settingNewPin').value.trim();
+
+    if (!p) { alert("पासवर्ड खाली नहीं हो सकता!"); return; }
+    if (!pin) { alert("सुरक्षा पिन खाली नहीं हो सकता!"); return; }
+
+    localStorage.setItem('master_admin_pass', p);
+    localStorage.setItem('master_security_pin', pin);
+    currentAdminToken = p;
+    sessionStorage.setItem('admin_session_pass', p);
+
+    try {
+      await fetch(`${FIREBASE_DB_URL}/settings/adminPass.json`, { method: "PUT", body: JSON.stringify(p) });
+      await fetch(`${FIREBASE_DB_URL}/settings/securityPin.json`, { method: "PUT", body: JSON.stringify(pin) });
+    } catch(e) {}
+
+    document.getElementById('changeSecurityModal').style.display = "none";
+    alert("✅ सुरक्षा सेटिंग्स सुरक्षित हो गईं!\nआपका नया पासवर्ड और नया गुप्त पिन सफलतापूर्वक सेव हो गया है।");
   }
 
   // ☁️ 1-क्लिक Firebase Cloud में सेव करना
   async function saveToCloudDirect() {
-    if (!currentAdminToken) {
-      alert("❌ पहले '🔐 एडमिन लॉगिन' करें!");
-      return;
-    }
+    if (!currentAdminToken) { alert("❌ पहले '🔐 एडमिन लॉगिन' करें!"); return; }
 
     let cName = document.getElementById('custName').value.trim();
     if (!cName) { alert("कृपया पहले ग्राहक का नाम लिखें!"); return; }
@@ -643,7 +734,6 @@
     let orig = btn.innerText;
     btn.innerText = "⏳ सेव हो रहा है...";
 
-    // Firebase Key निर्माण
     let safeKey = (cName.replace(/[.#$[\]/]/g, "_") + "_" + (document.getElementById('custPhone').value || "NoPhone")).trim();
 
     try {
@@ -656,7 +746,7 @@
       btn.innerText = orig;
 
       if (resp.ok) {
-        alert(`✅ सफलता! "${cName}" का पूरा बिल Firebase Cloud में सुरक्षित सेव हो गया है!`);
+        alert(`✅ सफलता! "${cName}" का पूरा बिल क्लाउड में सुरक्षित सेव हो गया है!`);
       } else {
         alert("❌ क्लाउड में सेव नहीं हो सका। कृपया इंटरनेट जांचें।");
       }
@@ -666,39 +756,9 @@
     }
   }
 
-  // पासवर्ड बदलना (लोकल + क्लाउड दोनों में स्थायी रूप से)
-  async function changeMasterPasswordDirectly() {
-    if (!currentAdminToken) { alert("कृपया पहले एडमिन लॉगिन करें!"); return; }
-
-    let newPass = await askPassword("🔑 नया पासवर्ड", "नया एडमिन पासवर्ड दर्ज करें:");
-    if (!newPass) { alert("नया पासवर्ड खाली नहीं हो सकता!"); return; }
-
-    let confirmNew = await askPassword("🔑 पुनः पुष्टि करें", "नया पासवर्ड फिर से दर्ज करें:");
-    if (newPass !== confirmNew) {
-      alert("❌ दोनों पासवर्ड आपस में मेल नहीं खाते!");
-      return;
-    }
-
-    localStorage.setItem('master_admin_pass', newPass);
-    currentAdminToken = newPass;
-    sessionStorage.setItem('admin_session_pass', newPass);
-
-    try {
-      await fetch(`${FIREBASE_DB_URL}/settings/adminPass.json`, {
-        method: "PUT",
-        body: JSON.stringify(newPass)
-      });
-    } catch(e) {}
-
-    alert("🎉 बधाई! आपका नया एडमिन पासवर्ड सफलतापूर्वक अपडेट हो गया है!");
-  }
-
-  // 📂 Firebase Cloud से सभी ऑर्डर्स की सूची देखना
+  // 📂 क्लाउड ऑर्डर्स की सूची
   async function openCloudOrdersList() {
-    if (!currentAdminToken) {
-      alert("❌ क्लाउड ऑर्डर्स देखने के लिए पहले एडमिन लॉगिन करें!");
-      return;
-    }
+    if (!currentAdminToken) { alert("❌ पहले एडमिन लॉगिन करें!"); return; }
 
     let card = document.getElementById('cloudListCard');
     let body = document.getElementById('cloudFilesBody');
@@ -747,7 +807,6 @@
     }
   }
 
-  // क्लाउड से ऑर्डर लोड करना
   async function loadFromCloud(orderKey) {
     try {
       let resp = await fetch(`${FIREBASE_DB_URL}/orders/${orderKey}.json`);
@@ -770,13 +829,10 @@
       renderReceipt();
       document.getElementById('cloudListCard').style.display = 'none';
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      alert(`🎉 "${o.custName}" का रिकॉर्ड सफलतापूर्वक खुल गया!`);
-    } catch(e) {
-      alert("लोड एरर: " + e.message);
-    }
+      alert(`🎉 "${o.custName}" का रिकॉर्ड खुल गया!`);
+    } catch(e) { alert("लोड एरर: " + e.message); }
   }
 
-  // क्लाउड से ऑर्डर डिलीट करना
   async function deleteFromCloud(orderKey) {
     if(!confirm("क्या आप वाकई इस ऑर्डर को क्लाउड से हमेशा के लिए हटाना चाहते हैं?")) return;
     try {
