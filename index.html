@@ -1,786 +1,1878 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>टेंट हाउस एवं कैटरिंग मैनेजमेंट सिस्टम</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        @media print {
-            .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            body { background: white !important; font-size: 12pt; color: black; }
-            .invoice-card { box-shadow: none !important; border: 1px solid #ddd !important; }
-        }
-        .print-only { display: none; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>टेंट हाउस एवं कैटरिंग मैनेजमेंट सिस्टम</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
+  <style>
+    :root { --maroon: #8b0000; --dark: #2c3e50; }
+    * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+    body { background-color: #f4f6f9; margin: 0; padding: 12px; padding-top: 125px; }
+    .container { max-width: 1200px; margin-left: 270px; transition: margin-left 0.3s; }
+    .container.full-width { margin-left: auto; margin-right: auto; }
+
+    .card { background: white; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 16px; }
+    h2, h3, h4 { color: var(--maroon); margin-top: 0; margin-bottom: 8px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+    label { font-weight: bold; font-size: 13px; display: block; margin-bottom: 4px; color: #333; }
+    input, select { width: 100%; padding: 7px 9px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; }
+    
+    .btn { padding: 7px 12px; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: 0.2s; }
+    .btn-maroon { background: var(--maroon); color: white; }
+    .btn-green { background: #28a745; color: white; }
+    .btn-blue { background: #007bff; color: white; }
+    .btn-info { background: #17a2b8; color: white; }
+    .btn-yellow { background: #ffc107; color: #212529; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-secondary { background: #6c757d; color: white; }
+    .btn-purple { background: #6f42c1; color: white; }
+    .btn-dark { background: #1a252f; color: white; }
+    .btn:hover { opacity: 0.88; }
+
+    /* शीर्ष एक्शन बार */
+    .sticky-action-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: #ffffff;
+      border-bottom: 3px solid var(--maroon);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      padding: 8px 14px;
+      z-index: 9999;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .admin-zone {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #fff3cd;
+      border: 1px solid #ffeeba;
+      padding: 3px 8px;
+      border-radius: 5px;
+    }
+
+    .live-date-indicator {
+      position: fixed;
+      top: 52px; left: 0; right: 0;
+      background: linear-gradient(90deg, #fff3cd, #ffe89e, #fff3cd);
+      border-bottom: 2.5px solid #e0a800;
+      box-shadow: 0 3px 8px rgba(224, 168, 0, 0.35);
+      color: #533f03;
+      padding: 7px 16px;
+      font-size: 14.5px;
+      font-weight: 800;
+      z-index: 9998;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .live-badge-glow {
+      background: #8b0000;
+      color: #ffffff !important;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      box-shadow: 0 0 10px rgba(139, 0, 0, 0.45);
+      display: inline-block;
+      margin-left: 5px;
+    }
+
+    /* साइडबार */
+    #quickSidebar {
+      position: fixed;
+      left: 0; top: 96px; bottom: 0;
+      width: 260px;
+      background: #ffffff;
+      border-right: 3px solid var(--maroon);
+      box-shadow: 3px 0 12px rgba(0,0,0,0.1);
+      z-index: 9997;
+      padding: 12px;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+    #quickSidebar.collapsed { transform: translateX(-100%); }
+
+    .sidebar-toggle-btn {
+      position: fixed;
+      left: 260px; top: 100px;
+      background: var(--maroon);
+      color: white;
+      border: none;
+      border-radius: 0 6px 6px 0;
+      padding: 8px 10px;
+      cursor: pointer;
+      z-index: 9998;
+      font-size: 12px;
+      font-weight: bold;
+      transition: left 0.3s ease;
+    }
+    .sidebar-toggle-btn.collapsed { left: 0; }
+    .sidebar-section { margin-bottom: 14px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .sidebar-btn { width: 100%; text-align: left; margin-bottom: 5px; font-size: 11px; padding: 6px 8px; border-radius: 4px; border: 1px solid #ddd; background: #fafafa; cursor: pointer; }
+    .sidebar-btn:hover { background: #eef2f7; border-color: #007bff; }
+
+    /* दिन व सत्र */
+    .day-box { border: 2px solid #8b0000; border-radius: 8px; padding: 12px; margin-bottom: 20px; background: #fffcfc; }
+    .day-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #8b0000; padding: 8px 12px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; background: #ffebee; border-radius: 5px; }
+    .day-content-area { transition: all 0.3s ease; }
+    .session-box { background: white; border: 1px solid #ddd; border-left: 6px solid var(--maroon); border-radius: 6px; padding: 12px; margin-bottom: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.04); }
+    
+    .session-date-banner {
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-left: 4px solid #f57f17;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: bold;
+      color: #b71c1c;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .category-line { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; align-items: flex-start; }
+    .cat-box { display: flex; flex-direction: column; position: relative; }
+    .cat-box label { font-size: 12px; margin-bottom: 3px; color: #222; }
+
+    .multiselect-container { position: relative; width: 100%; }
+    .multiselect-btn { width: 100%; padding: 7px 9px; background: white; border: 1px solid #b0bec5; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 12px; }
+    .ms-badge { background: #28a745; color: white; padding: 1px 6px; border-radius: 10px; font-size: 11px; font-weight: bold; display: none; margin-left: 4px; }
+    .multiselect-menu { display: none; position: absolute; top: 100%; left: 0; right: 0; min-width: 230px; max-height: 270px; overflow-y: auto; background: white; border: 1px solid #666; border-radius: 5px; box-shadow: 0 6px 16px rgba(0,0,0,0.25); z-index: 1050; padding: 6px; }
+    .ms-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; border-bottom: 1px solid #eee; padding-bottom: 3px; }
+    .ms-item { display: flex; align-items: center; gap: 7px; padding: 4px 6px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-bottom: 2px; }
+    .ms-item:hover { background: #f0f4f8; }
+    .ms-item input[type="checkbox"] { width: 16px; height: 16px; margin: 0; }
+
+    .action-row { display: flex; gap: 8px; margin-top: 12px; align-items: center; flex-wrap: wrap; background: #eef7ee; padding: 10px; border-radius: 6px; border: 1px solid #c3e6cb; }
+    .item-badge { background: #e9f5ff; color: #0056b3; padding: 4px 9px; border-radius: 14px; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; margin: 3px; border: 1px solid #bee5eb; }
+    .item-badge-nonveg { background: #ffebee; color: #b71c1c; border: 1px solid #ffcdd2; }
+
+    /* मोडल स्टाइल */
+    .custom-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.65);
+      z-index: 100000;
+      justify-content: center;
+      align-items: center;
+    }
+    .custom-modal {
+      background: #ffffff;
+      padding: 22px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.35);
+      border-top: 5px solid var(--maroon);
+    }
+    .pass-input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin: 12px 0 8px 0;
+    }
+    .pass-input-wrapper input {
+      padding-right: 40px;
+      font-size: 16px;
+    }
+    .eye-btn {
+      position: absolute;
+      right: 6px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 4px 8px;
+    }
+
+    /* रसीद / बिल पर्ची */
+    #billReceipt { background: white; padding: 25px; border: 2px solid #222; margin-top: 20px; }
+    .bill-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 10px; }
+    .bill-table { width: 100%; border-collapse: collapse; margin-top: 8px; margin-bottom: 12px; }
+    .bill-table th, .bill-table td { border: 1px solid #444; padding: 6px 8px; font-size: 12px; text-align: left; vertical-align: top; }
+    .bill-table th { background: #f0f0f0; }
+
+    /* श्रेणी-वार मेन्यू आइटम स्टाइल */
+    .cat-menu-row {
+      margin-bottom: 6px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .cat-menu-title {
+      font-weight: bold;
+      color: #8b0000;
+      display: inline-block;
+      min-width: 140px;
+    }
+    .cat-menu-items {
+      color: #222;
+    }
+
+    /* बिलिंग सारांश तालिका */
+    .billing-summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      border: 2px solid #444;
+    }
+    .billing-summary-table td {
+      padding: 6px 10px;
+      font-size: 13px;
+      border: 1px solid #666;
+    }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .no-print, .sticky-action-bar, .live-date-indicator, #quickSidebar, .sidebar-toggle-btn { display: none !important; }
+      .container { margin: 0 !important; max-width: 100% !important; }
+      #billReceipt { border: none; padding: 0; }
+    }
+  </style>
 </head>
-<body class="bg-slate-100 text-gray-800 font-sans min-h-screen">
+<body>
 
-    <!-- लॉगिन / ऑथेंटिकेशन मोडल -->
-    <div id="loginModal" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 md:p-8 max-w-md w-full border-t-8 border-orange-500">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
-                    <i class="fa-solid fa-campground"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-gray-800">टेंट हाउस एवं कैटरिंग</h2>
-                <p class="text-sm text-gray-500">सुरक्षा लॉगिन (पासवर्ड: admin123 या पिन: 9999)</p>
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">पासवर्ड या 4-अंकीय पिन दर्ज करें:</label>
-                    <input type="password" id="authInput" placeholder="admin123 या 9999" class="w-full border-2 border-gray-300 rounded-lg p-3 text-center text-lg tracking-wider focus:outline-none focus:border-orange-500 transition">
-                </div>
-                <p id="loginError" class="text-red-500 text-sm text-center hidden"><i class="fa-solid fa-circle-exclamation mr-1"></i> गलत पासवर्ड या पिन! पुनः प्रयास करें।</p>
-                <button onclick="handleLogin()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-lg shadow-md transition duration-200">
-                    <i class="fa-solid fa-unlock-keyhole mr-2"></i> लॉगिन करें
-                </button>
-            </div>
-        </div>
+<!-- 1. लॉगिन मोडल -->
+<div id="passwordModal" class="custom-modal-overlay">
+  <div class="custom-modal">
+    <h3 id="modalTitle" style="color:var(--maroon); margin-top:0; font-size:16px;">🔐 एडमिन लॉगिन</h3>
+    <p id="modalMsg" style="font-size:13px; color:#444; margin-bottom:8px; line-height:1.4;">कृपया आगे बढ़ने के लिए अपना एडमिन पासवर्ड दर्ज करें:</p>
+    
+    <div class="pass-input-wrapper">
+      <input type="password" id="modalPassInput" placeholder="यहाँ पासवर्ड लिखें...">
+      <button type="button" class="eye-btn" onclick="togglePasswordEye()" title="पासवर्ड दिखाएं/छुपाएं">👁️</button>
     </div>
 
-    <!-- मुख्य ऍप्लिकेशन कंटेनर -->
-    <div id="mainApp" class="hidden">
-        
-        <!-- नेवबार (Navbar) -->
-        <header class="bg-gradient-to-r from-orange-600 via-amber-600 to-red-600 text-white shadow-lg sticky top-0 z-30 no-print">
-            <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-                <div class="flex items-center space-x-3">
-                    <span class="text-2xl bg-white/20 p-2 rounded-lg"><i class="fa-solid fa-campground"></i></span>
-                    <div>
-                        <h1 class="text-xl md:text-2xl font-black tracking-wide">टेंट हाउस एवं कैटरिंग सिस्टम</h1>
-                        <p class="text-xs text-orange-200">॥ श्री गणेशाय नमः ॥</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <button onclick="switchTab('billingTab')" id="tabBtnBilling" class="bg-white text-orange-700 px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-orange-50 transition">
-                        <i class="fa-solid fa-file-invoice mr-1"></i> नया बिल
-                    </button>
-                    <button onclick="switchTab('recordsTab'); loadOrdersFromFirebase();" id="tabBtnRecords" class="bg-orange-700/60 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition">
-                        <i class="fa-solid fa-list-check mr-1"></i> पुराने रिकॉर्ड्स
-                    </button>
-                    <button onclick="handleLogout()" title="लॉगआउट" class="bg-red-700 hover:bg-red-800 text-white p-2 rounded-lg text-sm transition ml-2">
-                        <i class="fa-solid fa-power-off"></i>
-                    </button>
-                </div>
-            </div>
-        </header>
-
-        <!-- स्टेटस बार (Firebase) -->
-        <div class="bg-gray-800 text-gray-300 text-xs py-1 px-4 flex justify-between items-center no-print">
-            <span><i class="fa-solid fa-database text-green-400 mr-1"></i> Firebase RTDB: Connected</span>
-            <span id="syncStatus" class="text-amber-400"><i class="fa-solid fa-circle-check text-green-400 mr-1"></i> तैयार</span>
-        </div>
-
-        <div class="max-w-7xl mx-auto p-4 md:p-6">
-            
-            <!-- टैब 1: बिलिंग सेक्शन (Billing Section) -->
-            <div id="billingTab">
-                <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 mb-8 invoice-card">
-                    
-                    <!-- बिल हेडर -->
-                    <div class="bg-orange-50 border-b border-orange-200 p-4 md:p-6 flex flex-wrap justify-between items-center gap-4">
-                        <div>
-                            <span class="text-xs font-bold text-orange-600 uppercase tracking-widest">नया ऑर्डर / बिल रसीद</span>
-                            <h2 class="text-2xl font-black text-gray-800">ग्राहक एवं कार्यक्रम विवरण</h2>
-                        </div>
-                        <div class="flex items-center space-x-3">
-                            <span class="text-sm font-semibold text-gray-600">बिल संख्या:</span>
-                            <input type="text" id="billNo" readonly class="bg-white border-2 border-orange-300 font-mono font-bold text-orange-700 px-3 py-1 rounded-lg w-32 text-center">
-                        </div>
-                    </div>
-
-                    <div class="p-4 md:p-6 space-y-6">
-                        
-                        <!-- 1. ग्राहक विवरण -->
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">ग्राहक का नाम *</label>
-                                <input type="text" id="customerName" placeholder="श्री / श्रीमती..." class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-orange-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">मोबाइल नंबर *</label>
-                                <input type="tel" id="customerPhone" placeholder="10-अंकीय मोबाइल नंबर" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-orange-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">कार्यक्रम दिनांक *</label>
-                                <input type="date" id="eventDate" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-orange-500 focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 uppercase mb-1">स्थान / पता</label>
-                                <input type="text" id="eventAddress" placeholder="गाँव / शहर / पता" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-orange-500 focus:outline-none">
-                            </div>
-                        </div>
-
-                        <!-- 2. दिन-वार व्यक्ति संख्या (Day-wise guest calculation) -->
-                        <div class="bg-amber-50/70 border-2 border-amber-200 rounded-xl p-4 md:p-5">
-                            <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
-                                <div>
-                                    <h3 class="text-md font-bold text-amber-900 flex items-center">
-                                        <i class="fa-solid fa-users-line text-orange-600 mr-2"></i> 
-                                        कार्यक्रम दिन एवं व्यक्ति (मेहमान) संख्या अनुमान
-                                    </h3>
-                                    <p class="text-xs text-amber-700">अलग-अलग दिनों के व्यक्ति डालें, कुल व्यक्ति अपने आप जुड़ जाएंगे।</p>
-                                </div>
-                                <button type="button" onclick="addDayRow()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow transition">
-                                    <i class="fa-solid fa-plus mr-1"></i> + नया दिन जोड़ें
-                                </button>
-                            </div>
-
-                            <!-- दिन की पंक्तियाँ -->
-                            <div id="dayRowsContainer" class="space-y-2">
-                                <!-- डायनामिक पंक्तियाँ यहाँ आएँगी -->
-                            </div>
-
-                            <!-- कुल व्यक्ति योग पट्टी -->
-                            <div class="mt-4 pt-3 border-t border-amber-200 flex flex-wrap justify-between items-center bg-white p-3 rounded-lg shadow-sm">
-                                <span class="font-bold text-gray-700">सभी दिनों का कुल अनुमानित व्यक्ति:</span>
-                                <div class="flex items-center space-x-2">
-                                    <span id="totalGuestsBadge" class="text-xl font-black text-orange-600 bg-orange-100 px-4 py-1 rounded-full border border-orange-300">0 व्यक्ति</span>
-                                    <button type="button" onclick="addPerPlateCateringItem()" class="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow transition">
-                                        <i class="fa-solid fa-utensils mr-1"></i> इस व्यक्ति संख्या को प्लेट बिल में डालें
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 3. सामग्री एवं प्लेट बिलिंग तालिका (Billing Items Table) -->
-                        <div>
-                            <div class="flex flex-wrap justify-between items-center mb-3 gap-2">
-                                <h3 class="text-lg font-bold text-gray-800 flex items-center">
-                                    <i class="fa-solid fa-cart-flatbed text-orange-600 mr-2"></i> सामग्री एवं कैटरिंग विवरण (Items)
-                                </h3>
-                                <div class="flex space-x-2">
-                                    <button type="button" onclick="addPerPlateCateringItem()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow transition">
-                                        <i class="fa-solid fa-bowl-rice mr-1"></i> + प्रति व्यक्ति प्लेट जोड़ें
-                                    </button>
-                                    <button type="button" onclick="addItemRow('', 1, '', 0)" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow transition">
-                                        <i class="fa-solid fa-plus mr-1"></i> + टेंट सामग्री जोड़ें
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="overflow-x-auto border border-gray-200 rounded-xl shadow-sm">
-                                <table class="w-full text-left border-collapse" id="itemsTable">
-                                    <thead>
-                                        <tr class="bg-gray-100 text-gray-700 text-xs uppercase font-bold border-b border-gray-200">
-                                            <th class="p-3 w-12 text-center">क्र.</th>
-                                            <th class="p-3">सामग्री / कैटरिंग विवरण</th>
-                                            <th class="p-3 w-32">मात्रा / व्यक्ति</th>
-                                            <th class="p-3 w-24">इकाई</th>
-                                            <th class="p-3 w-32">दर (₹)</th>
-                                            <th class="p-3 w-36 text-right">कुल राशि (₹)</th>
-                                            <th class="p-3 w-16 text-center no-print">हटाएं</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="itemsTableBody" class="divide-y divide-gray-200 text-sm">
-                                        <!-- डायनामिक आइटम रोज़ -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <!-- 4. गणना एवं भुगतान विवरण (Totals & Payment) -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t border-gray-200">
-                            <div class="bg-gray-50 p-4 rounded-xl space-y-3">
-                                <h4 class="font-bold text-gray-700 text-sm uppercase">नोट्स / विशेष विवरण</h4>
-                                <textarea id="billNotes" rows="3" placeholder="नियम, शर्तें या कैटरिंग मेनू विवरण लिखें..." class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"></textarea>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-600 mb-1">भुगतान का माध्यम (Payment Mode)</label>
-                                    <select id="paymentMode" class="w-full border border-gray-300 rounded-lg p-2 text-sm bg-white">
-                                        <option value="नकद (Cash)">नकद (Cash)</option>
-                                        <option value="फोनपे / गूगल पे (UPI)">फोनपे / गूगल पे (UPI)</option>
-                                        <option value="बैंक ट्रांसफर (NEFT/RTGS)">बैंक ट्रांसफर (Bank Transfer)</option>
-                                        <option value="चेक (Cheque)">चेक (Cheque)</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="bg-orange-50/60 p-5 rounded-xl border border-orange-200 space-y-3">
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-gray-600 font-semibold">उप-योग (Subtotal):</span>
-                                    <span class="font-bold text-gray-800 text-base" id="subtotalDisplay">₹0.00</span>
-                                </div>
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-gray-600 font-semibold">छूट / डिस्काउंट (₹):</span>
-                                    <input type="number" id="discountInput" value="0" min="0" oninput="calculateTotalBill()" class="w-28 border border-gray-300 rounded p-1 text-right font-bold focus:outline-none focus:ring-1 focus:ring-orange-500">
-                                </div>
-                                <div class="flex justify-between items-center text-base pt-2 border-t border-orange-200">
-                                    <span class="text-gray-800 font-black">अंतिम कुल (Grand Total):</span>
-                                    <span class="font-black text-xl text-orange-700" id="grandTotalDisplay">₹0.00</span>
-                                </div>
-                                <div class="flex justify-between items-center text-sm">
-                                    <span class="text-green-700 font-bold">जमा / एडवांस राशि (₹):</span>
-                                    <input type="number" id="advanceInput" value="0" min="0" oninput="calculateTotalBill()" class="w-28 border border-green-300 rounded p-1 text-right font-bold text-green-700 focus:outline-none focus:ring-1 focus:ring-green-500">
-                                </div>
-                                <div class="flex justify-between items-center text-base pt-2 border-t border-orange-300 bg-white p-2 rounded-lg">
-                                    <span class="text-red-600 font-bold">शेष बकाया राशि (Balance Due):</span>
-                                    <span class="font-black text-xl text-red-600" id="balanceDueDisplay">₹0.00</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 5. एक्शन बटन्स (Action Buttons) -->
-                        <div class="flex flex-wrap gap-3 pt-4 border-t border-gray-200 no-print">
-                            <button onclick="saveBillToFirebase()" class="flex-1 min-w-[150px] bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition flex items-center justify-center">
-                                <i class="fa-solid fa-cloud-arrow-up mr-2 text-lg"></i> बिल सेव करें (Save)
-                            </button>
-                            <button onclick="window.print()" class="flex-1 min-w-[140px] bg-slate-700 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition flex items-center justify-center">
-                                <i class="fa-solid fa-print mr-2 text-lg"></i> प्रिंट / PDF निकालें
-                            </button>
-                            <button onclick="shareOnWhatsApp()" class="flex-1 min-w-[140px] bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition flex items-center justify-center">
-                                <i class="fa-brands fa-whatsapp mr-2 text-lg"></i> व्हाट्सएप भेजें
-                            </button>
-                            <button onclick="resetBillForm()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-3 px-4 rounded-xl transition flex items-center justify-center">
-                                <i class="fa-solid fa-rotate-left mr-2"></i> नया साफ़ बिल
-                            </button>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- टैब 2: पिछले रिकॉर्ड्स (Previous Saved Records) -->
-            <div id="recordsTab" class="hidden">
-                <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200 p-6">
-                    <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
-                        <div>
-                            <h2 class="text-2xl font-black text-gray-800">सेव किए गए बिल एवं ऑर्डर्स</h2>
-                            <p class="text-xs text-gray-500">Firebase Realtime Database से लाइव डेटा</p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <input type="text" id="searchRecord" onkeyup="filterOrders()" placeholder="ग्राहक का नाम या फोन खोजें..." class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-orange-500 w-64">
-                            <button onclick="loadOrdersFromFirebase()" class="bg-orange-600 text-white px-3 py-2 rounded-lg text-sm font-bold hover:bg-orange-700">
-                                <i class="fa-solid fa-rotate mr-1"></i> रिफ्रेश
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="overflow-x-auto border border-gray-200 rounded-xl">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gray-100 text-gray-700 text-xs uppercase font-bold border-b">
-                                    <th class="p-3">बिल नं</th>
-                                    <th class="p-3">तारीख</th>
-                                    <th class="p-3">ग्राहक का नाम</th>
-                                    <th class="p-3">मोबाइल</th>
-                                    <th class="p-3 text-right">कुल राशि</th>
-                                    <th class="p-3 text-right">एडवांस</th>
-                                    <th class="p-3 text-right">बकाया</th>
-                                    <th class="p-3 text-center">एक्शन</th>
-                                </tr>
-                            </thead>
-                            <tbody id="recordsTableBody" class="divide-y divide-gray-200 text-sm">
-                                <tr>
-                                    <td colspan="8" class="text-center py-6 text-gray-400">डेटा लोड हो रहा है...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-        </div>
+    <div style="margin-bottom:14px; text-align:left;">
+      <a href="javascript:void(0);" onclick="openForgotPinModal()" style="color:#dc3545; font-size:12px; font-weight:bold; text-decoration:underline;">
+        ❓ पासवर्ड भूल गए? गुप्त पिन से नया पासवर्ड बनाएं
+      </a>
     </div>
 
-    <!-- जावास्क्रिप्ट लॉजिक -->
-    <script>
-        // ==========================================
-        // 1. कॉन्फ़िगरेशन एवं ऑथेंटिकेशन (Security)
-        // ==========================================
-        const FIREBASE_DB_URL = "https://tent-house-76ec2-default-rtdb.firebaseio.com";
-        const DEFAULT_PASS = "admin123";
-        const SECRET_PIN = "9999";
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn btn-secondary" onclick="closePasswordModal(false)">रद्द करें</button>
+      <button class="btn btn-green" onclick="closePasswordModal(true)">लॉगिन करें</button>
+    </div>
+  </div>
+</div>
 
-        // लॉगिन जांच
-        function handleLogin() {
-            const inputVal = document.getElementById('authInput').value.trim();
-            const errEl = document.getElementById('loginError');
+<!-- 2. पासवर्ड भूल गए? (पिन द्वारा रीसेट मोडल) -->
+<div id="forgotModal" class="custom-modal-overlay">
+  <div class="custom-modal" style="border-top-color:#dc3545;">
+    <h3 style="color:#dc3545; margin-top:0; font-size:16px;">🚨 पासवर्ड रीसेट (सुरक्षा पिन द्वारा)</h3>
+    <p style="font-size:12.5px; color:#555; margin-bottom:8px;">अपना गुप्त सुरक्षा पिन दर्ज करें और नया पासवर्ड सेट करें:</p>
+    
+    <label>गुप्त सुरक्षा पिन (Security PIN):</label>
+    <input type="password" id="resetPinInput" placeholder="अपना गुप्त पिन यहाँ दर्ज करें" style="margin-bottom:10px;">
 
-            if (inputVal === DEFAULT_PASS || inputVal === SECRET_PIN) {
-                sessionStorage.setItem('tent_auth_logged_in', 'true');
-                document.getElementById('loginModal').classList.add('hidden');
-                document.getElementById('mainApp').classList.remove('hidden');
-                errEl.classList.add('hidden');
-                initializeDefaultData();
-            } else {
-                errEl.classList.remove('hidden');
-            }
+    <label>नया पासवर्ड बनाएं:</label>
+    <input type="password" id="resetNewPass" placeholder="नया पासवर्ड लिखें" style="margin-bottom:10px;">
+
+    <label>नए पासवर्ड की पुष्टि करें:</label>
+    <input type="password" id="resetConfirmPass" placeholder="नया पासवर्ड दोबारा लिखें" style="margin-bottom:14px;">
+
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn btn-secondary" onclick="document.getElementById('forgotModal').style.display='none'">रद्द करें</button>
+      <button class="btn btn-danger" onclick="submitPasswordResetWithPin()">नया पासवर्ड सेट करें</button>
+    </div>
+  </div>
+</div>
+
+<!-- 3. पासवर्ड व पिन बदलने का सेटिंग मोडल -->
+<div id="changeSecurityModal" class="custom-modal-overlay">
+  <div class="custom-modal" style="border-top-color:#28a745;">
+    <h3 style="color:#28a745; margin-top:0; font-size:16px;">🔑 सुरक्षा सेटिंग्स (पासवर्ड व गुप्त पिन बदलें)</h3>
+    <p style="font-size:12px; color:#666; margin-bottom:10px;">आप यहाँ से अपना एडमिन पासवर्ड और इमरजेंसी रिकवरी पिन बदल सकते हैं:</p>
+
+    <div style="background:#f8f9fa; padding:10px; border-radius:6px; margin-bottom:12px; border:1px solid #ddd;">
+      <label style="color:var(--maroon);">🔐 1. नया एडमिन पासवर्ड दर्ज करें:</label>
+      <input type="text" id="settingNewPass" placeholder="उदा. mypass@123" style="margin-bottom:6px;">
+    </div>
+
+    <div style="background:#f8f9fa; padding:10px; border-radius:6px; margin-bottom:14px; border:1px solid #ddd;">
+      <label style="color:#d9534f;">🛡️ 2. नया गुप्त सुरक्षा पिन (Recovery PIN) दर्ज करें:</label>
+      <input type="text" id="settingNewPin" placeholder="उदा. 8844 या मोबाइल नंबर" style="margin-bottom:6px;">
+    </div>
+
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn btn-secondary" onclick="document.getElementById('changeSecurityModal').style.display='none'">रद्द करें</button>
+      <button class="btn btn-green" onclick="saveSecuritySettings()">सुरक्षित सेव करें</button>
+    </div>
+  </div>
+</div>
+
+<!-- साइडबार टॉगल बटन -->
+<button class="sidebar-toggle-btn no-print" id="sbToggleBtn" onclick="toggleSidebar()">◀ साइडबार</button>
+
+<!-- साइडबार -->
+<div id="quickSidebar" class="no-print">
+  <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--maroon); padding-bottom:6px; margin-bottom:10px;">
+    <h4 style="margin:0; font-size:14px;">⚡ क्विक नेविगेशन</h4>
+    <span onclick="toggleSidebar()" style="cursor:pointer; color:red; font-weight:bold;">✖</span>
+  </div>
+
+  <div class="sidebar-section">
+    <div style="font-size:12px; font-weight:bold; color:var(--maroon); margin-bottom:6px;">📅 तारीख एवं सत्र स्थिति:</div>
+    <div id="sidebarDateList"><small style="color:#777;">कोई तारीख नहीं जुड़ी</small></div>
+  </div>
+
+  <div class="sidebar-section">
+    <div style="font-size:12px; font-weight:bold; color:var(--maroon); margin-bottom:6px;">⚡ आवश्यक सामान:</div>
+    <button class="sidebar-btn" onclick="quickAddTent('पानी कैंपर (20L)', '10 नग')">💧 पानी कैंपर (20L)</button>
+    <button class="sidebar-btn" onclick="quickAddTent('मिनरल वाटर बोतल', '5 पेटी')">🍾 मिनरल वाटर बोतल</button>
+    <button class="sidebar-btn" onclick="quickAddTent('डिस्पोजल प्लेट व गिलास', '1 सेट')">🍽️ डिस्पोजल सेट</button>
+    <button class="sidebar-btn" onclick="quickAddTent('जनरेटर (साउंड प्रूफ)', '1 नग')">⚡ साइलेंट जनरेटर</button>
+    <button class="sidebar-btn" onclick="quickAddTent('वेटर (सर्विस स्टाफ)', '5 आदमी')">🤵 वेटर स्टाफ</button>
+    <button class="sidebar-btn" onclick="quickAddTent('हलवाई (कारीगर टीम)', '1 सेट')">👨‍🍳 हलवाई टीम</button>
+  </div>
+</div>
+
+<!-- शीर्ष फ्लोटिंग बार -->
+<div class="sticky-action-bar no-print">
+  <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
+    <button class="btn btn-maroon" onclick="addNewDayNextDate()">📅 + नई तारीख</button>
+    
+    <div style="display:inline-flex; align-items:center; gap:4px; background:#eef2f7; padding:3px 6px; border-radius:4px; border:1px solid #ccd;">
+      <button class="btn btn-blue" style="padding:5px 9px;" onclick="addNextSessionFromSticky()">⏱️ + नया सत्र</button>
+      <select id="stickyDaySelect" style="width:170px; padding:4px; font-weight:bold; font-size:12px;" title="सत्र जोड़ने हेतु तारीख चुनें"></select>
+    </div>
+
+    <button class="btn btn-secondary" onclick="undoAction()">↩️ Undo</button>
+    <button class="btn btn-secondary" onclick="redoAction()">↪️ Redo</button>
+  </div>
+
+  <!-- सुरक्षित एडमिन जोन -->
+  <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
+    <button class="btn btn-dark" id="btnLoginAdmin" onclick="doAdminLogin()" style="border: 2px solid #ffc107;">🔐 एडमिन लॉगिन</button>
+
+    <div id="adminPanelArea" style="display:none;" class="admin-zone">
+      <span style="font-size:11px; font-weight:bold; color:#856404;">👑 एडमिन सक्रिय</span>
+      <button class="btn btn-green" id="btnSaveCloud" onclick="saveToCloudDirect()">☁️ क्लाउड में सेव</button>
+      <button class="btn btn-purple" onclick="openCloudOrdersList()">📂 क्लाउड ऑर्डर्स</button>
+      <button class="btn btn-secondary" style="font-size:11px;" onclick="openSecuritySettingsModal()">🔑 पासवर्ड व पिन बदलें</button>
+      <button class="btn btn-danger" style="font-size:11px;" onclick="doAdminLogout()">लॉगआउट</button>
+    </div>
+
+    <button class="btn btn-yellow" onclick="downloadImage()">🖼️ JPEG फोटो</button>
+    <button class="btn btn-blue" onclick="renderReceipt(); window.print();">🖨️ PDF / प्रिंट</button>
+    <button class="btn btn-info" onclick="renderReceipt(); downloadWord();">📄 Word</button>
+  </div>
+</div>
+
+<!-- लाइव एक्टिव डेट बैनर -->
+<div class="live-date-indicator no-print" id="liveDateIndicator">
+  <span>👉 वर्तमान कार्य स्थिति: <span id="currentActiveInfo" class="live-badge-glow">[ दिन 1 ] | 📅 तारीख: -- | ⏱️ सत्र: --</span></span>
+  <span style="font-size:12px; color:#6d5204; font-weight:bold;">⚡ Firebase Cloud सक्रिय</span>
+</div>
+
+<div class="container" id="mainContainer">
+
+  <!-- प्रोफाइल सेटिंग्स -->
+  <div class="card no-print" style="border-top: 4px solid var(--maroon);">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+      <h3>🎪 टेंट हाउस प्रोफाइल</h3>
+      <button class="btn btn-secondary" style="font-size:11px;" onclick="saveFirmProfile()">💾 प्रोफाइल सेव रखें</button>
+    </div>
+    <div class="grid">
+      <div>
+        <label>टेंट हाउस का नाम:</label>
+        <input type="text" id="firmName" placeholder="उदा. माँ भवानी टेंट हाउस एवं कैटरर्स">
+      </div>
+      <div>
+        <label>मोबाइल नंबर:</label>
+        <input type="text" id="firmPhone" placeholder="मोबाइल नंबर यहाँ लिखें">
+      </div>
+      <div>
+        <label>टैगलाइन / सेवा विवरण:</label>
+        <input type="text" id="firmTagline" placeholder="उदा. शादी व समस्त मांगलिक कार्यों के लिए">
+      </div>
+    </div>
+  </div>
+
+  <!-- ग्राहक विवरण -->
+  <div class="card no-print">
+    <h3>👤 ग्राहक एवं बुकिंग विवरण</h3>
+    <div class="grid">
+      <div>
+        <label>ग्राहक का नाम:</label>
+        <input type="text" id="custName" placeholder="ग्राहक का नाम लिखें" oninput="saveState(); renderReceipt();">
+      </div>
+      <div>
+        <label>ग्राहक मोबाइल नंबर:</label>
+        <input type="tel" id="custPhone" placeholder="मोबाइल नंबर लिखें" oninput="saveState(); renderReceipt();">
+      </div>
+      <div>
+        <label>कार्यक्रम तारीख:</label>
+        <input type="date" id="eventStartDate" onchange="saveState(); updateEventDates(); renderReceipt();">
+      </div>
+      <div>
+        <label>स्थान / पता:</label>
+        <input type="text" id="eventAddress" placeholder="स्थान लिखें" oninput="saveState(); renderReceipt();">
+      </div>
+    </div>
+  </div>
+
+  <!-- भोजन मीनू व्यवस्था -->
+  <div class="card no-print">
+    <div style="margin-bottom: 10px;">
+      <h3 style="margin-bottom:2px;">🍲 भोजन एवं नाश्ता व्यवस्था (तारीख वार मेन्यू)</h3>
+      <small style="color:#555;">💡 जिस सत्र को छिपाना हो, उसी के सामने <strong>"छिपाएं 🔼"</strong> दबाएं। पूरा दिन समेटने हेतु हेडर में <strong>"दिन छिपाएं 🔼"</strong> दबाएं।</small>
+    </div>
+    <div id="daysWrapper"></div>
+  </div>
+
+  <!-- टेंट सामान -->
+  <div class="card no-print">
+    <h3>⛺ टेंट, पांडाल, स्टेज व लाइट का सामान</h3>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap:10px; background:#f8f9fa; padding:12px; border-radius:5px; margin-bottom:10px;">
+      <div>
+        <label>सामान चुनें:</label>
+        <select id="tentDrop" onchange="toggleCustomTent(this)">
+          <optgroup label="टेंट व पांडाल">
+            <option value="बैठक टेंट">बैठक टेंट</option>
+            <option value="खाना टेंट">खाना टेंट</option>
+            <option value="टेंट (घर के पास)">टेंट (घर के पास)</option>
+            <option value="गैलरी टेंट">गैलरी टेंट</option>
+            <option value="टेंट ट्रस">टेंट ट्रस</option>
+            <option value="D. J ट्रस">D. J ट्रस</option>
+          </optgroup>
+          <optgroup label="बैठक व गद्दे">
+            <option value="कुर्सी">कुर्सी</option>
+            <option value="सोफा">सोफा</option>
+            <option value="कुर्सी with सोफा">कुर्सी with सोफा</option>
+            <option value="बिस्तर">बिस्तर (जोड़ी)</option>
+          </optgroup>
+          <optgroup label="स्टेज, काउंटर व गेट">
+            <option value="स्टेज पांडाल">स्टेज पांडाल</option>
+            <option value="हल्दी स्टेज">हल्दी स्टेज</option>
+            <option value="मेहंदी स्टेज">मेहंदी स्टेज</option>
+            <option value="मुख्य गेट">मुख्य गेट</option>
+            <option value="स्टील काउंटर">स्टील काउंटर</option>
+            <option value="गोल टेबल">गोल टेबल</option>
+          </optgroup>
+          <optgroup label="अन्य व्यवस्थाएं">
+            <option value="जनरेटर">जनरेटर</option>
+            <option value="लाइट डेकोरेशन">लाइट डेकोरेशन</option>
+            <option value="रोड लाइटिंग">रोड लाइटिंग</option>
+            <option value="हलवाई">हलवाई (कारीगर)</option>
+            <option value="वेटर">वेटर (स्टाफ)</option>
+          </optgroup>
+          <option value="CUSTOM">✍️ अन्य नया सामान लिखें...</option>
+        </select>
+        <input type="text" id="customTentInput" placeholder="सामान का नाम लिखें" style="display:none; margin-top:4px;">
+      </div>
+
+      <div>
+        <label>साइज / नाप:</label>
+        <input type="text" id="tentSize" placeholder="उदा. 60x60">
+      </div>
+
+      <div>
+        <label>मात्रा / संख्या:</label>
+        <input type="number" id="tentQty" placeholder="उदा. 250">
+      </div>
+
+      <div>
+        <label>इकाई (Unit):</label>
+        <select id="tentUnit">
+          <option value="नग (Pcs)">नग (Pcs)</option>
+          <option value="सेट">सेट</option>
+          <option value="फीट">फीट</option>
+          <option value="जोड़ी">जोड़ी</option>
+          <option value="आदमी">आदमी</option>
+        </select>
+      </div>
+
+      <div style="align-self: flex-end;">
+        <button class="btn btn-green" onclick="addTentItem()">+ सामान जोड़ें</button>
+      </div>
+    </div>
+
+    <div id="tentBadges" style="min-height:30px; background:white; border:1px solid #ddd; padding:6px; border-radius:4px;"></div>
+  </div>
+
+  <!-- बिलिंग एवं एडवांस पेमेंट कार्ड (एडमिन लॉगिन होने पर ही दिखेगा) -->
+  <div class="card no-print" id="billingCardSection" style="display:none; border-top: 4px solid #28a745;">
+    <h3>💰 बिलिंग एवं भुगतान विवरण (Billing & Payment)</h3>
+    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+      <div>
+        <label>बिलिंग का तरीका:</label>
+        <select id="billMode" onchange="calculateBilling(); saveState(); renderReceipt();">
+          <option value="lumpSum">1. एकमुश्त तय राशि (Lump-sum)</option>
+          <option value="perDay">2. प्रति दिन के हिसाब से (Per Day)</option>
+          <option value="perPax">3. प्रति व्यक्ति / प्लेट (Per Plate)</option>
+        </select>
+      </div>
+
+      <div>
+        <label id="lblBillRate">दर (Rate ₹):</label>
+        <input type="number" id="billRate" placeholder="0" oninput="calculateBilling(); saveState(); renderReceipt();">
+      </div>
+
+      <div>
+        <label>कुल राशि (Total Amount ₹):</label>
+        <input type="number" id="billTotal" placeholder="0" style="font-weight:bold; color:var(--maroon);" oninput="calculateBilling(); saveState(); renderReceipt();">
+      </div>
+
+      <div>
+        <label>एडवांस जमा (Advance Paid ₹):</label>
+        <input type="number" id="billAdvance" placeholder="0" style="font-weight:bold; color:#28a745;" oninput="calculateBilling(); saveState(); renderReceipt();">
+      </div>
+
+      <div>
+        <label>शेष बकाया (Balance Due ₹):</label>
+        <input type="number" id="billBalance" placeholder="0" readonly style="font-weight:bold; color:#dc3545; background:#fff3f3;">
+      </div>
+
+      <div>
+        <label>भुगतान का माध्यम:</label>
+        <select id="billPayMode" onchange="saveState(); renderReceipt();">
+          <option value="नकद (Cash)">नकद (Cash)</option>
+          <option value="ऑनलाइन UPI / PhonePe / GPay">ऑनलाइन UPI</option>
+          <option value="बैंक ट्रांसफर / चेक">बैंक ट्रांसफर / चेक</option>
+          <option value="बाकी (Pending)">बाकी (Pending)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase क्लाउड फाइलों की सूची -->
+  <div class="card no-print" id="cloudListCard" style="display:none; border:2px solid #6f42c1;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <h3 style="margin:0; color:#6f42c1;">☁️ सुरक्षित क्लाउड ऑर्डर्स</h3>
+      <button class="btn btn-danger" style="font-size:11px;" onclick="document.getElementById('cloudListCard').style.display='none'">बंद करें ✖</button>
+    </div>
+    <div id="cloudLoading" style="display:none; color:#0056b3; padding:8px; font-weight:bold;">⏳ क्लाउड से ऑर्डर्स लोड हो रहे हैं...</div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse:collapse;" border="1" cellpadding="6">
+        <thead style="background:#f3e8fd;">
+          <tr><th>ग्राहक का नाम</th><th>मोबाइल</th><th>कार्यक्रम तारीख</th><th>कुल बिल</th><th>बकाया</th><th>सेव समय</th><th>कार्य</th></tr>
+        </thead>
+        <tbody id="cloudFilesBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- रसीद / बिल पर्ची (प्रिंट और वर्ड एक्सपोर्ट हेतु) -->
+  <div id="billReceipt">
+    <div class="bill-header">
+      <h1 id="outFirmName" style="margin:0; color:var(--maroon); font-size:22px;">टेंट हाउस एवं कैटरर्स</h1>
+      <p id="outFirmTagline" style="margin:3px 0; font-size:13px;"></p>
+      <p style="margin:2px 0; font-weight:bold;">संपर्क सूत्र: <span id="outFirmPhone">-</span></p>
+    </div>
+
+    <table style="width:100%; font-size:12px; margin-bottom:8px;">
+      <tr>
+        <td style="border:none;"><strong>ग्राहक का नाम:</strong> <span id="outCustName">-</span></td>
+        <td style="border:none; text-align:right;"><strong>कार्यक्रम तारीख:</strong> <span id="outEventDate">-</span></td>
+      </tr>
+      <tr>
+        <td style="border:none;"><strong>स्थान / पता:</strong> <span id="outAddress">-</span></td>
+        <td style="border:none; text-align:right;"><strong>मोबाइल नंबर:</strong> <span id="outPhone">-</span></td>
+      </tr>
+    </table>
+
+    <!-- भोजन व्यवस्था (सुव्यवस्थित श्रेणी वार) -->
+    <div id="outFoodArea"></div>
+
+    <!-- टेंट सामान तालिका -->
+    <table class="bill-table" id="outTentTable">
+      <thead>
+        <tr style="background:#f0f0f0;"><th colspan="2">⛺ टेंट, स्टेज, लाइट व डेकोरेशन सामान सूची</th></tr>
+      </thead>
+      <tbody id="outTentBody"></tbody>
+    </table>
+
+    <!-- बिल एवं भुगतान सारांश -->
+    <table class="billing-summary-table" id="outBillingTable">
+      <tr style="background:#f9f9f9;">
+        <th colspan="4" style="text-align:center; color:var(--maroon); font-size:14px; padding:6px;">💰 बिल भुगतान एवं खाता सारांश</th>
+      </tr>
+      <tr>
+        <td width="25%"><strong>बिलिंग प्रकार:</strong> <span id="outBillMode">एकमुश्त तय राशि</span></td>
+        <td width="25%"><strong>कुल योग:</strong> ₹<span id="outBillTotal" style="font-weight:bold; font-size:14px;">0</span></td>
+        <td width="25%"><strong>एडवांस प्राप्त:</strong> ₹<span id="outBillAdvance" style="color:#28a745; font-weight:bold; font-size:14px;">0</span></td>
+        <td width="25%"><strong>शेष बकाया:</strong> <span style="color:#dc3545; font-weight:bold; font-size:15px;">₹<span id="outBillBalance">0</span></span></td>
+      </tr>
+      <tr>
+        <td colspan="4"><strong>भुगतान माध्यम:</strong> <span id="outBillPayMode">नकद (Cash)</span></td>
+      </tr>
+    </table>
+
+    <div style="margin-top:35px; display:flex; justify-content:space-between; font-size:12px;">
+      <div>ग्राहक हस्ताक्षर: ___________________</div>
+      <div>टेंट प्रोपराइटर हस्ताक्षर: ___________________</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // 🔗 आपका Firebase Realtime Database URL
+  const FIREBASE_DB_URL = "https://tent-house-76ec2-default-rtdb.firebaseio.com";
+
+  let currentAdminToken = sessionStorage.getItem('admin_session_pass') || "";
+
+  function renderAdminUI() {
+    let btnLogin = document.getElementById('btnLoginAdmin');
+    let adminArea = document.getElementById('adminPanelArea');
+    let billCard = document.getElementById('billingCardSection');
+    
+    if (currentAdminToken) {
+      if (btnLogin) btnLogin.style.display = 'none';
+      if (adminArea) adminArea.style.display = 'inline-flex';
+      if (billCard) billCard.style.display = 'block'; // एडमिन लॉगिन होने पर ही बिलिंग कार्ड दिखेगा
+    } else {
+      if (btnLogin) btnLogin.style.display = 'inline-flex';
+      if (adminArea) adminArea.style.display = 'none';
+      if (billCard) billCard.style.display = 'none'; // बिना एडमिन के बिलिंग कार्ड छिपा रहेगा
+    }
+  }
+
+  // लॉगिन फंक्शन
+  async function doAdminLogin() {
+    let pass = await askPassword("🔐 एडमिन लॉगिन", "सुरक्षित एडमिन पैनल खोलने के लिए पासवर्ड दर्ज करें:");
+    if (!pass) return;
+
+    let savedMasterPass = localStorage.getItem('master_admin_pass') || "admin123";
+
+    if (pass === savedMasterPass) {
+      currentAdminToken = pass;
+      sessionStorage.setItem('admin_session_pass', pass);
+      renderAdminUI();
+      calculateBilling();
+      alert("🎉 एडमिन लॉगिन सफल! बिलिंग पैनल खुल गया है।");
+      return;
+    }
+
+    try {
+      let resp = await fetch(`${FIREBASE_DB_URL}/settings/adminPass.json`);
+      let cloudPass = await resp.json();
+      if (cloudPass && pass === cloudPass) {
+        currentAdminToken = pass;
+        sessionStorage.setItem('admin_session_pass', pass);
+        localStorage.setItem('master_admin_pass', pass);
+        renderAdminUI();
+        calculateBilling();
+        alert("🎉 एडमिन लॉगिन सफल! बिलिंग पैनल खुल गया है।");
+        return;
+      }
+    } catch(e) {}
+
+    alert("❌ गलत पासवर्ड! कृपया सही पासवर्ड दर्ज करें।");
+  }
+
+  function doAdminLogout() {
+    if (confirm("क्या आप एडमिन पैनल से लॉगआउट होना चाहते हैं?")) {
+      currentAdminToken = "";
+      sessionStorage.removeItem('admin_session_pass');
+      renderAdminUI();
+      document.getElementById('cloudListCard').style.display = 'none';
+      alert("🚪 आप लॉगआउट हो गए हैं।");
+    }
+  }
+
+  let modalResolve = null;
+
+  function askPassword(title, msg) {
+    return new Promise((resolve) => {
+      modalResolve = resolve;
+      let modal = document.getElementById('passwordModal');
+      let inp = document.getElementById('modalPassInput');
+      
+      document.getElementById('modalTitle').innerText = title || "🔐 एडमिन लॉगिन";
+      document.getElementById('modalMsg').innerText = msg || "कृपया पासवर्ड दर्ज करें:";
+      inp.value = "";
+      inp.type = "password";
+      modal.style.display = "flex";
+      inp.focus();
+
+      inp.onkeydown = function(e) {
+        if (e.key === "Enter") closePasswordModal(true);
+        if (e.key === "Escape") closePasswordModal(false);
+      };
+    });
+  }
+
+  function closePasswordModal(confirmed) {
+    let modal = document.getElementById('passwordModal');
+    let val = document.getElementById('modalPassInput').value.trim();
+    modal.style.display = "none";
+
+    if (modalResolve) {
+      modalResolve(confirmed ? val : null);
+      modalResolve = null;
+    }
+  }
+
+  function togglePasswordEye() {
+    let inp = document.getElementById('modalPassInput');
+    inp.type = (inp.type === "password") ? "text" : "password";
+  }
+
+  function openForgotPinModal() {
+    closePasswordModal(false);
+    document.getElementById('resetPinInput').value = "";
+    document.getElementById('resetNewPass').value = "";
+    document.getElementById('resetConfirmPass').value = "";
+    document.getElementById('forgotModal').style.display = "flex";
+  }
+
+  async function submitPasswordResetWithPin() {
+    let enteredPin = document.getElementById('resetPinInput').value.trim();
+    let newPass = document.getElementById('resetNewPass').value.trim();
+    let confirmPass = document.getElementById('resetConfirmPass').value.trim();
+
+    if (!enteredPin) { alert("कृपया अपना गुप्त सुरक्षा पिन दर्ज करें!"); return; }
+    if (!newPass) { alert("कृपया नया पासवर्ड लिखें!"); return; }
+    if (newPass !== confirmPass) { alert("❌ दोनों पासवर्ड आपस में मेल नहीं खाते!"); return; }
+
+    let actualPin = localStorage.getItem('master_security_pin') || "9999";
+
+    try {
+      let resp = await fetch(`${FIREBASE_DB_URL}/settings/securityPin.json`);
+      let cloudPin = await resp.json();
+      if(cloudPin) actualPin = cloudPin;
+    } catch(e) {}
+
+    if (enteredPin === actualPin) {
+      localStorage.setItem('master_admin_pass', newPass);
+      currentAdminToken = newPass;
+      sessionStorage.setItem('admin_session_pass', newPass);
+
+      try {
+        await fetch(`${FIREBASE_DB_URL}/settings/adminPass.json`, { method: 'PUT', body: JSON.stringify(newPass) });
+      } catch(e) {}
+
+      document.getElementById('forgotModal').style.display = "none";
+      renderAdminUI();
+      alert("🎉 बधाई! आपका नया पासवर्ड सफलतापूर्वक सेट हो गया है!");
+    } else {
+      alert("❌ गलत सुरक्षा पिन! पासवर्ड नहीं बदला जा सका।");
+    }
+  }
+
+  function openSecuritySettingsModal() {
+    let curPass = localStorage.getItem('master_admin_pass') || "admin123";
+    let curPin = localStorage.getItem('master_security_pin') || "9999";
+    document.getElementById('settingNewPass').value = curPass;
+    document.getElementById('settingNewPin').value = curPin;
+    document.getElementById('changeSecurityModal').style.display = "flex";
+  }
+
+  async function saveSecuritySettings() {
+    let p = document.getElementById('settingNewPass').value.trim();
+    let pin = document.getElementById('settingNewPin').value.trim();
+
+    if (!p) { alert("पासवर्ड खाली नहीं हो सकता!"); return; }
+    if (!pin) { alert("सुरक्षा पिन खाली नहीं हो सकता!"); return; }
+
+    localStorage.setItem('master_admin_pass', p);
+    localStorage.setItem('master_security_pin', pin);
+    currentAdminToken = p;
+    sessionStorage.setItem('admin_session_pass', p);
+
+    try {
+      await fetch(`${FIREBASE_DB_URL}/settings/adminPass.json`, { method: "PUT", body: JSON.stringify(p) });
+      await fetch(`${FIREBASE_DB_URL}/settings/securityPin.json`, { method: "PUT", body: JSON.stringify(pin) });
+    } catch(e) {}
+
+    document.getElementById('changeSecurityModal').style.display = "none";
+    alert("✅ सुरक्षा सेटिंग्स सुरक्षित हो गईं!\nआपका नया पासवर्ड और नया गुप्त पिन सफलतापूर्वक सेव हो गया है।");
+  }
+
+  // --- बिलिंग कैलकुलेशन लॉजिक (अपडेटेड: कुल दिनों के व्यक्ति जोड़ना एवं स्वतः बिल गणना) ---
+  function calculateBilling() {
+    let mode = document.getElementById('billMode').value;
+    let rate = parseFloat(document.getElementById('billRate').value) || 0;
+    let advance = parseFloat(document.getElementById('billAdvance').value) || 0;
+    let totalInp = document.getElementById('billTotal');
+    let balanceInp = document.getElementById('billBalance');
+    let lblRate = document.getElementById('lblBillRate');
+
+    let total = parseFloat(totalInp.value) || 0;
+
+    if (mode === "perDay") {
+      let daysCount = schedule.length || 1;
+      if (lblRate) lblRate.innerHTML = `दर (Rate ₹ प्रति दिन) <span style="color:var(--maroon);">[${daysCount} दिन]</span>:`;
+      total = rate * daysCount;
+      totalInp.value = total;
+    } else if (mode === "perPax") {
+      // सभी दिनों और उनके सत्रों में दर्ज व्यक्तियों का कुल योग
+      let totalPax = 0;
+      schedule.forEach(d => {
+        (d.sessions || []).forEach(s => {
+          let p = parseFloat(s.pax) || 0;
+          totalPax += p;
+        });
+      });
+
+      // लेबल पर कुल व्यक्ति दिखाएं
+      if (lblRate) {
+        lblRate.innerHTML = `दर (Rate ₹ प्रति प्लेट) <span style="color:var(--maroon); font-weight:bold;">[कुल ${totalPax} व्यक्ति]</span>:`;
+      }
+
+      total = rate * totalPax;
+      totalInp.value = total;
+    } else {
+      if (lblRate) lblRate.innerText = "दर (Rate ₹):";
+    }
+
+    let bal = total - advance;
+    balanceInp.value = bal;
+  }
+
+  // ☁️ 1-क्लिक Firebase Cloud में सेव करना
+  async function saveToCloudDirect() {
+    if (!currentAdminToken) { alert("❌ पहले '🔐 एडमिन लॉगिन' करें!"); return; }
+
+    let cName = document.getElementById('custName').value.trim();
+    if (!cName) { alert("कृपया पहले ग्राहक का नाम लिखें!"); return; }
+
+    let now = new Date();
+    let displayTime = now.toLocaleDateString('hi-IN') + " " + now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
+
+    let orderData = {
+      custName: cName,
+      custPhone: document.getElementById('custPhone').value,
+      address: document.getElementById('eventAddress').value,
+      eventDate: document.getElementById('eventStartDate').value,
+      firmName: document.getElementById('firmName').value,
+      firmPhone: document.getElementById('firmPhone').value,
+      firmTagline: document.getElementById('firmTagline').value,
+      schedule: schedule,
+      tentList: tentList,
+      billing: {
+        mode: document.getElementById('billMode').value,
+        rate: document.getElementById('billRate').value,
+        total: document.getElementById('billTotal').value,
+        advance: document.getElementById('billAdvance').value,
+        balance: document.getElementById('billBalance').value,
+        payMode: document.getElementById('billPayMode').value
+      },
+      savedAt: displayTime,
+      timestamp: Date.now()
+    };
+
+    let btn = document.getElementById('btnSaveCloud');
+    let orig = btn.innerText;
+    btn.innerText = "⏳ सेव हो रहा है...";
+
+    let safeKey = (cName.replace(/[.#$[\]/]/g, "_") + "_" + (document.getElementById('custPhone').value || "NoPhone")).trim();
+
+    try {
+      let resp = await fetch(`${FIREBASE_DB_URL}/orders/${safeKey}.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData)
+      });
+
+      btn.innerText = orig;
+
+      if (resp.ok) {
+        alert(`✅ सफलता! "${cName}" का पूरा बिल क्लाउड में सुरक्षित सेव हो गया है!`);
+      } else {
+        alert("❌ क्लाउड में सेव नहीं हो सका।");
+      }
+    } catch(err) {
+      btn.innerText = orig;
+      alert("❌ सर्वर एरर: " + err.message);
+    }
+  }
+
+  async function openCloudOrdersList() {
+    if (!currentAdminToken) { alert("❌ पहले एडमिन लॉगिन करें!"); return; }
+
+    let card = document.getElementById('cloudListCard');
+    let body = document.getElementById('cloudFilesBody');
+    let loading = document.getElementById('cloudLoading');
+    
+    card.style.display = 'block';
+    body.innerHTML = "";
+    loading.style.display = 'block';
+
+    try {
+      let resp = await fetch(`${FIREBASE_DB_URL}/orders.json`);
+      loading.style.display = 'none';
+
+      if (!resp.ok) {
+        alert("❌ डेटाबेस लोड नहीं हो सका!");
+        card.style.display = 'none';
+        return;
+      }
+
+      let allOrders = await resp.json();
+      if (!allOrders || Object.keys(allOrders).length === 0) {
+        body.innerHTML = "<tr><td colspan='7' align='center'>क्लाउड में अभी कोई आर्डर सेव नहीं मिला।</td></tr>";
+        return;
+      }
+
+      let rows = "";
+      Object.keys(allOrders).reverse().forEach(key => {
+        let o = allOrders[key];
+        let total = (o.billing && o.billing.total) ? "₹" + o.billing.total : "-";
+        let bal = (o.billing && o.billing.balance) ? "₹" + o.billing.balance : "-";
+        rows += `
+          <tr>
+            <td><strong>${o.custName || "-"}</strong></td>
+            <td>${o.custPhone || "-"}</td>
+            <td>${formatDisplayDate(o.eventDate)}</td>
+            <td><strong>${total}</strong></td>
+            <td style="color:#dc3545; font-weight:bold;">${bal}</td>
+            <td><small style="color:#666;">${o.savedAt || "-"}</small></td>
+            <td>
+              <button class="btn btn-green" style="font-size:11px; padding:3px 7px;" onclick="loadFromCloud('${key}')">✏️ खोलें</button>
+              <button class="btn btn-danger" style="font-size:11px; padding:3px 7px; margin-left:4px;" onclick="deleteFromCloud('${key}')">🗑️ हटाएं</button>
+            </td>
+          </tr>
+        `;
+      });
+      body.innerHTML = rows;
+    } catch(e) {
+      loading.style.display = 'none';
+      alert("इंटरनेट एरर: " + e.message);
+    }
+  }
+
+  async function loadFromCloud(orderKey) {
+    try {
+      let resp = await fetch(`${FIREBASE_DB_URL}/orders/${orderKey}.json`);
+      let o = await resp.json();
+      if (!o) { alert("ऑर्डर नहीं मिला!"); return; }
+
+      saveState();
+
+      document.getElementById('custName').value = o.custName || "";
+      document.getElementById('custPhone').value = o.custPhone || "";
+      document.getElementById('eventAddress').value = o.address || "";
+      document.getElementById('eventStartDate').value = o.eventDate || "";
+      updateEventDates();
+
+      schedule = o.schedule || [];
+      tentList = o.tentList || [];
+
+      if (o.billing) {
+        document.getElementById('billMode').value = o.billing.mode || "lumpSum";
+        document.getElementById('billRate').value = o.billing.rate || "";
+        document.getElementById('billTotal').value = o.billing.total || "";
+        document.getElementById('billAdvance').value = o.billing.advance || "";
+        document.getElementById('billBalance').value = o.billing.balance || "";
+        document.getElementById('billPayMode').value = o.billing.payMode || "नकद (Cash)";
+      }
+
+      renderDaysUI();
+      renderTentBadges();
+      calculateBilling();
+      renderReceipt();
+      document.getElementById('cloudListCard').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      alert(`🎉 "${o.custName}" का रिकॉर्ड खुल गया!`);
+    } catch(e) { alert("लोड एरर: " + e.message); }
+  }
+
+  async function deleteFromCloud(orderKey) {
+    if(!confirm("क्या आप वाकई इस ऑर्डर को हमेशा के लिए हटाना चाहते हैं?")) return;
+    try {
+      let resp = await fetch(`${FIREBASE_DB_URL}/orders/${orderKey}.json`, { method: "DELETE" });
+      if(resp.ok) {
+        alert("🗑️ ऑर्डर हटा दिया गया!");
+        openCloudOrdersList();
+      }
+    } catch(e) { alert("एरर: " + e.message); }
+  }
+
+  const rawCategoryMaster = {
+    chaat: { title: "🥟 चाट, समोसा व आलू गुटके", items: ["आलू के गुटके (पहाड़ी स्टाइल)", "समोसा", "टिक्की चाट", "पानी बतासा (गोलगप्पा)", "पापड़ी चाट", "दही भल्ला", "मिक्स पकोड़ी", "पनीर पकोड़ा", "आलूबोंडा", "छोला भटूरा", "पाव भाजी", "मूंगफली चाट", "चना मसाला (चाट)"] },
+    chinese: { title: "🍜 चाइनीज व फास्ट-फूड", items: ["चाउमिन (Chowmein)", "वेज हक्का नूडल्स", "वेज मोमोज़ (स्टीम)", "वेज मोमोज़ (फ्राई / कुरकुरे)", "स्प्रिंग रोल", "वेज मंचूरियन (ड्राई)", "वेज मंचूरियन (ग्रेवी)", "फ्रेंच फ्राइज", "चिल्ली पोटैटो", "हनी चिल्ली पोटैटो", "पास्ता (रेड सॉस)", "पास्ता (व्हाइट सॉस)", "डोसा", "इडली सांभर"] },
+    starters: { title: "🍢 टिक्का, कबाब व स्टार्टर्स", items: ["पनीर टिक्का (ड्राई)", "मलाई पनीर टिक्का", "सोया टिक्का", "सोया मलाई चाप", "वेज कबाब", "मसाला कबाब", "हरियाली कबाब", "दही के कबाब", "सीक कबाब (वेज)", "कटलेट", "चीजबोल"] },
+    liquids: { title: "☕ पेय, चाय व सूप", items: ["चाय", "मसाला चाय", "कॉफी (Hot Coffee)", "कोल्ड कॉफी (Cold Coffee)", "टोमैटो सूप (Tomato Soup)", "वेज मंचाउ सूप", "स्वीट कॉर्न सूप", "हॉट बादाम मिल्क", "दूध (गर्म/मसाला)", "कोल्ड्रिंक", "मॉकटेल", "शिकंजी", "जलजीरा", "छाछ / लस्सी", "ठंडाई", "मिनरल वाटर (बोतल)", "पानी कैंपर", "सोडा पानी"] },
+    dal: { title: "🍲 दालें, फाणु व चैंसू", items: ["दाल फ्राई (Dal Fry)", "दाल तड़का", "कंडाली फाणु", "दाल फाणु", "चैंसू (उड़द/भट्ट)", "दाल मखनी", "राजमा दाल (पंजाबी)", "उड़द दाल (फ्राई/तड़का)", "अरहर मसूर दाल (तड़का)", "कढ़ी पकोड़ा", "चना दाल फ्राई", "दाल पंचमेल"] },
+    sabzi: { title: "🥦 सब्जी व पनीर", items: ["मटर पनीर", "शाही पनीर", "कढ़ाई पनीर", "पनीर टिक्का मसाला", "पनीर बटर मसाला", "पालक पनीर", "खोया पनीर", "छोला (पिंडी/मसाला)", "चना मसाला", "मिक्स सब्जी", "आलू की सब्जी (भंडारे वाली)", "आलू गोभी मटर", "सोया चाप मसाला", "मटर मशरूम", "दम आलू", "भिंडी मसाला", "बैंगन भर्ता", "वेज कोफ्ता"] },
+    rice: { title: "🍚 चावल / भात", items: ["सादा चावल (प्लेन राइस)", "जीरा चावल (जीरा राइस)", "मटर पुलाव", "कश्मीरी पुलाव", "मीठा चावल (लाल भात / केसरी भात)", "फ्राइड राइस", "पनीर पुलाव (पनीर राइस)", "वेज पुलाव / बिरयानी", "दाल खिचड़ी"] },
+    breads: { title: "🫓 रोटी, पूरी व नान", items: ["तवा रोटी (सादा)", "तवा रोटी (मक्खन)", "तंदूरी रोटी (नान)", "बटर नान", "लच्छा पराठा", "मिस्सी रोटी", "पूरी (सादा)", "बेड़मी पूरी", "कचौड़ी", "भटूरा"] },
+    sweets: { title: "🍨 मिठाई व आइसक्रीम", items: ["जलेबी", "रबड़ी", "जलेबी रबड़ी", "गुलाब जामुन", "रसगुल्ला / छोटे रसगुल्ले", "रसमलाई", "गाजर का हलवा", "मूंग दाल हलवा", "सूजी का हलवा", "इमरती", "लड्डू (बूंदी/मोतीचूर)", "बेसन लड्डू", "बालू साही", "मिल्क केक", "काजू कतली", "मठरी", "सक्कर पारा", "आइसक्रीम (वैनिला/स्ट्रॉबेरी/बटरस्कॉच)", "कुल्फी (मटका/केसर पिस्ता)", "पेस्ट्री"] },
+    salad: { title: "🥗 रायता, सलाद व पापड़", items: ["रायता बूंदी", "मिक्स वेज रायता", "खीरा रायता", "अनानास (Pineapple) रायता", "दही वड़ा", "ग्रीन सलाद", "रूसी सलाद (Russian Salad)", "सिरका प्याज", "पापड़", "मसाला पापड़", "आचार", "हरी चटनी", "मीठी चटनी"] },
+    nvSnacks: { title: "🍗 नॉन-वेज स्नैक्स", items: ["चिकन मोमोज़ (स्टीम)", "चिकन मोमोज़ (फ्राई / कुरकुरे)", "चिकन कबाब", "चिकन मसाला कबाब", "चिकन सीक कबाब", "चिकन शामी कबाब", "चिकन गलौटी कबाब", "मटन सीक कबाब", "मटन शामी कबाब", "मटन गलौटी कबाब", "मटन बोटी कबाब", "चिकन टिक्का (तंदूरी)", "चिकन मलाई टिक्का", "चिकन अफ़गानी टिक्का", "तंदूरी चिकन", "चिकन रोस्टेड / फ्राई", "चिकन लॉलीपॉप", "चिल्ली चिकन (ड्राई)", "चिकन टंगड़ी कबाब", "चिकन पॉपकॉर्न", "फिश फ्राई", "फिश फिंगर", "फिश टिक्का", "अंडा भुर्जी", "बॉयल एग (मसाला)"] },
+    nvMain: { title: "🍲 नॉन-वेज मेन कोर्स", items: ["चिकन करी (देसी स्टाइल)", "कढ़ाई चिकन", "बटर चिकन", "चिकन कोरमा", "चिकन मसाला", "हंडी चिकन", "चिकन लबावदार", "चिकन बिरयानी", "मटन बिरयानी", "मटन करी (देसी मटन)", "मटन कोरमा", "मटन रोगन जोश", "मटन रड़ा", "मटन हांडी", "मटन पाया सूप / करी", "फिश करी (मछली तरी)", "फिश मसाला", "एग करी (अंडा तरी)"] }
+  };
+
+  const hindiAlphabetOrder = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः','क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह','क्ष','त्र','ज्ञ'];
+
+  function getHindiCharRank(char) {
+    let idx = hindiAlphabetOrder.indexOf(char);
+    return idx === -1 ? 999 : idx;
+  }
+
+  function compareHindiWords(wordA, wordB) {
+    let a = wordA.trim();
+    let b = wordB.trim();
+    let minLen = Math.min(a.length, b.length);
+    for (let i = 0; i < minLen; i++) {
+      let charA = a[i];
+      let charB = b[i];
+      if (charA !== charB) {
+        let rankA = getHindiCharRank(charA);
+        let rankB = getHindiCharRank(charB);
+        if (rankA !== 999 && rankB !== 999) return rankA - rankB;
+        else return charA.localeCompare(charB, 'hi');
+      }
+    }
+    return a.length - b.length;
+  }
+
+  const categoryMaster = {};
+  for (let key in rawCategoryMaster) {
+    categoryMaster[key] = {
+      title: rawCategoryMaster[key].title,
+      items: [...rawCategoryMaster[key].items].sort(compareHindiWords)
+    };
+  }
+
+  // व्यंजन किस श्रेणी का है यह पता लगाने का फंक्शन
+  function findCategoryOfItem(itemName) {
+    for (let key in rawCategoryMaster) {
+      if (rawCategoryMaster[key].items.includes(itemName)) {
+        return rawCategoryMaster[key].title;
+      }
+    }
+    return "✍️ अन्य विशेष व्यंजन";
+  }
+
+  const defaultSessions = [
+    { title: "सुबह का नाश्ता", pax: "" },
+    { title: "दिन का खाना (लंच)", pax: "" },
+    { title: "शाम का नाश्ता / संगीत", pax: "" },
+    { title: "रात का खाना (प्रीतिभोज)", pax: "" }
+  ];
+
+  let schedule = [];
+  let tentList = [];
+  let undoStack = [];
+  let redoStack = [];
+  let sessionClipboard = null;
+  let sessionObserver = null;
+
+  function formatDisplayDate(dateStr) {
+    if(!dateStr) return "-";
+    let parts = dateStr.split('-');
+    if(parts.length === 3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    return dateStr;
+  }
+
+  function toggleSidebar() {
+    let sb = document.getElementById('quickSidebar');
+    let btn = document.getElementById('sbToggleBtn');
+    let cnt = document.getElementById('mainContainer');
+    sb.classList.toggle('collapsed');
+    btn.classList.toggle('collapsed');
+    cnt.classList.toggle('full-width');
+    btn.innerText = sb.classList.contains('collapsed') ? '▶ साइडबार' : '◀ साइडबार';
+  }
+
+  function quickAddTent(name, qty) {
+    saveState();
+    tentList.push({ name: name, size: '', qty: qty, unit: '' });
+    renderTentBadges();
+    renderReceipt();
+  }
+
+  function setActiveSessionInfo(dayNumber, dateStr, sessionTitle, dayId = null) {
+    let info = `[ दिन ${dayNumber} ] | 📅 तारीख: ${formatDisplayDate(dateStr)} | ⏱️ सत्र: ${sessionTitle}`;
+    let el = document.getElementById('currentActiveInfo');
+    if (el) el.innerText = info;
+
+    if (dayId) {
+      let sel = document.getElementById('stickyDaySelect');
+      if (sel && sel.value !== dayId) sel.value = dayId;
+    }
+  }
+
+  function setupScrollSpy() {
+    if (sessionObserver) sessionObserver.disconnect();
+    let options = { root: null, rootMargin: "-120px 0px -45% 0px", threshold: [0, 0.2, 0.5] };
+
+    sessionObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          let dayNum = entry.target.getAttribute('data-daynum');
+          let dateStr = entry.target.getAttribute('data-date');
+          let sessTitle = entry.target.getAttribute('data-title');
+          let dayId = entry.target.getAttribute('data-dayid');
+          if (dayNum && dateStr && sessTitle) {
+            setActiveSessionInfo(dayNum, dateStr, sessTitle, dayId);
+          }
         }
+      });
+    }, options);
 
-        // एंटर की दबाने पर लॉगिन
-        document.getElementById('authInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') handleLogin();
+    document.querySelectorAll('.session-box').forEach(el => sessionObserver.observe(el));
+  }
+
+  function toggleSessionDetails(sessId, ev) {
+    if(ev) ev.stopPropagation();
+    let found = null;
+    for (const day of schedule) {
+      found = day.sessions.find(s => s.id === sessId);
+      if (found) break;
+    }
+    if (!found) return;
+
+    saveState();
+    found.hidden = !found.hidden;
+    const bodyEl = document.getElementById('body_' + sessId);
+    const btn = document.getElementById('tgl_btn_' + sessId);
+
+    if (bodyEl) bodyEl.style.display = found.hidden ? "none" : "block";
+    if (btn) btn.innerText = found.hidden ? "खोलें 🔽" : "छिपाएं 🔼";
+  }
+
+  function toggleWholeDay(dayId) {
+    let day = schedule.find(d => d.id === dayId);
+    if (!day) return;
+
+    saveState();
+    day.hidden = !day.hidden;
+
+    const content = document.getElementById('day_content_' + dayId);
+    const btn = document.getElementById('btn_day_toggle_' + dayId);
+
+    if (content) content.style.display = day.hidden ? "none" : "block";
+    if (btn) btn.innerText = day.hidden ? "दिन खोलें 🔽" : "दिन छिपाएं 🔼";
+  }
+
+  function toggleAllSessionsInDay(dayId, expand = true) {
+    let day = schedule.find(d => d.id === dayId);
+    if (!day) return;
+
+    saveState();
+    day.sessions.forEach(sess => {
+      sess.hidden = !expand;
+      let bodyEl = document.getElementById('body_' + sess.id);
+      let btn = document.getElementById('tgl_btn_' + sess.id);
+      if (bodyEl) bodyEl.style.display = expand ? "block" : "none";
+      if (btn) btn.innerText = expand ? "छिपाएं 🔼" : "खोलें 🔽";
+    });
+  }
+
+  function getCurrentSnapshot() {
+    return JSON.stringify({
+      schedule: schedule,
+      tentList: tentList,
+      custName: document.getElementById('custName').value,
+      custPhone: document.getElementById('custPhone').value,
+      eventDate: document.getElementById('eventStartDate').value,
+      address: document.getElementById('eventAddress').value,
+      billing: {
+        mode: document.getElementById('billMode').value,
+        rate: document.getElementById('billRate').value,
+        total: document.getElementById('billTotal').value,
+        advance: document.getElementById('billAdvance').value,
+        balance: document.getElementById('billBalance').value,
+        payMode: document.getElementById('billPayMode').value
+      }
+    });
+  }
+
+  function applySnapshot(jsonStr) {
+    let state = JSON.parse(jsonStr);
+    schedule = state.schedule || [];
+    schedule.forEach(day => {
+      day.hidden = !!day.hidden;
+      (day.sessions || []).forEach(sess => { sess.hidden = !!sess.hidden; });
+    });
+    tentList = state.tentList || [];
+    document.getElementById('custName').value = state.custName || "";
+    document.getElementById('custPhone').value = state.custPhone || "";
+    document.getElementById('eventStartDate').value = state.eventDate || "";
+    document.getElementById('eventAddress').value = state.address || "";
+
+    if (state.billing) {
+      document.getElementById('billMode').value = state.billing.mode || "lumpSum";
+      document.getElementById('billRate').value = state.billing.rate || "";
+      document.getElementById('billTotal').value = state.billing.total || "";
+      document.getElementById('billAdvance').value = state.billing.advance || "";
+      document.getElementById('billBalance').value = state.billing.balance || "";
+      document.getElementById('billPayMode').value = state.billing.payMode || "नकद (Cash)";
+    }
+
+    updateEventDates();
+    renderDaysUI();
+    renderTentBadges();
+    calculateBilling();
+    renderReceipt();
+  }
+
+  function saveState() {
+    let cur = getCurrentSnapshot();
+    if (undoStack.length === 0 || undoStack[undoStack.length - 1] !== cur) {
+      undoStack.push(cur);
+      if (undoStack.length > 30) undoStack.shift();
+      redoStack = [];
+    }
+  }
+
+  function undoAction() {
+    if (undoStack.length === 0) { alert("Undo के लिए पिछला रिकॉर्ड नहीं है!"); return; }
+    redoStack.push(getCurrentSnapshot());
+    applySnapshot(undoStack.pop());
+  }
+
+  function redoAction() {
+    if (redoStack.length === 0) { alert("Redo के लिए कोई रिकॉर्ड नहीं है!"); return; }
+    undoStack.push(getCurrentSnapshot());
+    applySnapshot(redoStack.pop());
+  }
+
+  window.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
+      if (document.activeElement.tagName !== 'INPUT') { e.preventDefault(); undoAction(); }
+    } else if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') || ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z')) {
+      if (document.activeElement.tagName !== 'INPUT') { e.preventDefault(); redoAction(); }
+    }
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.multiselect-container')) closeAllMultiDropdowns();
+  });
+
+  window.onload = function() {
+    loadFirmProfile();
+    renderAdminUI();
+    let today = new Date().toISOString().split('T')[0];
+    document.getElementById('eventStartDate').value = today;
+    updateEventDates();
+    addNewDayWithDate(today);
+    calculateBilling();
+    renderReceipt();
+  };
+
+  function saveFirmProfile() {
+    localStorage.setItem('t_name', document.getElementById('firmName').value);
+    localStorage.setItem('t_phone', document.getElementById('firmPhone').value);
+    localStorage.setItem('t_tag', document.getElementById('firmTagline').value);
+    alert("✅ प्रोफाइल सुरक्षित हो गई!");
+    renderReceipt();
+  }
+
+  function loadFirmProfile() {
+    if(localStorage.getItem('t_name')) document.getElementById('firmName').value = localStorage.getItem('t_name');
+    if(localStorage.getItem('t_phone')) document.getElementById('firmPhone').value = localStorage.getItem('t_phone');
+    if(localStorage.getItem('t_tag')) document.getElementById('firmTagline').value = localStorage.getItem('t_tag');
+  }
+
+  function updateEventDates() {
+    let d = document.getElementById('eventStartDate').value;
+    if(d) document.getElementById('outEventDate').innerText = formatDisplayDate(d);
+  }
+
+  function getNextDayDateString(dateStr) {
+    if(!dateStr) return new Date().toISOString().split('T')[0];
+    let parts = dateStr.split('-');
+    let dt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+    dt.setDate(dt.getDate() + 1);
+    let nextY = dt.getFullYear();
+    let nextM = String(dt.getMonth() + 1).padStart(2, '0');
+    let nextD = String(dt.getDate()).padStart(2, '0');
+    return `${nextY}-${nextM}-${nextD}`;
+  }
+
+  function addNewDayNextDate() {
+    let nextDate = schedule.length > 0 ? getNextDayDateString(schedule[schedule.length - 1].date) : (document.getElementById('eventStartDate').value || new Date().toISOString().split('T')[0]);
+    addNewDayWithDate(nextDate);
+  }
+
+  function addNewDayWithDate(targetDateStr) {
+    saveState();
+    let dayId = "d_" + Date.now() + Math.floor(Math.random()*100);
+    schedule.push({ id: dayId, date: targetDateStr, hidden: false, sessions: [] });
+    addNextSession(dayId, false);
+    renderDaysUI();
+    let sel = document.getElementById('stickyDaySelect');
+    if (sel) sel.value = dayId;
+    calculateBilling();
+  }
+
+  function removeDay(dayId) {
+    saveState();
+    schedule = schedule.filter(d => d.id !== dayId);
+    renderDaysUI();
+    calculateBilling();
+  }
+
+  function addNextSession(dayId, shouldScroll = true) {
+    saveState();
+    let day = schedule.find(d => d.id === dayId);
+    if (!day) return;
+    let nextIdx = day.sessions.length % defaultSessions.length;
+    let template = defaultSessions[nextIdx];
+    let newSessId = "s_" + Date.now() + Math.floor(Math.random()*100);
+    day.sessions.push({
+      id: newSessId,
+      title: template.title,
+      pax: template.pax || "",
+      hidden: false,
+      items: []
+    });
+    renderDaysUI();
+
+    let dIdx = schedule.findIndex(d => d.id === dayId);
+    setActiveSessionInfo(dIdx + 1, day.date, template.title, dayId);
+
+    let sel = document.getElementById('stickyDaySelect');
+    if (sel) sel.value = dayId;
+
+    if (shouldScroll) {
+      setTimeout(() => {
+        let el = document.getElementById("box_" + newSessId);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 120);
+    }
+  }
+
+  function addNextSessionFromSticky() {
+    let sel = document.getElementById('stickyDaySelect');
+    if (!sel || !sel.value) { 
+      if (schedule.length > 0) addNextSession(schedule[0].id, true);
+      else alert("कृपया पहले '+ नई तारीख' बटन दबाएं!"); 
+      return; 
+    }
+    addNextSession(sel.value, true);
+  }
+
+  function copySessionItems(dayId, sessId) {
+    let day = schedule.find(d => d.id === dayId);
+    let sess = day ? day.sessions.find(s => s.id === sessId) : null;
+    if (!sess) return;
+    if (sess.items.length === 0) {
+      alert("⚠️ इस सत्र में अभी कोई सामान नहीं है!");
+      return;
+    }
+    sessionClipboard = {
+      fromSession: sess.title,
+      items: JSON.parse(JSON.stringify(sess.items))
+    };
+    alert(`📋 "${sess.title}" के (${sess.items.length}) सामान कॉपी हो गए!`);
+  }
+
+  function pasteSessionItems(targetDayId, targetSessId) {
+    if (!sessionClipboard || !sessionClipboard.items || sessionClipboard.items.length === 0) {
+      alert("⚠️ पहले किसी सत्र का सामान '📋 कॉपी मेन्यू' करें!");
+      return;
+    }
+    saveState();
+    let day = schedule.find(d => d.id === targetDayId);
+    let sess = day ? day.sessions.find(s => s.id === targetSessId) : null;
+    if (!sess) return;
+
+    let addedCount = 0;
+    sessionClipboard.items.forEach(copiedItem => {
+      let exists = sess.items.some(it => it.name === copiedItem.name && it.isNv === copiedItem.isNv);
+      if (!exists) {
+        sess.items.push(JSON.parse(JSON.stringify(copiedItem)));
+        addedCount++;
+      }
+    });
+
+    renderDaysUI();
+    renderReceipt();
+    alert(`📥 ${addedCount} नए व्यंजन इस सत्र में जोड़ दिए गए!`);
+  }
+
+  function updateStickyDaySelect() {
+    let sel = document.getElementById('stickyDaySelect');
+    let sbList = document.getElementById('sidebarDateList');
+    if (!sel) return;
+    let cur = sel.value;
+    sel.innerHTML = "";
+    if(sbList) sbList.innerHTML = "";
+
+    schedule.forEach((d, i) => {
+      let opt = document.createElement('option');
+      opt.value = d.id;
+      opt.innerText = `दिन ${i+1}: ${formatDisplayDate(d.date)}`;
+      if (d.id === cur) opt.selected = true;
+      sel.appendChild(opt);
+
+      if (sbList) {
+        let sessLinks = d.sessions.map((s) => `
+          <button class="sidebar-btn" style="margin-left:12px; width:calc(100% - 12px); border-left:3px solid var(--maroon);" onclick="document.getElementById('box_${s.id}').scrollIntoView({behavior:'smooth', block:'center'}); setActiveSessionInfo(${i+1}, '${d.date}', '${s.title}', '${d.id}');">
+            ⏱️ ${s.title} (${s.items.length} सामान)
+          </button>
+        `).join("");
+
+        sbList.innerHTML += `
+          <div style="margin-bottom:8px; background:#f9f9f9; padding:4px; border-radius:4px; border:1px solid #e2e8f0;">
+            <button class="sidebar-btn" style="background:#eef2f7; font-weight:bold; color:var(--maroon);" onclick="document.getElementById('day_card_${d.id}').scrollIntoView({behavior:'smooth', block:'start'}); document.getElementById('stickyDaySelect').value='${d.id}';">
+              📅 दिन ${i+1}: ${formatDisplayDate(d.date)}
+            </button>
+            <div style="margin-top:2px;">
+              ${sessLinks || '<small style="color:#999; margin-left:14px;">कोई सत्र नहीं</small>'}
+            </div>
+          </div>
+        `;
+      }
+    });
+
+    if (!sel.value && schedule.length > 0) sel.value = schedule[0].id;
+  }
+
+  function removeSession(dayId, sessId) {
+    saveState();
+    let day = schedule.find(d => d.id === dayId);
+    if (day) {
+      day.sessions = day.sessions.filter(s => s.id !== sessId);
+      renderDaysUI();
+      calculateBilling();
+    }
+  }
+
+  function toggleMultiDropdown(uniqueId, event) {
+    if(event) event.stopPropagation();
+    let menu = document.getElementById('menu_' + uniqueId);
+    let isOpen = menu.style.display === 'block';
+    closeAllMultiDropdowns();
+    if (!isOpen) menu.style.display = 'block';
+  }
+
+  function closeAllMultiDropdowns() {
+    document.querySelectorAll('.multiselect-menu').forEach(m => m.style.display = 'none');
+  }
+
+  function updateMultiBadge(sessId, catKey) {
+    let container = document.getElementById(`ms_${sessId}_${catKey}`);
+    if (!container) return;
+    let checked = container.querySelectorAll('input[type="checkbox"]:checked');
+    let badge = document.getElementById(`badge_${sessId}_${catKey}`);
+    let btn = container.querySelector('.multiselect-btn');
+
+    if (checked.length > 0) {
+      badge.innerText = checked.length;
+      badge.style.display = 'inline-block';
+      btn.style.borderColor = '#28a745';
+      btn.style.backgroundColor = '#e8f8ec';
+      btn.style.fontWeight = 'bold';
+    } else {
+      badge.innerText = '0';
+      badge.style.display = 'none';
+      btn.style.borderColor = '#b0bec5';
+      btn.style.backgroundColor = '#ffffff';
+      btn.style.fontWeight = 'normal';
+    }
+  }
+
+  function clearCatSelection(sessId, catKey, event) {
+    if(event) event.stopPropagation();
+    let container = document.getElementById(`ms_${sessId}_${catKey}`);
+    if (!container) return;
+    container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    updateMultiBadge(sessId, catKey);
+  }
+
+  function filterMultiItems(inp) {
+    let q = inp.value.toLowerCase();
+    let list = inp.closest('.multiselect-menu').querySelectorAll('.ms-item');
+    list.forEach(item => {
+      item.style.display = item.textContent.toLowerCase().includes(q) ? 'flex' : 'none';
+    });
+  }
+
+  function addAllSelectedItems(dayId, sessId) {
+    let day = schedule.find(d => d.id === dayId);
+    let sess = day.sessions.find(s => s.id === sessId);
+    let checkedBoxes = document.querySelectorAll(`.chk-item-${sessId}:checked`);
+    let customInput = document.getElementById(`custom_item_${sessId}`);
+    let customVal = customInput ? customInput.value.trim() : "";
+    let qty = document.getElementById(`qty_${sessId}`).value.trim();
+    let unit = document.getElementById(`unit_${sessId}`).value;
+
+    let itemsToAdd = [];
+    checkedBoxes.forEach(cb => {
+      itemsToAdd.push({ name: cb.value.trim(), qty: qty, unit: unit, isNv: cb.getAttribute('data-nv') === '1' });
+      cb.checked = false;
+    });
+
+    if (customVal !== "") {
+      itemsToAdd.push({ name: customVal, qty: qty, unit: unit, isNv: false });
+      customInput.value = "";
+    }
+
+    if (itemsToAdd.length === 0) {
+      alert("कृपया किसी व्यंजन पर टिक (✓) लगाएं या नया नाम लिखें!");
+      return;
+    }
+
+    saveState();
+    itemsToAdd.forEach(it => sess.items.push(it));
+    document.getElementById(`qty_${sessId}`).value = "";
+    closeAllMultiDropdowns();
+    renderDaysUI();
+  }
+
+  function deleteItem(dayId, sessId, idx) {
+    saveState();
+    let day = schedule.find(d => d.id === dayId);
+    day.sessions.find(s => s.id === sessId).items.splice(idx, 1);
+    renderDaysUI();
+  }
+
+  function generateMultiSelectHTML(sessId, catKey, isNv = false) {
+    let c = categoryMaster[catKey];
+    let uniqueId = `${sessId}_${catKey}`;
+
+    let itemsHTML = c.items.map(it => `
+      <label class="ms-item">
+        <input type="checkbox" class="chk-item-${sessId}" value="${it}" data-nv="${isNv ? '1' : '0'}" onchange="updateMultiBadge('${sessId}', '${catKey}')">
+        <span>${it}</span>
+      </label>
+    `).join("");
+
+    return `
+      <div class="cat-box">
+        <label style="${isNv ? 'color:#b22222; font-weight:bold;' : ''}">${c.title}:</label>
+        <div class="multiselect-container" id="ms_${uniqueId}">
+          <button type="button" class="multiselect-btn" onclick="toggleMultiDropdown('${uniqueId}', event)">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:140px;">-- चुनें --</span>
+            <div style="display:flex; align-items:center;">
+              <span class="ms-badge" id="badge_${uniqueId}">0</span>
+              <span style="font-size:10px; color:#666; margin-left:4px;">▼</span>
+            </div>
+          </button>
+          
+          <div class="multiselect-menu" id="menu_${uniqueId}">
+            <div class="ms-header">
+              <span style="font-size:11px; font-weight:bold; color:#444;">व्यंजन सूची:</span>
+              <span onclick="clearCatSelection('${sessId}', '${catKey}', event)" style="font-size:11px; color:red; cursor:pointer;">हटाएं ✖</span>
+            </div>
+            <input type="text" placeholder="🔍 खोजें..." onkeyup="filterMultiItems(this)" onclick="event.stopPropagation();" style="padding:4px 6px; font-size:11px; margin-bottom:5px;">
+            <div style="max-height:180px; overflow-y:auto;">${itemsHTML}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderDaysUI() {
+    let wrap = document.getElementById('daysWrapper');
+    let prevSelectedSticky = document.getElementById('stickyDaySelect') ? document.getElementById('stickyDaySelect').value : null;
+    wrap.innerHTML = "";
+
+    schedule.forEach((day, dIdx) => {
+      let dayBox = document.createElement('div');
+      dayBox.className = "day-box";
+      dayBox.id = `day_card_${day.id}`;
+
+      let displayDateText = formatDisplayDate(day.date);
+
+      let dHtml = `
+        <div class="day-header">
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="background:var(--maroon); color:white; padding:4px 9px; border-radius:4px; font-size:13px; font-weight:bold;">दिन ${dIdx + 1}</span>
+            <strong>📅 तारीख:</strong>
+            <input type="date" value="${day.date}" style="width:160px; font-weight:bold;" onchange="saveState(); schedule[${dIdx}].date = this.value; renderDaysUI(); renderReceipt();">
+            <span style="font-size:14px; font-weight:bold; color:var(--maroon);">[ ${displayDateText} ]</span>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-yellow" id="btn_day_toggle_${day.id}" style="font-size:11px; padding:4px 8px;" onclick="toggleWholeDay('${day.id}')">${day.hidden ? 'दिन खोलें 🔽' : 'दिन छिपाएं 🔼'}</button>
+            <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="toggleAllSessionsInDay('${day.id}', false)">🔼 सभी सत्र छिपाएं</button>
+            <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="toggleAllSessionsInDay('${day.id}', true)">🔽 सभी सत्र खोलें</button>
+            <button class="btn btn-blue" style="font-size:11px; padding:4px 8px;" onclick="addNextSession('${day.id}', true)">+ सत्र जोड़ें</button>
+            <button class="btn btn-danger" style="font-size:11px; padding:4px 8px;" onclick="removeDay('${day.id}')">दिन हटाएं</button>
+          </div>
+        </div>
+        
+        <div class="day-content-area" id="day_content_${day.id}" style="display:${day.hidden ? 'none' : 'block'};">
+      `;
+
+      day.sessions.forEach((sess, sIdx) => {
+        let badges = sess.items.map((it, iIdx) => `
+          <span class="item-badge ${it.isNv ? 'item-badge-nonveg' : ''}">
+            ${it.name} ${it.qty ? '<strong>('+it.qty+' '+it.unit+')</strong>' : ''}
+            <span style="cursor:pointer; color:red; margin-left:3px;" onclick="deleteItem('${day.id}', '${sess.id}', ${iIdx})">✖</span>
+          </span>
+        `).join("");
+
+        let vegKeys = ['chaat', 'chinese', 'starters', 'liquids', 'dal', 'sabzi', 'rice', 'breads', 'sweets', 'salad'];
+        let vegDropCols = vegKeys.map(k => generateMultiSelectHTML(sess.id, k, false)).join("");
+
+        let nvKeys = ['nvSnacks', 'nvMain'];
+        let nvDropCols = nvKeys.map(k => generateMultiSelectHTML(sess.id, k, true)).join("");
+
+        dHtml += `
+          <div class="session-box" id="box_${sess.id}" 
+               data-daynum="${dIdx + 1}" 
+               data-date="${day.date}" 
+               data-title="${sess.title}" 
+               data-dayid="${day.id}">
+            
+            <div class="session-date-banner">
+              <span>👉 <strong>दिन ${dIdx + 1}</strong> | तारीख: <span style="font-size:14px; text-decoration:underline;">${displayDateText}</span> | (${sess.title}) - <small style="color:#28a745;">[${sess.items.length} सामान जुड़ा]</small></span>
+              <div style="display:flex; gap:6px; align-items:center;">
+                <button class="btn btn-yellow" id="tgl_btn_${sess.id}" type="button" style="font-size:11px; padding:3px 8px;" onclick="toggleSessionDetails('${sess.id}', event)">छिपाएं 🔼</button>
+                <button class="btn btn-danger" type="button" style="font-size:10px; padding:2px 6px;" onclick="removeSession('${day.id}', '${sess.id}')">सत्र हटाएं ✖</button>
+              </div>
+            </div>
+
+            <div class="session-body-content" id="body_${sess.id}" style="display:${sess.hidden ? 'none' : 'block'};">
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+                <label style="margin:0;">सत्र नाम:</label>
+                <input type="text" value="${sess.title}" style="width:160px; font-weight:bold;" onfocus="setActiveSessionInfo(${dIdx + 1}, '${day.date}', this.value, '${day.id}');" oninput="schedule[${dIdx}].sessions[${sIdx}].title = this.value; document.getElementById('box_${sess.id}').setAttribute('data-title', this.value); renderReceipt();">
+                <label style="margin:0;">आदमी (Pax):</label>
+                <input type="number" placeholder="उदा. 40" value="${sess.pax}" style="width:110px;" oninput="schedule[${dIdx}].sessions[${sIdx}].pax = this.value; calculateBilling(); saveState(); renderReceipt();">
+                
+                <div style="display:inline-flex; align-items:center; gap:4px; margin-left:auto; background:#f0f4f8; padding:3px 6px; border-radius:4px; border:1px solid #c8d3de;">
+                  <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="copySessionItems('${day.id}', '${sess.id}')" title="इस सत्र के व्यंजन कॉपी करें">📋 कॉपी मेन्यू</button>
+                  <button class="btn btn-purple" style="font-size:11px; padding:4px 8px;" onclick="pasteSessionItems('${day.id}', '${sess.id}')" title="कॉपी किया हुआ मेन्यू इसी सत्र में जोड़ें">📥 यहाँ पेस्ट करें</button>
+                </div>
+              </div>
+
+              <div class="menu-panel" style="background:#f4fbf4; border:1px solid #c3e6cb; border-radius:6px; padding:10px; margin-top:8px;">
+                <div style="font-weight:bold; font-size:12px; color:green; margin-bottom:6px;">🥬 शाकाहारी मेन्यू (${displayDateText} के लिए):</div>
+                <div class="category-line">${vegDropCols}</div>
+              </div>
+
+              <div class="menu-panel" style="background:#fff5f5; border:1px solid #f5c6cb; border-radius:6px; padding:10px; margin-top:8px;">
+                <div style="font-weight:bold; font-size:12px; color:#b22222; margin-bottom:6px;">🍗 मांसाहारी मेन्यू (Non-Veg - ${displayDateText}):</div>
+                <div class="category-line" style="grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));">${nvDropCols}</div>
+              </div>
+
+              <div class="action-row">
+                <span style="font-size:12px; font-weight:bold; color:var(--maroon);">✍️ नया व्यंजन लिखें:</span>
+                <input type="text" id="custom_item_${sess.id}" placeholder="व्यंजन नाम" style="width:220px;">
+                <input type="number" id="qty_${sess.id}" placeholder="मात्रा" style="width:95px;">
+                <select id="unit_${sess.id}" style="width:95px;">
+                  <option value="kg">kg (किलो)</option>
+                  <option value="लीटर">लीटर</option>
+                  <option value="लोग">लोग</option>
+                  <option value="पीस">पीस</option>
+                  <option value="प्लेट">प्लेट</option>
+                  <option value="कप">कप</option>
+                </select>
+                <button class="btn btn-green" style="padding:7px 16px; font-size:13px; font-weight:bold;" onclick="addAllSelectedItems('${day.id}','${sess.id}')">
+                  ➕ चुने हुए सभी सामान जोड़ें
+                </button>
+              </div>
+
+              <div style="margin-top:10px; padding-top:4px;">
+                <strong>जुड़े हुए सामान (${sess.title}):</strong>
+                <div style="margin-top:4px;">
+                  ${badges || '<small style="color:#888;">इस सत्र में अभी कोई सामान नहीं जुड़ा है।</small>'}
+                </div>
+              </div>
+            </div>
+
+          </div>
+        `;
+      });
+
+      dHtml += `
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; margin-top:10px; background:#fff1f3; border:1px dashed #e57373; border-radius:6px;">
+          <span style="font-size:12.5px; font-weight:bold; color:var(--maroon);">
+            📅 दिन ${dIdx + 1} (${displayDateText}) में नया सत्र जोड़ें:
+          </span>
+          <button class="btn btn-blue" style="font-size:12px; padding:6px 14px;" onclick="addNextSession('${day.id}', true)">
+            ⏱️ + इस दिन में सत्र जोड़ें (नीचे)
+          </button>
+        </div>
+      `;
+
+      dayBox.innerHTML = dHtml;
+      wrap.appendChild(dayBox);
+    });
+
+    updateStickyDaySelect();
+    if (prevSelectedSticky && document.querySelector(`#stickyDaySelect option[value="${prevSelectedSticky}"]`)) {
+      document.getElementById('stickyDaySelect').value = prevSelectedSticky;
+    }
+    renderReceipt();
+    setupScrollSpy();
+  }
+
+  function toggleCustomTent(sel) {
+    document.getElementById('customTentInput').style.display = (sel.value === "CUSTOM") ? "block" : "none";
+  }
+
+  function addTentItem() {
+    let sel = document.getElementById('tentDrop');
+    let itemName = (sel.value === "CUSTOM") ? document.getElementById('customTentInput').value.trim() : sel.value;
+    if(!itemName) { alert("सामान का नाम लिखें!"); return; }
+
+    saveState();
+    let size = document.getElementById('tentSize').value.trim();
+    let qty = document.getElementById('tentQty').value.trim();
+    let unit = document.getElementById('tentUnit').value;
+
+    tentList.push({ name: itemName, size: size, qty: qty, unit: unit });
+    document.getElementById('tentSize').value = "";
+    document.getElementById('tentQty').value = "";
+    renderTentBadges();
+    renderReceipt();
+  }
+
+  function deleteTent(idx) {
+    saveState();
+    tentList.splice(idx, 1);
+    renderTentBadges();
+    renderReceipt();
+  }
+
+  function renderTentBadges() {
+    let box = document.getElementById('tentBadges');
+    box.innerHTML = tentList.map((t, i) => `
+      <span class="item-badge" style="background:#fff3cd; color:#856404; border-color:#ffeeba;">
+        ${t.name} ${t.size ? '<strong>(साइज: '+t.size+')</strong>' : ''} ${t.qty ? ': '+t.qty+' '+t.unit : ''}
+        <span style="cursor:pointer; color:red; margin-left:4px;" onclick="deleteTent(${i})">✖</span>
+      </span>
+    `).join("") || '<small style="color:#888;">कोई टेंट सामान नहीं जुड़ा।</small>';
+  }
+
+  // --- रसीद / पर्ची रेंडरिंग (श्रेणी-वार मेन्यू और बिलिंग के साथ) ---
+  function renderReceipt() {
+    document.getElementById('outFirmName').innerText = document.getElementById('firmName').value || "टेंट हाउस एवं कैटरर्स";
+    document.getElementById('outFirmPhone').innerText = document.getElementById('firmPhone').value || "-";
+    document.getElementById('outFirmTagline').innerText = document.getElementById('firmTagline').value || "";
+    document.getElementById('outCustName').innerText = document.getElementById('custName').value || "-";
+    document.getElementById('outPhone').innerText = document.getElementById('custPhone').value || "-";
+    document.getElementById('outAddress').innerText = document.getElementById('eventAddress').value || "-";
+
+    // 🍲 1. भोजन मेन्यू (सत्र एवं श्रेणी-वार व्यवस्थित)
+    let foodHtml = "";
+    schedule.forEach((d, i) => {
+      if(d.sessions.length > 0) {
+        foodHtml += `
+          <table class="bill-table" style="margin-bottom:14px;">
+            <thead>
+              <tr style="background:#f2dede; color:#8b0000;">
+                <th colspan="2" style="font-size:13px;">📅 दिन ${i+1}: दिनांक ${formatDisplayDate(d.date)}</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        
+        d.sessions.forEach(s => {
+          let paxText = s.pax && s.pax.toString().trim() !== "" ? (s.pax.toString().includes("लोग") ? `(${s.pax})` : `(${s.pax} लोग)`) : "";
+          
+          // सत्र के व्यंजनों को श्रेणी-वार अलग-अलग समूहों में बांटें
+          let categorizedItems = {};
+          s.items.forEach(it => {
+            let cat = findCategoryOfItem(it.name);
+            if (!categorizedItems[cat]) categorizedItems[cat] = [];
+            categorizedItems[cat].push(`${it.name}${it.qty ? ' ('+it.qty+' '+it.unit+')' : ''}`);
+          });
+
+          let itemsHtml = "";
+          let catKeys = Object.keys(categorizedItems);
+
+          if (catKeys.length === 0) {
+            itemsHtml = "<span style='color:#888;'>— (कोई व्यंजन दर्ज नहीं)</span>";
+          } else {
+            itemsHtml = catKeys.map(catTitle => `
+              <div class="cat-menu-row">
+                <span class="cat-menu-title">${catTitle}:</span>
+                <span class="cat-menu-items">${categorizedItems[catTitle].join(", ")}</span>
+              </div>
+            `).join("");
+          }
+
+          foodHtml += `
+            <tr>
+              <td width="28%" style="background:#fafafa; font-size:12.5px;">
+                <strong style="color:var(--maroon);">${s.title}</strong>
+                ${paxText ? '<br><small style="color:#555; font-weight:bold;">' + paxText + '</small>' : ''}
+              </td>
+              <td width="72%">${itemsHtml}</td>
+            </tr>
+          `;
         });
 
-        // लॉगआउट
-        function handleLogout() {
-            sessionStorage.removeItem('tent_auth_logged_in');
-            window.location.reload();
-        }
+        foodHtml += `</tbody></table>`;
+      }
+    });
 
-        // ऑटो लॉगिन चेक
-        window.onload = function() {
-            if (sessionStorage.getItem('tent_auth_logged_in') === 'true') {
-                document.getElementById('loginModal').classList.add('hidden');
-                document.getElementById('mainApp').classList.remove('hidden');
-                initializeDefaultData();
-            }
-        };
+    document.getElementById('outFoodArea').innerHTML = foodHtml || "<p style='font-size:12px; color:#888;'>कोई भोजन मीनू दर्ज नहीं है।</p>";
 
-        // टैब स्विचिंग
-        function switchTab(tabId) {
-            document.getElementById('billingTab').classList.toggle('hidden', tabId !== 'billingTab');
-            document.getElementById('recordsTab').classList.toggle('hidden', tabId !== 'recordsTab');
-            
-            const btnBill = document.getElementById('tabBtnBilling');
-            const btnRec = document.getElementById('tabBtnRecords');
+    // ⛺ 2. टेंट सामान सूची
+    let tentRows = "";
+    for(let i=0; i<tentList.length; i+=2) {
+      let t1 = tentList[i];
+      let t2 = tentList[i+1];
+      let t1Text = t1 ? `• ${t1.name} ${t1.size ? '('+t1.size+')' : ''} ${t1.qty ? ': <strong>'+t1.qty+' '+t1.unit+'</strong>' : ''}` : '';
+      let t2Text = t2 ? `• ${t2.name} ${t2.size ? '('+t2.size+')' : ''} ${t2.qty ? ': <strong>'+t2.qty+' '+t2.unit+'</strong>' : ''}` : '';
+      tentRows += `<tr><td width="50%">${t1Text}</td><td width="50%">${t2Text}</td></tr>`;
+    }
+    document.getElementById('outTentBody').innerHTML = tentRows || "<tr><td colspan='2' style='color:#888;'>कोई टेंट सामान दर्ज नहीं किया गया।</td></tr>";
 
-            if (tabId === 'billingTab') {
-                btnBill.className = "bg-white text-orange-700 px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-orange-50 transition";
-                btnRec.className = "bg-orange-700/60 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition";
-            } else {
-                btnRec.className = "bg-white text-orange-700 px-4 py-2 rounded-lg text-sm font-bold shadow hover:bg-orange-50 transition";
-                btnBill.className = "bg-orange-700/60 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition";
-            }
-        }
+    // 💰 3. बिल एवं एडवांस पेमेंट विवरण
+    let bMode = document.getElementById('billMode').value;
+    let modeText = "एकमुश्त तय राशि";
+    if (bMode === "perDay") modeText = "प्रति दिन हिसाब (" + schedule.length + " दिन)";
+    if (bMode === "perPax") {
+      let totalPax = 0;
+      schedule.forEach(d => {
+        (d.sessions || []).forEach(s => {
+          totalPax += (parseFloat(s.pax) || 0);
+        });
+      });
+      modeText = `प्रति प्लेट हिसाब (${totalPax} व्यक्ति)`;
+    }
 
-        // ==========================================
-        // 2. दिन-वार मेहमान गणना (Day-wise Guests)
-        // ==========================================
-        let dayCounter = 0;
+    document.getElementById('outBillMode').innerText = modeText;
+    document.getElementById('outBillTotal').innerText = document.getElementById('billTotal').value || "0";
+    document.getElementById('outBillAdvance').innerText = document.getElementById('billAdvance').value || "0";
+    document.getElementById('outBillBalance').innerText = document.getElementById('billBalance').value || "0";
+    document.getElementById('outBillPayMode').innerText = document.getElementById('billPayMode').value || "नकद";
+  }
 
-        function addDayRow(dayLabel = '', guestCount = '') {
-            dayCounter++;
-            const container = document.getElementById('dayRowsContainer');
-            const rowId = `day_row_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-            
-            const defaultName = dayLabel || `दिन ${container.children.length + 1} (कार्यक्रम)`;
+  function downloadImage() {
+    renderReceipt();
+    let cName = document.getElementById('custName').value.trim() || "Tent_Order";
+    let receiptEl = document.getElementById('billReceipt');
+    window.scrollTo(0, receiptEl.offsetTop - 70);
 
-            const div = document.createElement('div');
-            div.id = rowId;
-            div.className = "flex items-center gap-2 bg-white p-2 rounded-lg border border-amber-200 shadow-sm";
-            div.innerHTML = `
-                <div class="flex-1">
-                    <input type="text" value="${defaultName}" placeholder="दिन / कार्यक्रम (उदा. 1st Day / सगाई)" class="day-name w-full border border-gray-300 rounded p-1.5 text-sm font-medium focus:outline-none focus:border-amber-500">
-                </div>
-                <div class="w-36 flex items-center">
-                    <input type="number" value="${guestCount}" min="0" placeholder="व्यक्ति (उदा. 40)" oninput="recalculateGuests()" class="day-guests w-full border border-orange-300 rounded p-1.5 text-sm text-center font-bold text-orange-700 focus:outline-none focus:border-orange-500">
-                    <span class="text-xs text-gray-500 ml-1">लोग</span>
-                </div>
-                <button type="button" onclick="removeDayRow('${rowId}')" class="text-red-500 hover:text-red-700 p-2 text-sm" title="दिन हटाएं">
-                    <i class="fa-solid fa-trash-can"></i>
-                </button>
-            `;
-            container.appendChild(div);
-            recalculateGuests();
-        }
+    html2canvas(receiptEl, { scale: 2, useCORS: true, backgroundColor: "#ffffff" }).then(canvas => {
+      let a = document.createElement("a");
+      a.href = canvas.toDataURL("image/jpeg", 0.95);
+      a.download = `${cName}_बिल_पर्ची.jpg`;
+      a.click();
+    }).catch(err => { alert("फोटो बनाने में समस्या: " + err.message); });
+  }
 
-        function removeDayRow(rowId) {
-            const el = document.getElementById(rowId);
-            if (el) {
-                el.remove();
-                recalculateGuests();
-            }
-        }
+  function downloadWord() {
+    let cName = document.getElementById('custName').value || "Tent_Order";
+    let billHtml = document.getElementById('billReceipt').innerHTML;
+    let docHtml = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset='utf-8'>
+        <title>Order Receipt</title>
+        <style>
+          body { font-family: 'Segoe UI', Arial, sans-serif; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 12px; }
+          table, th, td { border: 1px solid #444; }
+          th { background-color: #f0f0f0; padding: 6px 8px; }
+          td { padding: 6px 8px; font-size: 12px; }
+          .cat-menu-row { margin-bottom: 4px; }
+          .cat-menu-title { font-weight: bold; color: #8b0000; }
+        </style>
+      </head>
+      <body>${billHtml}</body>
+      </html>
+    `;
+    let blob = new Blob(['\ufeff' + docHtml], { type: 'application/msword' });
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${cName}_Order_Bill.doc`;
+    a.click();
+  }
+</script>
 
-        function recalculateGuests() {
-            let totalGuests = 0;
-            const guestInputs = document.querySelectorAll('.day-guests');
-            guestInputs.forEach(input => {
-                const val = parseFloat(input.value) || 0;
-                totalGuests += val;
-            });
-
-            document.getElementById('totalGuestsBadge').innerText = `${totalGuests} व्यक्ति`;
-            return totalGuests;
-        }
-
-        // ==========================================
-        // 3. बिल आइटम एवं "प्रति व्यक्ति प्लेट" फंक्शन
-        // ==========================================
-        let itemRowIndex = 0;
-
-        // प्रति व्यक्ति प्लेट जोड़ना (मुख्य मांग)
-        function addPerPlateCateringItem() {
-            const totalGuests = recalculateGuests();
-            if (totalGuests <= 0) {
-                alert("कृपया पहले ऊपर दिए गए 'कार्यक्रम दिन' में व्यक्ति संख्या भरें (उदा. दिन 1: 40, दिन 2: 50)!");
-            }
-            // टेबल में ऑटोमैटिक प्रति व्यक्ति प्लेट की पंक्ति जोड़ें
-            addItemRow(`प्रति व्यक्ति प्लेट (कैटरिंग - कुल ${totalGuests} व्यक्ति)`, totalGuests, 'व्यक्ति/प्लेट', 0, true);
-        }
-
-        function addItemRow(desc = '', qty = 1, unit = 'नग', rate = 0, isPlate = false) {
-            itemRowIndex++;
-            const tbody = document.getElementById('itemsTableBody');
-            const rowId = `item_row_${Date.now()}_${Math.random().toString(36).substr(2, 4)}`;
-
-            const tr = document.createElement('tr');
-            tr.id = rowId;
-            tr.className = isPlate ? "bg-orange-50/70 font-semibold" : "hover:bg-gray-50";
-
-            tr.innerHTML = `
-                <td class="p-3 text-center text-gray-500 row-num"></td>
-                <td class="p-3">
-                    <input type="text" value="${desc}" placeholder="सामग्री या भोजन विवरण..." class="item-desc w-full border border-gray-300 rounded p-1.5 text-sm focus:outline-none focus:border-orange-500">
-                </td>
-                <td class="p-3">
-                    <input type="number" value="${qty}" min="1" step="any" oninput="calculateItemRow('${rowId}')" class="item-qty w-full border border-gray-300 rounded p-1.5 text-sm font-bold text-center focus:outline-none focus:border-orange-500">
-                </td>
-                <td class="p-3">
-                    <input type="text" value="${unit}" placeholder="नग/प्लेट" class="item-unit w-full border border-gray-300 rounded p-1.5 text-sm text-center focus:outline-none">
-                </td>
-                <td class="p-3">
-                    <input type="number" value="${rate}" min="0" step="any" placeholder="दर" oninput="calculateItemRow('${rowId}')" class="item-rate w-full border border-gray-300 rounded p-1.5 text-sm font-bold text-right focus:outline-none focus:border-orange-500">
-                </td>
-                <td class="p-3 text-right">
-                    <span class="item-total font-black text-gray-800">₹0.00</span>
-                </td>
-                <td class="p-3 text-center no-print">
-                    <button type="button" onclick="removeItemRow('${rowId}')" class="text-red-500 hover:text-red-700" title="हटाएं">
-                        <i class="fa-solid fa-circle-xmark text-lg"></i>
-                    </button>
-                </td>
-            `;
-
-            tbody.appendChild(tr);
-            updateRowNumbers();
-            calculateItemRow(rowId);
-
-            // यदि यह प्लेट आइटम है, तो सीधे दर वाले बॉक्स पर फोकस करें ताकि यूजर तुरंत दर डाल सके
-            if (isPlate) {
-                const rateInput = tr.querySelector('.item-rate');
-                if (rateInput) {
-                    rateInput.focus();
-                    rateInput.select();
-                }
-            }
-        }
-
-        function removeItemRow(rowId) {
-            const row = document.getElementById(rowId);
-            if (row) {
-                row.remove();
-                updateRowNumbers();
-                calculateTotalBill();
-            }
-        }
-
-        function updateRowNumbers() {
-            const rows = document.querySelectorAll('#itemsTableBody tr');
-            rows.forEach((r, idx) => {
-                const numCell = r.querySelector('.row-num');
-                if (numCell) numCell.innerText = idx + 1;
-            });
-        }
-
-        function calculateItemRow(rowId) {
-            const row = document.getElementById(rowId);
-            if (!row) return;
-
-            const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
-            const rate = parseFloat(row.querySelector('.item-rate').value) || 0;
-            const total = qty * rate;
-
-            row.querySelector('.item-total').innerText = `₹${total.toFixed(2)}`;
-            calculateTotalBill();
-        }
-
-        function calculateTotalBill() {
-            let subtotal = 0;
-            const rows = document.querySelectorAll('#itemsTableBody tr');
-            rows.forEach(r => {
-                const qty = parseFloat(r.querySelector('.item-qty').value) || 0;
-                const rate = parseFloat(r.querySelector('.item-rate').value) || 0;
-                subtotal += (qty * rate);
-            });
-
-            const discount = parseFloat(document.getElementById('discountInput').value) || 0;
-            const grandTotal = Math.max(0, subtotal - discount);
-            const advance = parseFloat(document.getElementById('advanceInput').value) || 0;
-            const balanceDue = Math.max(0, grandTotal - advance);
-
-            document.getElementById('subtotalDisplay').innerText = `₹${subtotal.toFixed(2)}`;
-            document.getElementById('grandTotalDisplay').innerText = `₹${grandTotal.toFixed(2)}`;
-            document.getElementById('balanceDueDisplay').innerText = `₹${balanceDue.toFixed(2)}`;
-        }
-
-        // ==========================================
-        // 4. डिफ़ॉल्ट डेटा एवं बिल रीसेट
-        // ==========================================
-        function initializeDefaultData() {
-            // ऑटो जनरेट बिल नंबर
-            const randomBillNo = 'TH-' + Math.floor(1000 + Math.random() * 9000);
-            document.getElementById('billNo').value = randomBillNo;
-
-            // आज की दिनांक
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('eventDate').value = today;
-
-            // डिफ़ॉल्ट 2 दिन के उदाहरण ताकि यूजर तुरंत समझ सके
-            const dayContainer = document.getElementById('dayRowsContainer');
-            if (dayContainer.children.length === 0) {
-                addDayRow('1st Day (सगाई / हल्दी)', '40');
-                addDayRow('2nd Day (मुख्य शादी / रिसेप्शन)', '50');
-            }
-
-            // डिफ़ॉल्ट 1 टेंट सामग्री
-            const itemsTableBody = document.getElementById('itemsTableBody');
-            if (itemsTableBody.children.length === 0) {
-                addItemRow('पाइप शामियाना / टेंट सेट', 1, 'सेट', 2500);
-                addItemRow('वीआईपी कुर्सियां (कवर सहित)', 50, 'नग', 12);
-            }
-        }
-
-        function resetBillForm() {
-            if (confirm("क्या आप वाकई नया फॉर्म शुरू करना चाहते हैं? वर्तमान अनसेव्ड डेटा साफ़ हो जाएगा।")) {
-                document.getElementById('customerName').value = '';
-                document.getElementById('customerPhone').value = '';
-                document.getElementById('eventAddress').value = '';
-                document.getElementById('billNotes').value = '';
-                document.getElementById('discountInput').value = '0';
-                document.getElementById('advanceInput').value = '0';
-                document.getElementById('dayRowsContainer').innerHTML = '';
-                document.getElementById('itemsTableBody').innerHTML = '';
-                initializeDefaultData();
-            }
-        }
-
-        // ==========================================
-        // 5. Firebase Realtime Database ऑपरेशंस
-        // ==========================================
-        async function saveBillToFirebase() {
-            const customerName = document.getElementById('customerName').value.trim();
-            const customerPhone = document.getElementById('customerPhone').value.trim();
-            const billNo = document.getElementById('billNo').value;
-
-            if (!customerName || !customerPhone) {
-                alert("कृपया ग्राहक का नाम और मोबाइल नंबर अवश्य भरें!");
-                return;
-            }
-
-            // दिन-वार व्यक्ति डेटा संकलन
-            const daysData = [];
-            document.querySelectorAll('#dayRowsContainer > div').forEach(div => {
-                const name = div.querySelector('.day-name').value;
-                const guests = parseFloat(div.querySelector('.day-guests').value) || 0;
-                daysData.push({ dayName: name, guestCount: guests });
-            });
-
-            // सामग्री डेटा संकलन
-            const itemsData = [];
-            document.querySelectorAll('#itemsTableBody tr').forEach(tr => {
-                const desc = tr.querySelector('.item-desc').value;
-                const qty = parseFloat(tr.querySelector('.item-qty').value) || 0;
-                const unit = tr.querySelector('.item-unit').value;
-                const rate = parseFloat(tr.querySelector('.item-rate').value) || 0;
-                const total = qty * rate;
-                if (desc) {
-                    itemsData.push({ desc, qty, unit, rate, total });
-                }
-            });
-
-            const billData = {
-                billNo: billNo,
-                customerName: customerName,
-                customerPhone: customerPhone,
-                eventDate: document.getElementById('eventDate').value,
-                eventAddress: document.getElementById('eventAddress').value,
-                paymentMode: document.getElementById('paymentMode').value,
-                notes: document.getElementById('billNotes').value,
-                daysBreakdown: daysData,
-                totalGuests: recalculateGuests(),
-                items: itemsData,
-                subtotal: parseFloat(document.getElementById('subtotalDisplay').innerText.replace('₹', '')) || 0,
-                discount: parseFloat(document.getElementById('discountInput').value) || 0,
-                grandTotal: parseFloat(document.getElementById('grandTotalDisplay').innerText.replace('₹', '')) || 0,
-                advancePaid: parseFloat(document.getElementById('advanceInput').value) || 0,
-                balanceDue: parseFloat(document.getElementById('balanceDueDisplay').innerText.replace('₹', '')) || 0,
-                updatedAt: new Date().toISOString()
-            };
-
-            const statusEl = document.getElementById('syncStatus');
-            statusEl.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-amber-400"></i> सेव हो रहा है...';
-
-            try {
-                // Firebase REST API कॉल
-                const response = await fetch(`${FIREBASE_DB_URL}/tent_orders/${billNo}.json`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(billData)
-                });
-
-                if (response.ok) {
-                    statusEl.innerHTML = '<i class="fa-solid fa-circle-check text-green-400"></i> सफलतापूर्वक सुरक्षित!';
-                    alert(`बिल संख्या ${billNo} सफलतापूर्वक Firebase में सुरक्षित हो गया है!`);
-                } else {
-                    throw new Error("नेटवर्क प्रतिक्रिया असफल रही");
-                }
-            } catch (err) {
-                console.error(err);
-                statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-red-400"></i> सेव में त्रुटि';
-                alert("डेटाबेस में सेव करने में समस्या आई। इंटरनेट कनेक्शन जांचें!");
-            }
-        }
-
-        // पिछले रिकॉर्ड्स लोड करना
-        let loadedOrdersCache = {};
-
-        async function loadOrdersFromFirebase() {
-            const tbody = document.getElementById('recordsTableBody');
-            tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-gray-500"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Firebase से रिकॉर्ड लोड हो रहे हैं...</td></tr>`;
-
-            try {
-                const response = await fetch(`${FIREBASE_DB_URL}/tent_orders.json`);
-                const data = await response.json();
-
-                if (!data) {
-                    tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-gray-400">कोई सुरक्षित बिल नहीं मिला।</td></tr>`;
-                    return;
-                }
-
-                loadedOrdersCache = data;
-                renderOrdersTable(data);
-            } catch (err) {
-                console.error(err);
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-red-500">रिकॉर्ड लोड करने में समस्या आई।</td></tr>`;
-            }
-        }
-
-        function renderOrdersTable(data) {
-            const tbody = document.getElementById('recordsTableBody');
-            tbody.innerHTML = '';
-
-            const keys = Object.keys(data).reverse(); // नवीनतम पहले
-
-            keys.forEach(k => {
-                const order = data[k];
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-gray-50 border-b";
-                tr.innerHTML = `
-                    <td class="p-3 font-mono font-bold text-orange-600">${order.billNo || k}</td>
-                    <td class="p-3">${order.eventDate || '-'}</td>
-                    <td class="p-3 font-semibold">${order.customerName || '-'}</td>
-                    <td class="p-3">${order.customerPhone || '-'}</td>
-                    <td class="p-3 text-right font-bold">₹${order.grandTotal || 0}</td>
-                    <td class="p-3 text-right text-green-600">₹${order.advancePaid || 0}</td>
-                    <td class="p-3 text-right text-red-600 font-bold">₹${order.balanceDue || 0}</td>
-                    <td class="p-3 text-center space-x-2">
-                        <button onclick="viewOrderInBill('${k}')" class="text-blue-600 hover:text-blue-800" title="देखें एवं एडिट करें"><i class="fa-solid fa-eye"></i></button>
-                        <button onclick="deleteOrder('${k}')" class="text-red-500 hover:text-red-700" title="हटाएं"><i class="fa-solid fa-trash"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        function filterOrders() {
-            const query = document.getElementById('searchRecord').value.toLowerCase();
-            const filtered = {};
-            for (let k in loadedOrdersCache) {
-                const order = loadedOrdersCache[k];
-                const name = (order.customerName || '').toLowerCase();
-                const phone = (order.customerPhone || '').toLowerCase();
-                if (name.includes(query) || phone.includes(query) || k.toLowerCase().includes(query)) {
-                    filtered[k] = order;
-                }
-            }
-            renderOrdersTable(filtered);
-        }
-
-        // लोड किए गए ऑर्डर को मुख्य बिल में खोलना
-        function viewOrderInBill(billKey) {
-            const order = loadedOrdersCache[billKey];
-            if (!order) return;
-
-            document.getElementById('billNo').value = order.billNo || billKey;
-            document.getElementById('customerName').value = order.customerName || '';
-            document.getElementById('customerPhone').value = order.customerPhone || '';
-            document.getElementById('eventDate').value = order.eventDate || '';
-            document.getElementById('eventAddress').value = order.eventAddress || '';
-            document.getElementById('paymentMode').value = order.paymentMode || 'नकद (Cash)';
-            document.getElementById('billNotes').value = order.notes || '';
-            document.getElementById('discountInput').value = order.discount || 0;
-            document.getElementById('advanceInput').value = order.advancePaid || 0;
-
-            // दिन लोड करना
-            const dayContainer = document.getElementById('dayRowsContainer');
-            dayContainer.innerHTML = '';
-            if (order.daysBreakdown && order.daysBreakdown.length > 0) {
-                order.daysBreakdown.forEach(d => addDayRow(d.dayName, d.guestCount));
-            } else {
-                addDayRow('दिन 1', order.totalGuests || '');
-            }
-
-            // सामग्री लोड करना
-            const tbody = document.getElementById('itemsTableBody');
-            tbody.innerHTML = '';
-            if (order.items && order.items.length > 0) {
-                order.items.forEach(it => {
-                    const isPlate = (it.desc || '').includes('प्लेट');
-                    addItemRow(it.desc, it.qty, it.unit, it.rate, isPlate);
-                });
-            }
-
-            switchTab('billingTab');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // ऑर्डर हटाना
-        async function deleteOrder(billKey) {
-            if (!confirm(`क्या आप वाकई बिल ${billKey} को हटाना चाहते हैं?`)) return;
-
-            try {
-                const response = await fetch(`${FIREBASE_DB_URL}/tent_orders/${billKey}.json`, {
-                    method: 'DELETE'
-                });
-                if (response.ok) {
-                    alert("बिल रिकॉर्ड हटा दिया गया!");
-                    loadOrdersFromFirebase();
-                }
-            } catch (err) {
-                alert("हटाने में त्रुटि आई!");
-            }
-        }
-
-        // ==========================================
-        // 6. व्हाट्सएप शेयरिंग (WhatsApp Share)
-        // ==========================================
-        function shareOnWhatsApp() {
-            const billNo = document.getElementById('billNo').value;
-            const name = document.getElementById('customerName').value || 'ग्राहक';
-            const phone = document.getElementById('customerPhone').value;
-            const totalGuests = recalculateGuests();
-            const grandTotal = document.getElementById('grandTotalDisplay').innerText;
-            const advance = document.getElementById('advanceInput').value;
-            const balance = document.getElementById('balanceDueDisplay').innerText;
-            const eventDate = document.getElementById('eventDate').value;
-
-            const text = `*॥ श्री गणेशाय नमः ॥*%0A`
-                + `*टेंट हाउस एवं कैटरिंग सर्विस*%0A`
-                + `----------------------------------%0A`
-                + `*बिल नं:* ${billNo}%0A`
-                + `*ग्राहक का नाम:* ${name}%0A`
-                + `*कार्यक्रम दिनांक:* ${eventDate}%0A`
-                + `*कुल अनुमानित व्यक्ति:* ${totalGuests} मेहमान%0A`
-                + `----------------------------------%0A`
-                + `*कुल राशि:* ${grandTotal}%0A`
-                + `*जमा एडवांस:* ₹${advance}%0A`
-                + `*शेष बकाया राशि:* ${balance}%0A`
-                + `----------------------------------%0A`
-                + `_हमारे साथ जुड़ने के लिए धन्यवाद!_`;
-
-            let url = `https://wa.me/?text=${text}`;
-            if (phone && phone.length === 10) {
-                url = `https://wa.me/91${phone}?text=${text}`;
-            }
-            window.open(url, '_blank');
-        }
-    </script>
 </body>
 </html>
