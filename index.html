@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>टेंट हाउस एवं कैटरिंग मैनेजमेंट सिस्टम</title>
+  <title>टेंट हाउस एवं कैटरिंग मैनेजमेंट सिस्टम (Firebase Cloud)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   
   <style>
@@ -187,7 +187,7 @@
       position: relative;
       display: flex;
       align-items: center;
-      margin: 12px 0 14px 0;
+      margin: 12px 0 8px 0;
     }
     .pass-input-wrapper input {
       padding-right: 40px;
@@ -230,6 +230,12 @@
     <div class="pass-input-wrapper">
       <input type="password" id="modalPassInput" placeholder="यहाँ पासवर्ड लिखें...">
       <button type="button" class="eye-btn" onclick="togglePasswordEye()" title="पासवर्ड दिखाएं/छुपाएं">👁️</button>
+    </div>
+
+    <div style="margin-bottom:12px; text-align:left;">
+      <a href="javascript:void(0);" onclick="triggerEmergencyReset()" style="color:#dc3545; font-size:11.5px; font-weight:bold; text-decoration:underline;">
+        ❓ पासवर्ड काम नहीं कर रहा या भूल गए? यहाँ रीसेट करें
+      </a>
     </div>
 
     <div style="display:flex; justify-content:flex-end; gap:8px;">
@@ -279,17 +285,14 @@
     <button class="btn btn-secondary" onclick="redoAction()">↪️ Redo</button>
   </div>
 
-  <!-- सुरक्षित एडमिन जोन (लॉगिन से नियंत्रित) -->
+  <!-- सुरक्षित एडमिन जोन -->
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
-    
-    <!-- जब तक लॉगिन नहीं होगा, केवल यह लॉगिन बटन दिखेगा -->
     <button class="btn btn-dark" id="btnLoginAdmin" onclick="doAdminLogin()" style="border: 2px solid #ffc107;">🔐 एडमिन लॉगिन</button>
 
-    <!-- लॉगिन होने के बाद यह एडमिन पैनल दिखेगा -->
     <div id="adminPanelArea" style="display:none;" class="admin-zone">
       <span style="font-size:11px; font-weight:bold; color:#856404;">👑 एडमिन सक्रिय</span>
-      <button class="btn btn-green" id="btnSaveDrive" onclick="saveToGoogleDriveDirect()">☁️ Drive में सेव</button>
-      <button class="btn btn-purple" onclick="openGoogleDriveList()">📂 Drive फाइलें</button>
+      <button class="btn btn-green" id="btnSaveCloud" onclick="saveToCloudDirect()">☁️ क्लाउड में सेव</button>
+      <button class="btn btn-purple" onclick="openCloudOrdersList()">📂 क्लाउड ऑर्डर्स</button>
       <button class="btn btn-secondary" style="font-size:11px;" onclick="changeMasterPasswordDirectly()">🔑 पासवर्ड बदलें</button>
       <button class="btn btn-danger" style="font-size:11px;" onclick="doAdminLogout()">लॉगआउट</button>
     </div>
@@ -303,7 +306,7 @@
 <!-- लाइव एक्टिव डेट बैनर -->
 <div class="live-date-indicator no-print" id="liveDateIndicator">
   <span>👉 वर्तमान कार्य स्थिति: <span id="currentActiveInfo" class="live-badge-glow">[ दिन 1 ] | 📅 तारीख: -- | ⏱️ सत्र: --</span></span>
-  <span style="font-size:12px; color:#6d5204; font-weight:bold;">⚡ ऑटो-ट्रैकिंग सक्रिय</span>
+  <span style="font-size:12px; color:#6d5204; font-weight:bold;">⚡ Firebase Cloud सक्रिय</span>
 </div>
 
 <div class="container" id="mainContainer">
@@ -432,24 +435,24 @@
     <div id="tentBadges" style="min-height:30px; background:white; border:1px solid #ddd; padding:6px; border-radius:4px;"></div>
   </div>
 
-  <!-- Google Drive फाइलों की सूची -->
-  <div class="card no-print" id="driveListCard" style="display:none; border:2px solid #6f42c1;">
+  <!-- Firebase क्लाउड फाइलों की सूची -->
+  <div class="card no-print" id="cloudListCard" style="display:none; border:2px solid #6f42c1;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-      <h3 style="margin:0; color:#6f42c1;">☁️ Google Drive सुरक्षित फाइलें</h3>
-      <button class="btn btn-danger" style="font-size:11px;" onclick="document.getElementById('driveListCard').style.display='none'">बंद करें ✖</button>
+      <h3 style="margin:0; color:#6f42c1;">☁️ Firebase Cloud सुरक्षित ऑर्डर्स</h3>
+      <button class="btn btn-danger" style="font-size:11px;" onclick="document.getElementById('cloudListCard').style.display='none'">बंद करें ✖</button>
     </div>
-    <div id="driveLoading" style="display:none; color:#0056b3; padding:8px; font-weight:bold;">⏳ Google Drive से फ़ाइलें खोजी जा रही हैं...</div>
+    <div id="cloudLoading" style="display:none; color:#0056b3; padding:8px; font-weight:bold;">⏳ क्लाउड से ऑर्डर्स लोड हो रहे हैं...</div>
     <div style="overflow-x:auto;">
       <table style="width:100%; border-collapse:collapse;" border="1" cellpadding="6">
         <thead style="background:#f3e8fd;">
-          <tr><th>फ़ाइल नाम (ग्राहक)</th><th>अंतिम सेव तारीख</th><th>कार्य</th></tr>
+          <tr><th>ग्राहक का नाम</th><th>मोबाइल</th><th>कार्यक्रम तारीख</th><th>सेव समय</th><th>कार्य</th></tr>
         </thead>
-        <tbody id="driveFilesBody"></tbody>
+        <tbody id="cloudFilesBody"></tbody>
       </table>
     </div>
   </div>
 
-  <!-- 5. रसीद / बिल पर्ची -->
+  <!-- रसीद / बिल पर्ची -->
   <div id="billReceipt">
     <div class="bill-header">
       <h1 id="outFirmName" style="margin:0; color:var(--maroon); font-size:22px;">टेंट हाउस एवं कैटरर्स</h1>
@@ -486,10 +489,10 @@
 </div>
 
 <script>
-  // 🔗 Google Apps Script URL
-  const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxFwf4Y6nigUyZmXXdEuup_f9ncex0hV5DYw4-GphLfFNW7dwADTBPLra-bepSKAvOo/exec";
+  // 🔗 आपका Firebase Realtime Database URL
+  const FIREBASE_DB_URL = "https://tent-house-76ec2-default-rtdb.firebaseio.com";
+  const EMERGENCY_SECURITY_PIN = "9999"; // आपातकालीन पिन जो कभी नहीं बदलेगा
 
-  // एडमिन ऑथेंटिकेशन व्यवस्था
   let currentAdminToken = sessionStorage.getItem('admin_session_pass') || "";
 
   function renderAdminUI() {
@@ -504,19 +507,36 @@
     }
   }
 
+  // 100% विश्वसनीय लॉगिन फ़ंक्शन (लोकल + क्लाउड सिंक)
   async function doAdminLogin() {
-    let pass = await askPassword("🔐 एडमिन लॉगिन", "एडमिन टूल्स और गूगल ड्राइव सेव के लिए पासवर्ड डालें (डिफ़ॉल्ट: admin123):");
+    let pass = await askPassword("🔐 एडमिन लॉगिन", "एडमिन टूल्स और क्लाउड सेव के लिए पासवर्ड डालें (डिफ़ॉल्ट: admin123):");
     if (!pass) return;
 
-    let res = await apiCall({ action: "login", pass: pass });
-    if (res.status === "success") {
+    let savedMasterPass = localStorage.getItem('master_admin_pass') || "admin123";
+
+    if (pass === savedMasterPass) {
       currentAdminToken = pass;
       sessionStorage.setItem('admin_session_pass', pass);
       renderAdminUI();
-      alert("🎉 एडमिन लॉगिन सफल! अब आप एक क्लिक में बिना किसी रोक-टोक के Google Drive में सेव कर सकते हैं।");
-    } else {
-      alert("❌ " + res.message);
+      alert("🎉 एडमिन लॉगिन सफल! Firebase Cloud सक्रिय है।");
+      return;
     }
+
+    // यदि लोकल नहीं मिला, तो Firebase में चेक करें
+    try {
+      let resp = await fetch(`${FIREBASE_DB_URL}/settings/adminPass.json`);
+      let cloudPass = await resp.json();
+      if (cloudPass && pass === cloudPass) {
+        currentAdminToken = pass;
+        sessionStorage.setItem('admin_session_pass', pass);
+        localStorage.setItem('master_admin_pass', pass);
+        renderAdminUI();
+        alert("🎉 एडमिन लॉगिन सफल!");
+        return;
+      }
+    } catch(e) { console.log(e); }
+
+    alert("❌ गलत पासवर्ड! कृपया सही पासवर्ड दर्ज करें। (डिफ़ॉल्ट: admin123)");
   }
 
   function doAdminLogout() {
@@ -524,8 +544,8 @@
       currentAdminToken = "";
       sessionStorage.removeItem('admin_session_pass');
       renderAdminUI();
-      document.getElementById('driveListCard').style.display = 'none';
-      alert("🚪 आप सफलतापूर्वक लॉगआउट हो गए हैं।");
+      document.getElementById('cloudListCard').style.display = 'none';
+      alert("🚪 आप लॉगआउट हो गए हैं।");
     }
   }
 
@@ -567,27 +587,33 @@
     inp.type = (inp.type === "password") ? "text" : "password";
   }
 
-  // कॉमन API कॉलर
-  async function apiCall(payloadObj) {
-    try {
-      let resp = await fetch(GOOGLE_SCRIPT_URL, {
-        method: "POST",
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(payloadObj)
-      });
-      let text = await resp.text();
+  // 🚨 आपातकालीन पासवर्ड रीसेट
+  async function triggerEmergencyReset() {
+    let pin = prompt("🚨 इमरजेंसी रीसेट:\nअपना 4 अंकों का सुरक्षा पिन दर्ज करें (डिफ़ॉल्ट पिन: 9999):");
+    if (!pin) return;
+
+    if (pin.trim() === EMERGENCY_SECURITY_PIN) {
+      localStorage.setItem('master_admin_pass', 'admin123');
+      currentAdminToken = "admin123";
+      sessionStorage.setItem('admin_session_pass', "admin123");
+
       try {
-        return JSON.parse(text);
-      } catch (err) {
-        return { status: "error", message: "Google Apps Script एरर: " + text.substring(0, 150) };
-      }
-    } catch (e) {
-      return { status: "error", message: "इंटरनेट या सर्वर एरर: " + e.message };
+        await fetch(`${FIREBASE_DB_URL}/settings/adminPass.json`, {
+          method: 'PUT',
+          body: JSON.stringify("admin123")
+        });
+      } catch(e) {}
+
+      closePasswordModal(false);
+      renderAdminUI();
+      alert("✅ पासवर्ड सफलतापूर्वक रीसेट हो गया है!\n\nअब आपका पासवर्ड वापस 'admin123' हो गया है।");
+    } else {
+      alert("❌ गलत सुरक्षा पिन! पासवर्ड रीसेट नहीं किया जा सका।");
     }
   }
 
-  // 1-क्लिक डायरेक्ट सेव (कोई पासवर्ड नहीं पूछेगा)
-  async function saveToGoogleDriveDirect() {
+  // ☁️ 1-क्लिक Firebase Cloud में सेव करना
+  async function saveToCloudDirect() {
     if (!currentAdminToken) {
       alert("❌ पहले '🔐 एडमिन लॉगिन' करें!");
       return;
@@ -595,6 +621,9 @@
 
     let cName = document.getElementById('custName').value.trim();
     if (!cName) { alert("कृपया पहले ग्राहक का नाम लिखें!"); return; }
+
+    let now = new Date();
+    let displayTime = now.toLocaleDateString('hi-IN') + " " + now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
 
     let orderData = {
       custName: cName,
@@ -605,38 +634,41 @@
       firmPhone: document.getElementById('firmPhone').value,
       firmTagline: document.getElementById('firmTagline').value,
       schedule: schedule,
-      tentList: tentList
+      tentList: tentList,
+      savedAt: displayTime,
+      timestamp: Date.now()
     };
 
-    let btn = document.getElementById('btnSaveDrive');
+    let btn = document.getElementById('btnSaveCloud');
     let orig = btn.innerText;
     btn.innerText = "⏳ सेव हो रहा है...";
 
-    let res = await apiCall({
-      action: "save",
-      pass: currentAdminToken,
-      payload: orderData
-    });
+    // Firebase Key निर्माण
+    let safeKey = (cName.replace(/[.#$[\]/]/g, "_") + "_" + (document.getElementById('custPhone').value || "NoPhone")).trim();
 
-    btn.innerText = orig;
+    try {
+      let resp = await fetch(`${FIREBASE_DB_URL}/orders/${safeKey}.json`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(orderData)
+      });
 
-    if (res.status === "success") {
-      alert(`✅ सफलता! "${cName}" का पूरा रिकॉर्ड Google Drive में सुरक्षित सेव हो गया है!`);
-    } else {
-      alert("❌ सेव नहीं हुआ: " + res.message);
-      if (res.message.includes("पासवर्ड")) {
-        currentAdminToken = "";
-        sessionStorage.removeItem('admin_session_pass');
-        renderAdminUI();
+      btn.innerText = orig;
+
+      if (resp.ok) {
+        alert(`✅ सफलता! "${cName}" का पूरा बिल Firebase Cloud में सुरक्षित सेव हो गया है!`);
+      } else {
+        alert("❌ क्लाउड में सेव नहीं हो सका। कृपया इंटरनेट जांचें।");
       }
+    } catch(err) {
+      btn.innerText = orig;
+      alert("❌ सर्वर एरर: " + err.message);
     }
   }
 
+  // पासवर्ड बदलना (लोकल + क्लाउड दोनों में स्थायी रूप से)
   async function changeMasterPasswordDirectly() {
-    if (!currentAdminToken) {
-      alert("कृपया पहले एडमिन लॉगिन करें!");
-      return;
-    }
+    if (!currentAdminToken) { alert("कृपया पहले एडमिन लॉगिन करें!"); return; }
 
     let newPass = await askPassword("🔑 नया पासवर्ड", "नया एडमिन पासवर्ड दर्ज करें:");
     if (!newPass) { alert("नया पासवर्ड खाली नहीं हो सकता!"); return; }
@@ -647,92 +679,113 @@
       return;
     }
 
-    let res = await apiCall({
-      action: "change_password",
-      oldPass: currentAdminToken,
-      newPass: newPass
-    });
+    localStorage.setItem('master_admin_pass', newPass);
+    currentAdminToken = newPass;
+    sessionStorage.setItem('admin_session_pass', newPass);
 
-    if (res.status === "success") {
-      currentAdminToken = newPass;
-      sessionStorage.setItem('admin_session_pass', newPass);
-      alert("🎉 बधाई! आपका एडमिन पासवर्ड हमेशा के लिए बदल गया है!");
-    } else {
-      alert("❌ " + res.message);
-    }
+    try {
+      await fetch(`${FIREBASE_DB_URL}/settings/adminPass.json`, {
+        method: "PUT",
+        body: JSON.stringify(newPass)
+      });
+    } catch(e) {}
+
+    alert("🎉 बधाई! आपका नया एडमिन पासवर्ड सफलतापूर्वक अपडेट हो गया है!");
   }
 
-  async function openGoogleDriveList() {
+  // 📂 Firebase Cloud से सभी ऑर्डर्स की सूची देखना
+  async function openCloudOrdersList() {
     if (!currentAdminToken) {
-      alert("❌ ड्राइव फाइलें देखने के लिए पहले एडमिन लॉगिन करें!");
+      alert("❌ क्लाउड ऑर्डर्स देखने के लिए पहले एडमिन लॉगिन करें!");
       return;
     }
 
-    let card = document.getElementById('driveListCard');
-    let body = document.getElementById('driveFilesBody');
-    let loading = document.getElementById('driveLoading');
+    let card = document.getElementById('cloudListCard');
+    let body = document.getElementById('cloudFilesBody');
+    let loading = document.getElementById('cloudLoading');
     
     card.style.display = 'block';
     body.innerHTML = "";
     loading.style.display = 'block';
 
-    let res = await apiCall({ action: "list", pass: currentAdminToken });
-    loading.style.display = 'none';
+    try {
+      let resp = await fetch(`${FIREBASE_DB_URL}/orders.json`);
+      loading.style.display = 'none';
 
-    if (res.status !== "success") {
-      alert("❌ " + res.message);
-      card.style.display = 'none';
-      return;
+      if (!resp.ok) {
+        alert("❌ डेटाबेस लोड नहीं हो सका!");
+        card.style.display = 'none';
+        return;
+      }
+
+      let allOrders = await resp.json();
+      if (!allOrders || Object.keys(allOrders).length === 0) {
+        body.innerHTML = "<tr><td colspan='5' align='center'>क्लाउड में अभी कोई आर्डर सेव नहीं मिला।</td></tr>";
+        return;
+      }
+
+      let rows = "";
+      Object.keys(allOrders).reverse().forEach(key => {
+        let o = allOrders[key];
+        rows += `
+          <tr>
+            <td><strong>${o.custName || "-"}</strong></td>
+            <td>${o.custPhone || "-"}</td>
+            <td>${formatDisplayDate(o.eventDate)}</td>
+            <td><small style="color:#666;">${o.savedAt || "-"}</small></td>
+            <td>
+              <button class="btn btn-green" style="font-size:11px; padding:3px 7px;" onclick="loadFromCloud('${key}')">✏️ खोलें</button>
+              <button class="btn btn-danger" style="font-size:11px; padding:3px 7px; margin-left:4px;" onclick="deleteFromCloud('${key}')">🗑️ हटाएं</button>
+            </td>
+          </tr>
+        `;
+      });
+      body.innerHTML = rows;
+    } catch(e) {
+      loading.style.display = 'none';
+      alert("इंटरनेट एरर: " + e.message);
     }
-
-    if (!res.list || res.list.length === 0) {
-      body.innerHTML = "<tr><td colspan='3' align='center'>Google Drive में अभी कोई आर्डर नहीं मिला।</td></tr>";
-      return;
-    }
-
-    res.list.forEach(f => {
-      body.innerHTML += `
-        <tr>
-          <td><strong>${f.name}</strong></td>
-          <td>${f.date}</td>
-          <td>
-            <button class="btn btn-green" style="font-size:11px; padding:3px 8px;" onclick="loadFromGoogleDrive('${f.id}')">✏️ Drive से खोलें</button>
-          </td>
-        </tr>
-      `;
-    });
   }
 
-  async function loadFromGoogleDrive(fileId) {
-    let res = await apiCall({
-      action: "load",
-      pass: currentAdminToken,
-      fileId: fileId
-    });
+  // क्लाउड से ऑर्डर लोड करना
+  async function loadFromCloud(orderKey) {
+    try {
+      let resp = await fetch(`${FIREBASE_DB_URL}/orders/${orderKey}.json`);
+      let o = await resp.json();
+      if (!o) { alert("ऑर्डर नहीं मिला!"); return; }
 
-    if (res.status !== "success") {
-      alert("फ़ाइल लोड नहीं हो सकी: " + res.message);
-      return;
+      saveState();
+
+      document.getElementById('custName').value = o.custName || "";
+      document.getElementById('custPhone').value = o.custPhone || "";
+      document.getElementById('eventAddress').value = o.address || "";
+      document.getElementById('eventStartDate').value = o.eventDate || "";
+      updateEventDates();
+
+      schedule = o.schedule || [];
+      tentList = o.tentList || [];
+
+      renderDaysUI();
+      renderTentBadges();
+      renderReceipt();
+      document.getElementById('cloudListCard').style.display = 'none';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      alert(`🎉 "${o.custName}" का रिकॉर्ड सफलतापूर्वक खुल गया!`);
+    } catch(e) {
+      alert("लोड एरर: " + e.message);
     }
+  }
 
-    let o = res.data;
-    saveState();
-
-    document.getElementById('custName').value = o.custName || "";
-    document.getElementById('custPhone').value = o.custPhone || "";
-    document.getElementById('eventAddress').value = o.address || "";
-    document.getElementById('eventStartDate').value = o.eventDate || "";
-    updateEventDates();
-
-    schedule = o.schedule || [];
-    tentList = o.tentList || [];
-
-    renderDaysUI();
-    renderTentBadges();
-    renderReceipt();
-    document.getElementById('driveListCard').style.display = 'none';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    alert(`🎉 Google Drive से "${o.custName}" का रिकॉर्ड खुल गया!`);
+  // क्लाउड से ऑर्डर डिलीट करना
+  async function deleteFromCloud(orderKey) {
+    if(!confirm("क्या आप वाकई इस ऑर्डर को क्लाउड से हमेशा के लिए हटाना चाहते हैं?")) return;
+    try {
+      let resp = await fetch(`${FIREBASE_DB_URL}/orders/${orderKey}.json`, { method: "DELETE" });
+      if(resp.ok) {
+        alert("🗑️ ऑर्डर हटा दिया गया!");
+        openCloudOrdersList();
+      }
+    } catch(e) { alert("एरर: " + e.message); }
   }
 
   const hindiAlphabetOrder = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः','क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह','क्ष','त्र','ज्ञ'];
@@ -791,7 +844,6 @@
 
   let schedule = [];
   let tentList = [];
-  let currentOrderId = null;
   let undoStack = [];
   let redoStack = [];
   let sessionClipboard = null;
