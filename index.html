@@ -230,6 +230,17 @@
       border: 1px solid #666;
     }
 
+    /* मोबाइल अनुकूलन (स्क्रीन पर सही दिखने के लिए) */
+    @media screen and (max-width: 768px) {
+      body { padding: 8px; padding-top: 130px; }
+      .container { margin-left: 0 !important; width: 100% !important; }
+      #quickSidebar { transform: translateX(-100%); }
+      #quickSidebar.mobile-open { transform: translateX(0); z-index: 10000; }
+      .sidebar-toggle-btn { left: 0 !important; }
+      .sticky-action-bar { padding: 6px 8px; }
+      .live-date-indicator { top: 58px; font-size: 12px; padding: 6px 10px; }
+    }
+
     @media print {
       body { background: white; padding: 0; }
       .no-print, .sticky-action-bar, .live-date-indicator, #quickSidebar, .sidebar-toggle-btn { display: none !important; }
@@ -240,71 +251,23 @@
 </head>
 <body>
 
+<!-- छिपी हुई फाइल इनपुट (Word / HTML फ़ाइल अपलोड हेतु) -->
+<input type="file" id="fileRestoreInput" accept=".doc,.html,.txt" style="display:none;" onchange="handleFileRestore(event)">
+
 <!-- 1. लॉगिन मोडल -->
 <div id="passwordModal" class="custom-modal-overlay">
   <div class="custom-modal">
     <h3 id="modalTitle" style="color:var(--maroon); margin-top:0; font-size:16px;">🔐 एडमिन लॉगिन</h3>
-    <p id="modalMsg" style="font-size:13px; color:#444; margin-bottom:8px; line-height:1.4;">कृपया आगे बढ़ने के लिए अपना एडमिन पासवर्ड दर्ज करें:</p>
+    <p id="modalMsg" style="font-size:13px; color:#444; margin-bottom:8px; line-height:1.4;">कृपया पासवर्ड दर्ज करें:</p>
     
     <div class="pass-input-wrapper">
       <input type="password" id="modalPassInput" placeholder="यहाँ पासवर्ड लिखें...">
       <button type="button" class="eye-btn" onclick="togglePasswordEye()" title="पासवर्ड दिखाएं/छुपाएं">👁️</button>
     </div>
 
-    <div style="margin-bottom:14px; text-align:left;">
-      <a href="javascript:void(0);" onclick="openForgotPinModal()" style="color:#dc3545; font-size:12px; font-weight:bold; text-decoration:underline;">
-        ❓ पासवर्ड भूल गए? गुप्त पिन से नया पासवर्ड बनाएं
-      </a>
-    </div>
-
     <div style="display:flex; justify-content:flex-end; gap:8px;">
       <button class="btn btn-secondary" onclick="closePasswordModal(false)">रद्द करें</button>
       <button class="btn btn-green" onclick="closePasswordModal(true)">लॉगिन करें</button>
-    </div>
-  </div>
-</div>
-
-<!-- 2. पासवर्ड भूल गए? (पिन द्वारा रीसेट मोडल) -->
-<div id="forgotModal" class="custom-modal-overlay">
-  <div class="custom-modal" style="border-top-color:#dc3545;">
-    <h3 style="color:#dc3545; margin-top:0; font-size:16px;">🚨 पासवर्ड रीसेट (सुरक्षा पिन द्वारा)</h3>
-    <p style="font-size:12.5px; color:#555; margin-bottom:8px;">अपना गुप्त सुरक्षा पिन दर्ज करें और नया पासवर्ड सेट करें:</p>
-    
-    <label>गुप्त सुरक्षा पिन (Security PIN):</label>
-    <input type="password" id="resetPinInput" placeholder="अपना गुप्त पिन यहाँ दर्ज करें" style="margin-bottom:10px;">
-
-    <label>नया पासवर्ड बनाएं:</label>
-    <input type="password" id="resetNewPass" placeholder="नया पासवर्ड लिखें" style="margin-bottom:10px;">
-
-    <label>नए पासवर्ड की पुष्टि करें:</label>
-    <input type="password" id="resetConfirmPass" placeholder="नया पासवर्ड दोबारा लिखें" style="margin-bottom:14px;">
-
-    <div style="display:flex; justify-content:flex-end; gap:8px;">
-      <button class="btn btn-secondary" onclick="document.getElementById('forgotModal').style.display='none'">रद्द करें</button>
-      <button class="btn btn-danger" onclick="submitPasswordResetWithPin()">नया पासवर्ड सेट करें</button>
-    </div>
-  </div>
-</div>
-
-<!-- 3. पासवर्ड व पिन बदलने का सेटिंग मोडल -->
-<div id="changeSecurityModal" class="custom-modal-overlay">
-  <div class="custom-modal" style="border-top-color:#28a745;">
-    <h3 style="color:#28a745; margin-top:0; font-size:16px;">🔑 सुरक्षा सेटिंग्स (पासवर्ड व गुप्त पिन बदलें)</h3>
-    <p style="font-size:12px; color:#666; margin-bottom:10px;">आप यहाँ से अपना एडमिन पासवर्ड और इमरजेंसी रिकवरी पिन बदल सकते हैं:</p>
-
-    <div style="background:#f8f9fa; padding:10px; border-radius:6px; margin-bottom:12px; border:1px solid #ddd;">
-      <label style="color:var(--maroon);">🔐 1. नया एडमिन पासवर्ड दर्ज करें:</label>
-      <input type="text" id="settingNewPass" placeholder="उदा. mypass@123" style="margin-bottom:6px;">
-    </div>
-
-    <div style="background:#f8f9fa; padding:10px; border-radius:6px; margin-bottom:14px; border:1px solid #ddd;">
-      <label style="color:#d9534f;">🛡️ 2. नया गुप्त सुरक्षा पिन (Recovery PIN) दर्ज करें:</label>
-      <input type="text" id="settingNewPin" placeholder="उदा. 8844 या मोबाइल नंबर" style="margin-bottom:6px;">
-    </div>
-
-    <div style="display:flex; justify-content:flex-end; gap:8px;">
-      <button class="btn btn-secondary" onclick="document.getElementById('changeSecurityModal').style.display='none'">रद्द करें</button>
-      <button class="btn btn-green" onclick="saveSecuritySettings()">सुरक्षित सेव करें</button>
     </div>
   </div>
 </div>
@@ -342,25 +305,31 @@
     
     <div style="display:inline-flex; align-items:center; gap:4px; background:#eef2f7; padding:3px 6px; border-radius:4px; border:1px solid #ccd;">
       <button class="btn btn-blue" style="padding:5px 9px;" onclick="addNextSessionFromSticky()">⏱️ + नया सत्र</button>
-      <select id="stickyDaySelect" style="width:170px; padding:4px; font-weight:bold; font-size:12px;" title="सत्र जोड़ने हेतु तारीख चुनें"></select>
+      <select id="stickyDaySelect" style="width:170px; padding:4px; font-weight:bold; font-size:12px;"></select>
     </div>
 
+    <!-- Word फाइल से डेटा वापस लाने का बटन -->
+    <button class="btn btn-purple" onclick="document.getElementById('fileRestoreInput').click();" title="Word (.doc) फ़ाइल चुनकर पूरा डेटा वापस लाएं">
+      📥 Word से डेटा लाएं
+    </button>
     <button class="btn btn-secondary" onclick="undoAction()">↩️ Undo</button>
-    <button class="btn btn-secondary" onclick="redoAction()">↪️ Redo</button>
   </div>
 
-  <!-- सुरक्षित एडमिन जोन -->
+  <!-- एडमिन जोन -->
   <div style="display:flex; gap:5px; align-items:center; flex-wrap:wrap;">
     <button class="btn btn-dark" id="btnLoginAdmin" onclick="doAdminLogin()" style="border: 2px solid #ffc107;">🔐 एडमिन लॉगिन</button>
 
     <div id="adminPanelArea" style="display:none;" class="admin-zone">
-      <span style="font-size:11px; font-weight:bold; color:#856404;">👑 एडमिन सक्रिय</span>
-      <button class="btn btn-green" id="btnSaveCloud" onclick="saveToCloudDirect()">☁️ क्लाउड में सेव</button>
-      <button class="btn btn-purple" onclick="openCloudOrdersList()">📂 क्लाउड ऑर्डर्स</button>
-      <button class="btn btn-secondary" style="font-size:11px;" onclick="openSecuritySettingsModal()">🔑 पासवर्ड व पिन बदलें</button>
+      <span style="font-size:11px; font-weight:bold; color:#856404;">👑 एडमिन</span>
+      <button class="btn btn-green" id="btnSaveCloud" onclick="saveToCloudDirect()">☁️ क्लाउड सेव</button>
+      <button class="btn btn-purple" onclick="openCloudOrdersList()">📂 ऑर्डर्स</button>
       <button class="btn btn-danger" style="font-size:11px;" onclick="doAdminLogout()">लॉगआउट</button>
     </div>
 
+    <label style="display:flex; align-items:center; gap:5px; font-size:11px; font-weight:bold; background:#eef2f7; padding:5px 8px; border-radius:4px; border:1px solid #ccd; cursor:pointer;">
+      <input type="checkbox" id="includeBillToggle" onchange="renderReceipt()" style="width:14px; height:14px; margin:0;">
+      🧾 बिल शामिल करें
+    </label>
     <button class="btn btn-yellow" onclick="downloadImage()">🖼️ JPEG फोटो</button>
     <button class="btn btn-blue" onclick="renderReceipt(); window.print();">🖨️ PDF / प्रिंट</button>
     <button class="btn btn-info" onclick="renderReceipt(); downloadWord();">📄 Word</button>
@@ -370,7 +339,7 @@
 <!-- लाइव एक्टिव डेट बैनर -->
 <div class="live-date-indicator no-print" id="liveDateIndicator">
   <span>👉 वर्तमान कार्य स्थिति: <span id="currentActiveInfo" class="live-badge-glow">[ दिन 1 ] | 📅 तारीख: -- | ⏱️ सत्र: --</span></span>
-  <span style="font-size:12px; color:#6d5204; font-weight:bold;">⚡ Firebase Cloud सक्रिय</span>
+  <span style="font-size:12px; color:#6d5204; font-weight:bold;">⚡ ऑटो-सेव चालू</span>
 </div>
 
 <div class="container" id="mainContainer">
@@ -424,7 +393,6 @@
   <div class="card no-print">
     <div style="margin-bottom: 10px;">
       <h3 style="margin-bottom:2px;">🍲 भोजन एवं नाश्ता व्यवस्था (तारीख वार मेन्यू)</h3>
-      <small style="color:#555;">💡 जिस सत्र को छिपाना हो, उसी के सामने <strong>"छिपाएं 🔼"</strong> दबाएं। पूरा दिन समेटने हेतु हेडर में <strong>"दिन छिपाएं 🔼"</strong> दबाएं।</small>
     </div>
     <div id="daysWrapper"></div>
   </div>
@@ -499,69 +467,46 @@
     <div id="tentBadges" style="min-height:30px; background:white; border:1px solid #ddd; padding:6px; border-radius:4px;"></div>
   </div>
 
-  <!-- बिलिंग एवं एडवांस पेमेंट कार्ड (एडमिन लॉगिन होने पर ही दिखेगा) -->
+  <!-- बिलिंग कार्ड -->
   <div class="card no-print" id="billingCardSection" style="display:none; border-top: 4px solid #28a745;">
-    <h3>💰 बिलिंग एवं भुगतान विवरण (Billing & Payment)</h3>
-    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+    <h3>💰 बिलिंग एवं भुगतान विवरण</h3>
+    <div class="grid">
       <div>
         <label>बिलिंग का तरीका:</label>
         <select id="billMode" onchange="calculateBilling(); saveState(); renderReceipt();">
-          <option value="lumpSum">1. एकमुश्त तय राशि (Lump-sum)</option>
-          <option value="perDay">2. प्रति दिन के हिसाब से (Per Day)</option>
-          <option value="perPax">3. प्रति व्यक्ति / प्लेट (Per Plate)</option>
+          <option value="lumpSum">1. एकमुश्त तय राशि</option>
+          <option value="perDay">2. प्रति दिन के हिसाब से</option>
+          <option value="perPax">3. प्रति व्यक्ति / प्लेट</option>
         </select>
       </div>
-
       <div>
         <label id="lblBillRate">दर (Rate ₹):</label>
         <input type="number" id="billRate" placeholder="0" oninput="calculateBilling(); saveState(); renderReceipt();">
       </div>
-
       <div>
-        <label>कुल राशि (Total Amount ₹):</label>
+        <label>कुल राशि (Total ₹):</label>
         <input type="number" id="billTotal" placeholder="0" style="font-weight:bold; color:var(--maroon);" oninput="calculateBilling(); saveState(); renderReceipt();">
       </div>
-
       <div>
-        <label>एडवांस जमा (Advance Paid ₹):</label>
+        <label>एडवांस जमा (₹):</label>
         <input type="number" id="billAdvance" placeholder="0" style="font-weight:bold; color:#28a745;" oninput="calculateBilling(); saveState(); renderReceipt();">
       </div>
-
       <div>
-        <label>शेष बकाया (Balance Due ₹):</label>
+        <label>शेष बकाया (₹):</label>
         <input type="number" id="billBalance" placeholder="0" readonly style="font-weight:bold; color:#dc3545; background:#fff3f3;">
       </div>
-
       <div>
-        <label>भुगतान का माध्यम:</label>
+        <label>भुगतान माध्यम:</label>
         <select id="billPayMode" onchange="saveState(); renderReceipt();">
           <option value="नकद (Cash)">नकद (Cash)</option>
-          <option value="ऑनलाइन UPI / PhonePe / GPay">ऑनलाइन UPI</option>
+          <option value="ऑनलाइन UPI">ऑनलाइन UPI</option>
           <option value="बैंक ट्रांसफर / चेक">बैंक ट्रांसफर / चेक</option>
-          <option value="बाकी (Pending)">बाकी (Pending)</option>
         </select>
       </div>
     </div>
   </div>
 
-  <!-- Firebase क्लाउड फाइलों की सूची -->
-  <div class="card no-print" id="cloudListCard" style="display:none; border:2px solid #6f42c1;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-      <h3 style="margin:0; color:#6f42c1;">☁️ सुरक्षित क्लाउड ऑर्डर्स</h3>
-      <button class="btn btn-danger" style="font-size:11px;" onclick="document.getElementById('cloudListCard').style.display='none'">बंद करें ✖</button>
-    </div>
-    <div id="cloudLoading" style="display:none; color:#0056b3; padding:8px; font-weight:bold;">⏳ क्लाउड से ऑर्डर्स लोड हो रहे हैं...</div>
-    <div style="overflow-x:auto;">
-      <table style="width:100%; border-collapse:collapse;" border="1" cellpadding="6">
-        <thead style="background:#f3e8fd;">
-          <tr><th>ग्राहक का नाम</th><th>मोबाइल</th><th>कार्यक्रम तारीख</th><th>कुल बिल</th><th>बकाया</th><th>सेव समय</th><th>कार्य</th></tr>
-        </thead>
-        <tbody id="cloudFilesBody"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- रसीद / बिल पर्ची (प्रिंट और वर्ड एक्सपोर्ट हेतु) -->
+  <!-- रसीद / बिल पर्ची -->
   <div id="billReceipt">
     <div class="bill-header">
       <h1 id="outFirmName" style="margin:0; color:var(--maroon); font-size:22px;">टेंट हाउस एवं कैटरर्स</h1>
@@ -591,7 +536,7 @@
       <tbody id="outTentBody"></tbody>
     </table>
 
-    <!-- बिल एवं भुगतान सारांश -->
+    <!-- बिल सारांश -->
     <table class="billing-summary-table" id="outBillingTable">
       <tr style="background:#f9f9f9;">
         <th colspan="4" style="text-align:center; color:var(--maroon); font-size:14px; padding:6px;">💰 बिल भुगतान एवं खाता सारांश</th>
@@ -616,392 +561,23 @@
 </div>
 
 <script>
-  // 🔗 आपका Firebase Realtime Database URL
   const FIREBASE_DB_URL = "https://tent-house-76ec2-default-rtdb.firebaseio.com";
-
   let currentAdminToken = sessionStorage.getItem('admin_session_pass') || "";
 
-  function renderAdminUI() {
-    let btnLogin = document.getElementById('btnLoginAdmin');
-    let adminArea = document.getElementById('adminPanelArea');
-    let billCard = document.getElementById('billingCardSection');
-    
-    if (currentAdminToken) {
-      if (btnLogin) btnLogin.style.display = 'none';
-      if (adminArea) adminArea.style.display = 'inline-flex';
-      if (billCard) billCard.style.display = 'block'; // एडमिन लॉगिन होने पर ही बिलिंग कार्ड दिखेगा
-    } else {
-      if (btnLogin) btnLogin.style.display = 'inline-flex';
-      if (adminArea) adminArea.style.display = 'none';
-      if (billCard) billCard.style.display = 'none'; // बिना एडमिन के बिलिंग कार्ड छिपा रहेगा
-    }
-  }
-
-  // लॉगिन फंक्शन
-  async function doAdminLogin() {
-    let pass = await askPassword("🔐 एडमिन लॉगिन", "सुरक्षित एडमिन पैनल खोलने के लिए पासवर्ड दर्ज करें:");
-    if (!pass) return;
-
-    let savedMasterPass = localStorage.getItem('master_admin_pass') || "admin123";
-
-    if (pass === savedMasterPass) {
-      currentAdminToken = pass;
-      sessionStorage.setItem('admin_session_pass', pass);
-      renderAdminUI();
-      calculateBilling();
-      alert("🎉 एडमिन लॉगिन सफल! बिलिंग पैनल खुल गया है।");
-      return;
-    }
-
-    try {
-      let resp = await fetch(`${FIREBASE_DB_URL}/settings/adminPass.json`);
-      let cloudPass = await resp.json();
-      if (cloudPass && pass === cloudPass) {
-        currentAdminToken = pass;
-        sessionStorage.setItem('admin_session_pass', pass);
-        localStorage.setItem('master_admin_pass', pass);
-        renderAdminUI();
-        calculateBilling();
-        alert("🎉 एडमिन लॉगिन सफल! बिलिंग पैनल खुल गया है।");
-        return;
-      }
-    } catch(e) {}
-
-    alert("❌ गलत पासवर्ड! कृपया सही पासवर्ड दर्ज करें।");
-  }
-
-  function doAdminLogout() {
-    if (confirm("क्या आप एडमिन पैनल से लॉगआउट होना चाहते हैं?")) {
-      currentAdminToken = "";
-      sessionStorage.removeItem('admin_session_pass');
-      renderAdminUI();
-      document.getElementById('cloudListCard').style.display = 'none';
-      alert("🚪 आप लॉगआउट हो गए हैं।");
-    }
-  }
-
-  let modalResolve = null;
-
-  function askPassword(title, msg) {
-    return new Promise((resolve) => {
-      modalResolve = resolve;
-      let modal = document.getElementById('passwordModal');
-      let inp = document.getElementById('modalPassInput');
-      
-      document.getElementById('modalTitle').innerText = title || "🔐 एडमिन लॉगिन";
-      document.getElementById('modalMsg').innerText = msg || "कृपया पासवर्ड दर्ज करें:";
-      inp.value = "";
-      inp.type = "password";
-      modal.style.display = "flex";
-      inp.focus();
-
-      inp.onkeydown = function(e) {
-        if (e.key === "Enter") closePasswordModal(true);
-        if (e.key === "Escape") closePasswordModal(false);
-      };
-    });
-  }
-
-  function closePasswordModal(confirmed) {
-    let modal = document.getElementById('passwordModal');
-    let val = document.getElementById('modalPassInput').value.trim();
-    modal.style.display = "none";
-
-    if (modalResolve) {
-      modalResolve(confirmed ? val : null);
-      modalResolve = null;
-    }
-  }
-
-  function togglePasswordEye() {
-    let inp = document.getElementById('modalPassInput');
-    inp.type = (inp.type === "password") ? "text" : "password";
-  }
-
-  function openForgotPinModal() {
-    closePasswordModal(false);
-    document.getElementById('resetPinInput').value = "";
-    document.getElementById('resetNewPass').value = "";
-    document.getElementById('resetConfirmPass').value = "";
-    document.getElementById('forgotModal').style.display = "flex";
-  }
-
-  async function submitPasswordResetWithPin() {
-    let enteredPin = document.getElementById('resetPinInput').value.trim();
-    let newPass = document.getElementById('resetNewPass').value.trim();
-    let confirmPass = document.getElementById('resetConfirmPass').value.trim();
-
-    if (!enteredPin) { alert("कृपया अपना गुप्त सुरक्षा पिन दर्ज करें!"); return; }
-    if (!newPass) { alert("कृपया नया पासवर्ड लिखें!"); return; }
-    if (newPass !== confirmPass) { alert("❌ दोनों पासवर्ड आपस में मेल नहीं खाते!"); return; }
-
-    let actualPin = localStorage.getItem('master_security_pin') || "9999";
-
-    try {
-      let resp = await fetch(`${FIREBASE_DB_URL}/settings/securityPin.json`);
-      let cloudPin = await resp.json();
-      if(cloudPin) actualPin = cloudPin;
-    } catch(e) {}
-
-    if (enteredPin === actualPin) {
-      localStorage.setItem('master_admin_pass', newPass);
-      currentAdminToken = newPass;
-      sessionStorage.setItem('admin_session_pass', newPass);
-
-      try {
-        await fetch(`${FIREBASE_DB_URL}/settings/adminPass.json`, { method: 'PUT', body: JSON.stringify(newPass) });
-      } catch(e) {}
-
-      document.getElementById('forgotModal').style.display = "none";
-      renderAdminUI();
-      alert("🎉 बधाई! आपका नया पासवर्ड सफलतापूर्वक सेट हो गया है!");
-    } else {
-      alert("❌ गलत सुरक्षा पिन! पासवर्ड नहीं बदला जा सका।");
-    }
-  }
-
-  function openSecuritySettingsModal() {
-    let curPass = localStorage.getItem('master_admin_pass') || "admin123";
-    let curPin = localStorage.getItem('master_security_pin') || "9999";
-    document.getElementById('settingNewPass').value = curPass;
-    document.getElementById('settingNewPin').value = curPin;
-    document.getElementById('changeSecurityModal').style.display = "flex";
-  }
-
-  async function saveSecuritySettings() {
-    let p = document.getElementById('settingNewPass').value.trim();
-    let pin = document.getElementById('settingNewPin').value.trim();
-
-    if (!p) { alert("पासवर्ड खाली नहीं हो सकता!"); return; }
-    if (!pin) { alert("सुरक्षा पिन खाली नहीं हो सकता!"); return; }
-
-    localStorage.setItem('master_admin_pass', p);
-    localStorage.setItem('master_security_pin', pin);
-    currentAdminToken = p;
-    sessionStorage.setItem('admin_session_pass', p);
-
-    try {
-      await fetch(`${FIREBASE_DB_URL}/settings/adminPass.json`, { method: "PUT", body: JSON.stringify(p) });
-      await fetch(`${FIREBASE_DB_URL}/settings/securityPin.json`, { method: "PUT", body: JSON.stringify(pin) });
-    } catch(e) {}
-
-    document.getElementById('changeSecurityModal').style.display = "none";
-    alert("✅ सुरक्षा सेटिंग्स सुरक्षित हो गईं!\nआपका नया पासवर्ड और नया गुप्त पिन सफलतापूर्वक सेव हो गया है।");
-  }
-
-  // --- बिलिंग कैलकुलेशन लॉजिक (अपडेटेड: कुल दिनों के व्यक्ति जोड़ना एवं स्वतः बिल गणना) ---
-  function calculateBilling() {
-    let mode = document.getElementById('billMode').value;
-    let rate = parseFloat(document.getElementById('billRate').value) || 0;
-    let advance = parseFloat(document.getElementById('billAdvance').value) || 0;
-    let totalInp = document.getElementById('billTotal');
-    let balanceInp = document.getElementById('billBalance');
-    let lblRate = document.getElementById('lblBillRate');
-
-    let total = parseFloat(totalInp.value) || 0;
-
-    if (mode === "perDay") {
-      let daysCount = schedule.length || 1;
-      if (lblRate) lblRate.innerHTML = `दर (Rate ₹ प्रति दिन) <span style="color:var(--maroon);">[${daysCount} दिन]</span>:`;
-      total = rate * daysCount;
-      totalInp.value = total;
-    } else if (mode === "perPax") {
-      // सभी दिनों और उनके सत्रों में दर्ज व्यक्तियों का कुल योग
-      let totalPax = 0;
-      schedule.forEach(d => {
-        (d.sessions || []).forEach(s => {
-          let p = parseFloat(s.pax) || 0;
-          totalPax += p;
-        });
-      });
-
-      // लेबल पर कुल व्यक्ति दिखाएं
-      if (lblRate) {
-        lblRate.innerHTML = `दर (Rate ₹ प्रति प्लेट) <span style="color:var(--maroon); font-weight:bold;">[कुल ${totalPax} व्यक्ति]</span>:`;
-      }
-
-      total = rate * totalPax;
-      totalInp.value = total;
-    } else {
-      if (lblRate) lblRate.innerText = "दर (Rate ₹):";
-    }
-
-    let bal = total - advance;
-    balanceInp.value = bal;
-  }
-
-  // ☁️ 1-क्लिक Firebase Cloud में सेव करना
-  async function saveToCloudDirect() {
-    if (!currentAdminToken) { alert("❌ पहले '🔐 एडमिन लॉगिन' करें!"); return; }
-
-    let cName = document.getElementById('custName').value.trim();
-    if (!cName) { alert("कृपया पहले ग्राहक का नाम लिखें!"); return; }
-
-    let now = new Date();
-    let displayTime = now.toLocaleDateString('hi-IN') + " " + now.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'});
-
-    let orderData = {
-      custName: cName,
-      custPhone: document.getElementById('custPhone').value,
-      address: document.getElementById('eventAddress').value,
-      eventDate: document.getElementById('eventStartDate').value,
-      firmName: document.getElementById('firmName').value,
-      firmPhone: document.getElementById('firmPhone').value,
-      firmTagline: document.getElementById('firmTagline').value,
-      schedule: schedule,
-      tentList: tentList,
-      billing: {
-        mode: document.getElementById('billMode').value,
-        rate: document.getElementById('billRate').value,
-        total: document.getElementById('billTotal').value,
-        advance: document.getElementById('billAdvance').value,
-        balance: document.getElementById('billBalance').value,
-        payMode: document.getElementById('billPayMode').value
-      },
-      savedAt: displayTime,
-      timestamp: Date.now()
-    };
-
-    let btn = document.getElementById('btnSaveCloud');
-    let orig = btn.innerText;
-    btn.innerText = "⏳ सेव हो रहा है...";
-
-    let safeKey = (cName.replace(/[.#$[\]/]/g, "_") + "_" + (document.getElementById('custPhone').value || "NoPhone")).trim();
-
-    try {
-      let resp = await fetch(`${FIREBASE_DB_URL}/orders/${safeKey}.json`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData)
-      });
-
-      btn.innerText = orig;
-
-      if (resp.ok) {
-        alert(`✅ सफलता! "${cName}" का पूरा बिल क्लाउड में सुरक्षित सेव हो गया है!`);
-      } else {
-        alert("❌ क्लाउड में सेव नहीं हो सका।");
-      }
-    } catch(err) {
-      btn.innerText = orig;
-      alert("❌ सर्वर एरर: " + err.message);
-    }
-  }
-
-  async function openCloudOrdersList() {
-    if (!currentAdminToken) { alert("❌ पहले एडमिन लॉगिन करें!"); return; }
-
-    let card = document.getElementById('cloudListCard');
-    let body = document.getElementById('cloudFilesBody');
-    let loading = document.getElementById('cloudLoading');
-    
-    card.style.display = 'block';
-    body.innerHTML = "";
-    loading.style.display = 'block';
-
-    try {
-      let resp = await fetch(`${FIREBASE_DB_URL}/orders.json`);
-      loading.style.display = 'none';
-
-      if (!resp.ok) {
-        alert("❌ डेटाबेस लोड नहीं हो सका!");
-        card.style.display = 'none';
-        return;
-      }
-
-      let allOrders = await resp.json();
-      if (!allOrders || Object.keys(allOrders).length === 0) {
-        body.innerHTML = "<tr><td colspan='7' align='center'>क्लाउड में अभी कोई आर्डर सेव नहीं मिला।</td></tr>";
-        return;
-      }
-
-      let rows = "";
-      Object.keys(allOrders).reverse().forEach(key => {
-        let o = allOrders[key];
-        let total = (o.billing && o.billing.total) ? "₹" + o.billing.total : "-";
-        let bal = (o.billing && o.billing.balance) ? "₹" + o.billing.balance : "-";
-        rows += `
-          <tr>
-            <td><strong>${o.custName || "-"}</strong></td>
-            <td>${o.custPhone || "-"}</td>
-            <td>${formatDisplayDate(o.eventDate)}</td>
-            <td><strong>${total}</strong></td>
-            <td style="color:#dc3545; font-weight:bold;">${bal}</td>
-            <td><small style="color:#666;">${o.savedAt || "-"}</small></td>
-            <td>
-              <button class="btn btn-green" style="font-size:11px; padding:3px 7px;" onclick="loadFromCloud('${key}')">✏️ खोलें</button>
-              <button class="btn btn-danger" style="font-size:11px; padding:3px 7px; margin-left:4px;" onclick="deleteFromCloud('${key}')">🗑️ हटाएं</button>
-            </td>
-          </tr>
-        `;
-      });
-      body.innerHTML = rows;
-    } catch(e) {
-      loading.style.display = 'none';
-      alert("इंटरनेट एरर: " + e.message);
-    }
-  }
-
-  async function loadFromCloud(orderKey) {
-    try {
-      let resp = await fetch(`${FIREBASE_DB_URL}/orders/${orderKey}.json`);
-      let o = await resp.json();
-      if (!o) { alert("ऑर्डर नहीं मिला!"); return; }
-
-      saveState();
-
-      document.getElementById('custName').value = o.custName || "";
-      document.getElementById('custPhone').value = o.custPhone || "";
-      document.getElementById('eventAddress').value = o.address || "";
-      document.getElementById('eventStartDate').value = o.eventDate || "";
-      updateEventDates();
-
-      schedule = o.schedule || [];
-      tentList = o.tentList || [];
-
-      if (o.billing) {
-        document.getElementById('billMode').value = o.billing.mode || "lumpSum";
-        document.getElementById('billRate').value = o.billing.rate || "";
-        document.getElementById('billTotal').value = o.billing.total || "";
-        document.getElementById('billAdvance').value = o.billing.advance || "";
-        document.getElementById('billBalance').value = o.billing.balance || "";
-        document.getElementById('billPayMode').value = o.billing.payMode || "नकद (Cash)";
-      }
-
-      renderDaysUI();
-      renderTentBadges();
-      calculateBilling();
-      renderReceipt();
-      document.getElementById('cloudListCard').style.display = 'none';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      alert(`🎉 "${o.custName}" का रिकॉर्ड खुल गया!`);
-    } catch(e) { alert("लोड एरर: " + e.message); }
-  }
-
-  async function deleteFromCloud(orderKey) {
-    if(!confirm("क्या आप वाकई इस ऑर्डर को हमेशा के लिए हटाना चाहते हैं?")) return;
-    try {
-      let resp = await fetch(`${FIREBASE_DB_URL}/orders/${orderKey}.json`, { method: "DELETE" });
-      if(resp.ok) {
-        alert("🗑️ ऑर्डर हटा दिया गया!");
-        openCloudOrdersList();
-      }
-    } catch(e) { alert("एरर: " + e.message); }
-  }
-
+  // 100% संपूर्ण मूल व्यंजन सूची (ताकि कोई भी व्यंजन 'अन्य व्यंजन' में न जाए)
   const rawCategoryMaster = {
-    chaat: { title: "🥟 चाट, समोसा व आलू गुटके", items: ["आलू के गुटके (पहाड़ी स्टाइल)", "समोसा", "टिक्की चाट", "पानी बतासा (गोलगप्पा)", "पापड़ी चाट", "दही भल्ला", "मिक्स पकोड़ी", "पनीर पकोड़ा", "आलूबोंडा", "छोला भटूरा", "पाव भाजी", "मूंगफली चाट", "चना मसाला (चाट)"] },
-    chinese: { title: "🍜 चाइनीज व फास्ट-फूड", items: ["चाउमिन (Chowmein)", "वेज हक्का नूडल्स", "वेज मोमोज़ (स्टीम)", "वेज मोमोज़ (फ्राई / कुरकुरे)", "स्प्रिंग रोल", "वेज मंचूरियन (ड्राई)", "वेज मंचूरियन (ग्रेवी)", "फ्रेंच फ्राइज", "चिल्ली पोटैटो", "हनी चिल्ली पोटैटो", "पास्ता (रेड सॉस)", "पास्ता (व्हाइट सॉस)", "डोसा", "इडली सांभर"] },
-    starters: { title: "🍢 टिक्का, कबाब व स्टार्टर्स", items: ["पनीर टिक्का (ड्राई)", "मलाई पनीर टिक्का", "सोया टिक्का", "सोया मलाई चाप", "वेज कबाब", "मसाला कबाब", "हरियाली कबाब", "दही के कबाब", "सीक कबाब (वेज)", "कटलेट", "चीजबोल"] },
-    liquids: { title: "☕ पेय, चाय व सूप", items: ["चाय", "मसाला चाय", "कॉफी (Hot Coffee)", "कोल्ड कॉफी (Cold Coffee)", "टोमैटो सूप (Tomato Soup)", "वेज मंचाउ सूप", "स्वीट कॉर्न सूप", "हॉट बादाम मिल्क", "दूध (गर्म/मसाला)", "कोल्ड्रिंक", "मॉकटेल", "शिकंजी", "जलजीरा", "छाछ / लस्सी", "ठंडाई", "मिनरल वाटर (बोतल)", "पानी कैंपर", "सोडा पानी"] },
-    dal: { title: "🍲 दालें, फाणु व चैंसू", items: ["दाल फ्राई (Dal Fry)", "दाल तड़का", "कंडाली फाणु", "दाल फाणु", "चैंसू (उड़द/भट्ट)", "दाल मखनी", "राजमा दाल (पंजाबी)", "उड़द दाल (फ्राई/तड़का)", "अरहर मसूर दाल (तड़का)", "कढ़ी पकोड़ा", "चना दाल फ्राई", "दाल पंचमेल"] },
-    sabzi: { title: "🥦 सब्जी व पनीर", items: ["मटर पनीर", "शाही पनीर", "कढ़ाई पनीर", "पनीर टिक्का मसाला", "पनीर बटर मसाला", "पालक पनीर", "खोया पनीर", "छोला (पिंडी/मसाला)", "चना मसाला", "मिक्स सब्जी", "आलू की सब्जी (भंडारे वाली)", "आलू गोभी मटर", "सोया चाप मसाला", "मटर मशरूम", "दम आलू", "भिंडी मसाला", "बैंगन भर्ता", "वेज कोफ्ता"] },
-    rice: { title: "🍚 चावल / भात", items: ["सादा चावल (प्लेन राइस)", "जीरा चावल (जीरा राइस)", "मटर पुलाव", "कश्मीरी पुलाव", "मीठा चावल (लाल भात / केसरी भात)", "फ्राइड राइस", "पनीर पुलाव (पनीर राइस)", "वेज पुलाव / बिरयानी", "दाल खिचड़ी"] },
-    breads: { title: "🫓 रोटी, पूरी व नान", items: ["तवा रोटी (सादा)", "तवा रोटी (मक्खन)", "तंदूरी रोटी (नान)", "बटर नान", "लच्छा पराठा", "मिस्सी रोटी", "पूरी (सादा)", "बेड़मी पूरी", "कचौड़ी", "भटूरा"] },
-    sweets: { title: "🍨 मिठाई व आइसक्रीम", items: ["जलेबी", "रबड़ी", "जलेबी रबड़ी", "गुलाब जामुन", "रसगुल्ला / छोटे रसगुल्ले", "रसमलाई", "गाजर का हलवा", "मूंग दाल हलवा", "सूजी का हलवा", "इमरती", "लड्डू (बूंदी/मोतीचूर)", "बेसन लड्डू", "बालू साही", "मिल्क केक", "काजू कतली", "मठरी", "सक्कर पारा", "आइसक्रीम (वैनिला/स्ट्रॉबेरी/बटरस्कॉच)", "कुल्फी (मटका/केसर पिस्ता)", "पेस्ट्री"] },
-    salad: { title: "🥗 रायता, सलाद व पापड़", items: ["रायता बूंदी", "मिक्स वेज रायता", "खीरा रायता", "अनानास (Pineapple) रायता", "दही वड़ा", "ग्रीन सलाद", "रूसी सलाद (Russian Salad)", "सिरका प्याज", "पापड़", "मसाला पापड़", "आचार", "हरी चटनी", "मीठी चटनी"] },
-    nvSnacks: { title: "🍗 नॉन-वेज स्नैक्स", items: ["चिकन मोमोज़ (स्टीम)", "चिकन मोमोज़ (फ्राई / कुरकुरे)", "चिकन कबाब", "चिकन मसाला कबाब", "चिकन सीक कबाब", "चिकन शामी कबाब", "चिकन गलौटी कबाब", "मटन सीक कबाब", "मटन शामी कबाब", "मटन गलौटी कबाब", "मटन बोटी कबाब", "चिकन टिक्का (तंदूरी)", "चिकन मलाई टिक्का", "चिकन अफ़गानी टिक्का", "तंदूरी चिकन", "चिकन रोस्टेड / फ्राई", "चिकन लॉलीपॉप", "चिल्ली चिकन (ड्राई)", "चिकन टंगड़ी कबाब", "चिकन पॉपकॉर्न", "फिश फ्राई", "फिश फिंगर", "फिश टिक्का", "अंडा भुर्जी", "बॉयल एग (मसाला)"] },
-    nvMain: { title: "🍲 नॉन-वेज मेन कोर्स", items: ["चिकन करी (देसी स्टाइल)", "कढ़ाई चिकन", "बटर चिकन", "चिकन कोरमा", "चिकन मसाला", "हंडी चिकन", "चिकन लबावदार", "चिकन बिरयानी", "मटन बिरयानी", "मटन करी (देसी मटन)", "मटन कोरमा", "मटन रोगन जोश", "मटन रड़ा", "मटन हांडी", "मटन पाया सूप / करी", "फिश करी (मछली तरी)", "फिश मसाला", "एग करी (अंडा तरी)"] }
+    chaat: { title: "🥟 चाट, समोसा व आलू गुटके", short: "स्नैक्स", items: ["आलू के गुटके (पहाड़ी स्टाइल)", "समोसा", "टिक्की चाट", "पानी बतासा (गोलगप्पा)", "पापड़ी चाट", "दही भल्ला", "मिक्स पकोड़ी", "पनीर पकोड़ा", "आलूबोंडा", "छोला भटूरा", "पाव भाजी", "मूंगफली चाट", "चना मसाला (चाट)"] },
+    chinese: { title: "🍜 चाइनीज व फास्ट-फूड", short: "चाइनीज़", items: ["चाउमिन (Chowmein)", "वेज हक्का नूडल्स", "वेज मोमोज़ (स्टीम)", "वेज मोमोज़ (फ्राई / कुरकुरे)", "स्प्रिंग रोल", "वेज मंचूरियन (ड्राई)", "वेज मंचूरियन (ग्रेवी)", "फ्रेंच फ्राइज", "चिल्ली पोटैटो", "हनी चिल्ली पोटैटो", "पास्ता (रेड सॉस)", "पास्ता (व्हाइट सॉस)", "डोसा", "इडली सांभर"] },
+    starters: { title: "🍢 टिक्का, कबाब व स्टार्टर्स", short: "स्टार्टर्स", items: ["पनीर टिक्का (ड्राई)", "मलाई पनीर टिक्का", "सोया टिक्का", "सोया मलाई चाप", "वेज कबाब", "मसाला कबाब", "हरियाली कबाब", "दही के कबाब", "सीक कबाब (वेज)", "कटलेट", "चीजबोल"] },
+    liquids: { title: "☕ पेय, चाय व सूप", short: "पेय पदार्थ", items: ["चाय", "मसाला चाय", "कॉफी (Hot Coffee)", "कोल्ड कॉफी (Cold Coffee)", "टोमैटो सूप (Tomato Soup)", "वेज मंचाउ सूप", "स्वीट कॉर्न सूप", "हॉट बादाम मिल्क", "दूध (गर्म/मसाला)", "कोल्ड्रिंक", "मॉकटेल", "शिकंजी", "जलजीरा", "छाछ / लस्सी", "ठंडाई", "मिनरल वाटर (बोतल)", "पानी कैंपर", "सोडा पानी"] },
+    dal: { title: "🍲 दालें, फाणु व चैंसू", short: "दाल", items: ["दाल फ्राई (Dal Fry)", "दाल तड़का", "कंडाली फाणु", "दाल फाणु", "चैंसू (उड़द/भट्ट)", "दाल मखनी", "राजमा दाल (पंजाबी)", "उड़द दाल (फ्राई/तड़का)", "अरहर मसूर दाल (तड़का)", "कढ़ी पकोड़ा", "चना दाल फ्राई", "दाल पंचमेल"] },
+    sabzi: { title: "🥦 सब्जी व पनीर", short: "सब्जी", items: ["मटर पनीर", "शाही पनीर", "कढ़ाई पनीर", "पनीर टिक्का मसाला", "पनीर बटर मसाला", "पालक पनीर", "खोया पनीर", "छोला (पिंडी/मसाला)", "चना मसाला", "मिक्स सब्जी", "आलू की सब्जी", "आलू गोभी मटर", "सोया चाप मसाला", "मटर मशरूम", "दम आलू", "भिंडी मसाला", "बैंगन भर्ता", "वेज कोफ्ता"] },
+    rice: { title: "🍚 चावल / भात", short: "चावल", items: ["सादा चावल (प्लेन राइस)", "जीरा चावल (जीरा राइस)", "मटर पुलाव", "कश्मीरी पुलाव", "मीठा चावल (लाल भात / केसरी भात)", "फ्राइड राइस", "पनीर पुलाव (पनीर राइस)", "वेज पुलाव / बिरयानी", "दाल खिचड़ी"] },
+    breads: { title: "🫓 रोटी, पूरी व नान", short: "रोटी", items: ["तवा रोटी (सादा)", "तवा रोटी (मक्खन)", "तंदूरी रोटी (नान)", "बटर नान", "लच्छा पराठा", "मिस्सी रोटी", "पूरी (सादा)", "बेड़मी पूरी", "कचौड़ी", "भटूरा"] },
+    sweets: { title: "🍨 मिठाई व आइसक्रीम", short: "मिठाई", items: ["जलेबी", "रबड़ी", "जलेबी रबड़ी", "गुलाब जामुन", "रसगुल्ला / छोटे रसगुल्ले", "रसमलाई", "गाजर का हलवा", "मूंग दाल हलवा", "सूजी का हलवा", "इमरती", "लड्डू (बूंदी/मोतीचूर)", "बेसन लड्डू", "बालू साही", "मिल्क केक", "काजू कतली", "मठरी", "सक्कर पारा", "आइसक्रीम (वैनिला/स्ट्रॉबेरी/बटरस्कॉच)", "कुल्फी (मटका/केसर पिस्ता)", "पेस्ट्री"] },
+    salad: { title: "🥗 रायता, सलाद व पापड़", short: "सलाद", items: ["रायता बूंदी", "मिक्स वेज रायता", "खीरा रायता", "अनानास (Pineapple) रायता", "दही वड़ा", "ग्रीन सलाद", "रूसी सलाद (Russian Salad)", "सिरका प्याज", "पापड़", "मसाला पापड़", "आचार", "हरी चटनी", "मीठी चटनी"] },
+    nvSnacks: { title: "🍗 नॉन-वेज स्नैक्स", short: "नॉन-वेज स्नैक्स", items: ["चिकन मोमोज़ (स्टीम)", "चिकन मोमोज़ (फ्राई / कुरकुरे)", "चिकन कबाब", "चिकन मसाला कबाब", "चिकन सीक कबाब", "चिकन शामी कबाब", "चिकन गलौटी कबाब", "मटन सीक कबाब", "मटन शामी कबाब", "मटन गलौटी कबाब", "मटन बोटी कबाब", "चिकन टिक्का (तंदूरी)", "चिकन मलाई टिक्का", "चिकन अफ़गानी टिक्का", "तंदूरी चिकन", "चिकन रोस्टेड / फ्राई", "चिकन लॉलीपॉप", "चिल्ली चिकन (ड्राई)", "चिकन टंगड़ी कबाब", "चिकन पॉपकॉर्न", "फिश फ्राई", "फिश फिंगर", "फिश टिक्का", "अंडा भुर्जी", "बॉयल एग (मसाला)"] },
+    nvMain: { title: "🍲 नॉन-वेज मेन कोर्स", short: "नॉन-वेज मेन कोर्स", items: ["चिकन करी (देसी स्टाइल)", "कढ़ाई चिकन", "बटर चिकन", "चिकन कोरमा", "चिकन मसाला", "हंडी चिकन", "चिकन लबावदार", "चिकन बिरयानी", "मटन बिरयानी", "मटन करी (देसी मटन)", "मटन कोरमा", "मटन रोगन जोश", "मटन रड़ा", "मटन हांडी", "मटन पाया सूप / करी", "फिश करी (मछली तरी)", "फिश मसाला", "एग करी (अंडा तरी)"] }
   };
 
   const hindiAlphabetOrder = ['अ','आ','इ','ई','उ','ऊ','ऋ','ए','ऐ','ओ','औ','अं','अः','क','ख','ग','घ','ङ','च','छ','ज','झ','ञ','ट','ठ','ड','ढ','ण','त','थ','द','ध','न','प','फ','ब','भ','म','य','र','ल','व','श','ष','स','ह','क्ष','त्र','ज्ञ'];
@@ -1036,14 +612,17 @@
     };
   }
 
-  // व्यंजन किस श्रेणी का है यह पता लगाने का फंक्शन
+  // श्रेणी पहचानने का फंक्शन
   function findCategoryOfItem(itemName) {
+    let cleanName = itemName.trim();
     for (let key in rawCategoryMaster) {
-      if (rawCategoryMaster[key].items.includes(itemName)) {
-        return rawCategoryMaster[key].title;
+      for (let masterItem of rawCategoryMaster[key].items) {
+        if (masterItem.trim() === cleanName || cleanName.includes(masterItem.trim()) || masterItem.trim().includes(cleanName)) {
+          return rawCategoryMaster[key].short;
+        }
       }
     }
-    return "✍️ अन्य विशेष व्यंजन";
+    return "अन्य व्यंजन";
   }
 
   const defaultSessions = [
@@ -1056,9 +635,6 @@
   let schedule = [];
   let tentList = [];
   let undoStack = [];
-  let redoStack = [];
-  let sessionClipboard = null;
-  let sessionObserver = null;
 
   function formatDisplayDate(dateStr) {
     if(!dateStr) return "-";
@@ -1067,14 +643,25 @@
     return dateStr;
   }
 
+  function parseDisplayDate(dStr) {
+    if(!dStr) return "";
+    let parts = dStr.trim().split('/');
+    if(parts.length === 3) return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    return dStr;
+  }
+
   function toggleSidebar() {
     let sb = document.getElementById('quickSidebar');
     let btn = document.getElementById('sbToggleBtn');
     let cnt = document.getElementById('mainContainer');
-    sb.classList.toggle('collapsed');
-    btn.classList.toggle('collapsed');
-    cnt.classList.toggle('full-width');
-    btn.innerText = sb.classList.contains('collapsed') ? '▶ साइडबार' : '◀ साइडबार';
+    if (window.innerWidth <= 768) {
+      sb.classList.toggle('mobile-open');
+    } else {
+      sb.classList.toggle('collapsed');
+      btn.classList.toggle('collapsed');
+      cnt.classList.toggle('full-width');
+      btn.innerText = sb.classList.contains('collapsed') ? '▶ साइडबार' : '◀ साइडबार';
+    }
   }
 
   function quickAddTent(name, qty) {
@@ -1084,82 +671,100 @@
     renderReceipt();
   }
 
-  function setActiveSessionInfo(dayNumber, dateStr, sessionTitle, dayId = null) {
-    let info = `[ दिन ${dayNumber} ] | 📅 तारीख: ${formatDisplayDate(dateStr)} | ⏱️ सत्र: ${sessionTitle}`;
-    let el = document.getElementById('currentActiveInfo');
-    if (el) el.innerText = info;
-
-    if (dayId) {
-      let sel = document.getElementById('stickyDaySelect');
-      if (sel && sel.value !== dayId) sel.value = dayId;
+  function renderAdminUI() {
+    let btnLogin = document.getElementById('btnLoginAdmin');
+    let adminArea = document.getElementById('adminPanelArea');
+    let billCard = document.getElementById('billingCardSection');
+    if (currentAdminToken) {
+      if (btnLogin) btnLogin.style.display = 'none';
+      if (adminArea) adminArea.style.display = 'inline-flex';
+      if (billCard) billCard.style.display = 'block';
+    } else {
+      if (btnLogin) btnLogin.style.display = 'inline-flex';
+      if (adminArea) adminArea.style.display = 'none';
+      if (billCard) billCard.style.display = 'none';
     }
   }
 
-  function setupScrollSpy() {
-    if (sessionObserver) sessionObserver.disconnect();
-    let options = { root: null, rootMargin: "-120px 0px -45% 0px", threshold: [0, 0.2, 0.5] };
-
-    sessionObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          let dayNum = entry.target.getAttribute('data-daynum');
-          let dateStr = entry.target.getAttribute('data-date');
-          let sessTitle = entry.target.getAttribute('data-title');
-          let dayId = entry.target.getAttribute('data-dayid');
-          if (dayNum && dateStr && sessTitle) {
-            setActiveSessionInfo(dayNum, dateStr, sessTitle, dayId);
-          }
-        }
-      });
-    }, options);
-
-    document.querySelectorAll('.session-box').forEach(el => sessionObserver.observe(el));
-  }
-
-  function toggleSessionDetails(sessId, ev) {
-    if(ev) ev.stopPropagation();
-    let found = null;
-    for (const day of schedule) {
-      found = day.sessions.find(s => s.id === sessId);
-      if (found) break;
+  async function doAdminLogin() {
+    let pass = await askPassword("🔐 एडमिन लॉगिन", "कृपया पासवर्ड दर्ज करें:");
+    if (!pass) return;
+    let savedMasterPass = localStorage.getItem('master_admin_pass') || "admin123";
+    if (pass === savedMasterPass) {
+      currentAdminToken = pass;
+      sessionStorage.setItem('admin_session_pass', pass);
+      renderAdminUI();
+      calculateBilling();
+      alert("🎉 एडमिन लॉगिन सफल!");
+      return;
     }
-    if (!found) return;
-
-    saveState();
-    found.hidden = !found.hidden;
-    const bodyEl = document.getElementById('body_' + sessId);
-    const btn = document.getElementById('tgl_btn_' + sessId);
-
-    if (bodyEl) bodyEl.style.display = found.hidden ? "none" : "block";
-    if (btn) btn.innerText = found.hidden ? "खोलें 🔽" : "छिपाएं 🔼";
+    alert("❌ गलत पासवर्ड! कृपया सही पासवर्ड दर्ज करें।");
   }
 
-  function toggleWholeDay(dayId) {
-    let day = schedule.find(d => d.id === dayId);
-    if (!day) return;
-
-    saveState();
-    day.hidden = !day.hidden;
-
-    const content = document.getElementById('day_content_' + dayId);
-    const btn = document.getElementById('btn_day_toggle_' + dayId);
-
-    if (content) content.style.display = day.hidden ? "none" : "block";
-    if (btn) btn.innerText = day.hidden ? "दिन खोलें 🔽" : "दिन छिपाएं 🔼";
+  function doAdminLogout() {
+    currentAdminToken = "";
+    sessionStorage.removeItem('admin_session_pass');
+    renderAdminUI();
   }
 
-  function toggleAllSessionsInDay(dayId, expand = true) {
-    let day = schedule.find(d => d.id === dayId);
-    if (!day) return;
-
-    saveState();
-    day.sessions.forEach(sess => {
-      sess.hidden = !expand;
-      let bodyEl = document.getElementById('body_' + sess.id);
-      let btn = document.getElementById('tgl_btn_' + sess.id);
-      if (bodyEl) bodyEl.style.display = expand ? "block" : "none";
-      if (btn) btn.innerText = expand ? "छिपाएं 🔼" : "खोलें 🔽";
+  let modalResolve = null;
+  function askPassword(title, msg) {
+    return new Promise((resolve) => {
+      modalResolve = resolve;
+      let modal = document.getElementById('passwordModal');
+      let inp = document.getElementById('modalPassInput');
+      document.getElementById('modalTitle').innerText = title || "🔐 एडमिन लॉगिन";
+      document.getElementById('modalMsg').innerText = msg || "कृपया पासवर्ड दर्ज करें:";
+      inp.value = "";
+      inp.type = "password";
+      modal.style.display = "flex";
+      inp.focus();
     });
+  }
+
+  function closePasswordModal(confirmed) {
+    let modal = document.getElementById('passwordModal');
+    let val = document.getElementById('modalPassInput').value.trim();
+    modal.style.display = "none";
+    if (modalResolve) {
+      modalResolve(confirmed ? val : null);
+      modalResolve = null;
+    }
+  }
+
+  function togglePasswordEye() {
+    let inp = document.getElementById('modalPassInput');
+    inp.type = (inp.type === "password") ? "text" : "password";
+  }
+
+  function calculateBilling() {
+    let mode = document.getElementById('billMode').value;
+    let rate = parseFloat(document.getElementById('billRate').value) || 0;
+    let advance = parseFloat(document.getElementById('billAdvance').value) || 0;
+    let totalInp = document.getElementById('billTotal');
+    let balanceInp = document.getElementById('billBalance');
+    let lblRate = document.getElementById('lblBillRate');
+    let total = parseFloat(totalInp.value) || 0;
+
+    if (mode === "perDay") {
+      let daysCount = schedule.length || 1;
+      if (lblRate) lblRate.innerHTML = `दर (Rate ₹ प्रति दिन) [${daysCount} दिन]:`;
+      total = rate * daysCount;
+      totalInp.value = total;
+    } else if (mode === "perPax") {
+      let totalPax = 0;
+      schedule.forEach(d => {
+        (d.sessions || []).forEach(s => {
+          totalPax += (parseFloat(s.pax) || 0);
+        });
+      });
+      if (lblRate) lblRate.innerHTML = `दर (Rate ₹ प्रति प्लेट) [कुल ${totalPax} व्यक्ति]:`;
+      total = rate * totalPax;
+      totalInp.value = total;
+    } else {
+      if (lblRate) lblRate.innerText = "दर (Rate ₹):";
+    }
+    balanceInp.value = total - advance;
   }
 
   function getCurrentSnapshot() {
@@ -1181,13 +786,9 @@
     });
   }
 
-  function applySnapshot(jsonStr) {
-    let state = JSON.parse(jsonStr);
+  function applySnapshot(stateObj) {
+    let state = typeof stateObj === 'string' ? JSON.parse(stateObj) : stateObj;
     schedule = state.schedule || [];
-    schedule.forEach(day => {
-      day.hidden = !!day.hidden;
-      (day.sessions || []).forEach(sess => { sess.hidden = !!sess.hidden; });
-    });
     tentList = state.tentList || [];
     document.getElementById('custName').value = state.custName || "";
     document.getElementById('custPhone').value = state.custPhone || "";
@@ -1215,57 +816,160 @@
     if (undoStack.length === 0 || undoStack[undoStack.length - 1] !== cur) {
       undoStack.push(cur);
       if (undoStack.length > 30) undoStack.shift();
-      redoStack = [];
     }
   }
 
   function undoAction() {
     if (undoStack.length === 0) { alert("Undo के लिए पिछला रिकॉर्ड नहीं है!"); return; }
-    redoStack.push(getCurrentSnapshot());
     applySnapshot(undoStack.pop());
   }
 
-  function redoAction() {
-    if (redoStack.length === 0) { alert("Redo के लिए कोई रिकॉर्ड नहीं है!"); return; }
-    undoStack.push(getCurrentSnapshot());
-    applySnapshot(redoStack.pop());
+  // -------------------------------------------------------------
+  // 📥 Word फ़ाइल से 100% सटीक डेटा रिकवरी
+  // -------------------------------------------------------------
+  function handleFileRestore(event) {
+    let file = event.target.files[0];
+    if (!file) return;
+
+    let reader = new FileReader();
+    reader.onload = function(e) {
+      let content = e.target.result;
+      try {
+        let parser = new DOMParser();
+        let doc = parser.parseFromString(content, 'text/html');
+
+        let cName = doc.getElementById('outCustName')?.innerText.trim() || "";
+        let cPhone = doc.getElementById('outPhone')?.innerText.trim() || "";
+        let eDateStr = doc.getElementById('outEventDate')?.innerText.trim() || "";
+        let eAddr = doc.getElementById('outAddress')?.innerText.trim() || "";
+
+        let newSchedule = [];
+        let tables = doc.querySelectorAll('.bill-table');
+
+        tables.forEach((table) => {
+          let th = table.querySelector('thead th')?.innerText || "";
+          if (th.includes("दिन")) {
+            let parts = th.split("दिनांक");
+            let dDate = parts.length > 1 ? parseDisplayDate(parts[1].trim()) : "";
+            let dayObj = { id: "d_" + Date.now() + Math.random(), date: dDate, hidden: false, sessions: [] };
+
+            let trs = table.querySelectorAll('tbody tr');
+            trs.forEach(tr => {
+              let tds = tr.querySelectorAll('td');
+              if (tds.length >= 2) {
+                let sessCol = tds[0].innerText.trim();
+                let sTitle = sessCol.split('(')[0].trim() || "सत्र";
+                let pax = "";
+                if (sessCol.includes('(')) {
+                  pax = sessCol.split('(')[1].replace(/[^0-9]/g, '');
+                }
+
+                let items = [];
+                let itemRows = tds[1].querySelectorAll('.cat-menu-row');
+                if (itemRows.length > 0) {
+                  itemRows.forEach(cr => {
+                    let itemsSpan = cr.querySelector('.cat-menu-items');
+                    let rawList = (itemsSpan ? itemsSpan.innerText : cr.innerText).split(',');
+                    rawList.forEach(rawItem => {
+                      let itClean = rawItem.trim();
+                      if (itClean && itClean !== "—") {
+                        items.push({ name: itClean, qty: "", unit: "", isNv: false });
+                      }
+                    });
+                  });
+                }
+                dayObj.sessions.push({ id: "s_" + Date.now() + Math.random(), title: sTitle, pax: pax, hidden: false, items: items });
+              }
+            });
+            if(dayObj.sessions.length > 0) newSchedule.push(dayObj);
+          }
+        });
+
+        let newTent = [];
+        let tentTds = doc.querySelectorAll('#outTentBody td');
+        tentTds.forEach(td => {
+          let txt = td.innerText.replace(/^[•\s]+/, '').trim();
+          if (txt && !txt.includes("कोई टेंट सामान")) {
+            newTent.push({ name: txt, size: "", qty: "", unit: "" });
+          }
+        });
+
+        if (!cName && newSchedule.length === 0) {
+          alert("⚠️ इस फ़ाइल से डेटा नहीं पढ़ा जा सका। कृपया इसी सिस्टम से डाउनलोड की गई Word (.doc) फ़ाइल चुनें।");
+          return;
+        }
+
+        saveState();
+        applySnapshot({
+          custName: cName === "-" ? "" : cName,
+          custPhone: cPhone === "-" ? "" : cPhone,
+          eventDate: parseDisplayDate(eDateStr),
+          address: eAddr === "-" ? "" : eAddr,
+          schedule: newSchedule,
+          tentList: newTent
+        });
+
+        alert("🎉 बधाई! Word फ़ाइल से सारा मेन्यू, नाश्ता, दाल, चावल और टेंट का सामान अपनी-अपनी जगह वापस आ गया है!");
+      } catch (err) {
+        alert("फ़ाइल पढ़ने में त्रुटि: " + err.message);
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = "";
   }
 
-  window.addEventListener('keydown', function(e) {
-    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
-      if (document.activeElement.tagName !== 'INPUT') { e.preventDefault(); undoAction(); }
-    } else if (((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') || ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'z')) {
-      if (document.activeElement.tagName !== 'INPUT') { e.preventDefault(); redoAction(); }
-    }
-  });
-
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('.multiselect-container')) closeAllMultiDropdowns();
-  });
-
-  window.onload = function() {
-    loadFirmProfile();
-    renderAdminUI();
-    let today = new Date().toISOString().split('T')[0];
-    document.getElementById('eventStartDate').value = today;
-    updateEventDates();
-    addNewDayWithDate(today);
-    calculateBilling();
-    renderReceipt();
-  };
-
-  function saveFirmProfile() {
-    localStorage.setItem('t_name', document.getElementById('firmName').value);
-    localStorage.setItem('t_phone', document.getElementById('firmPhone').value);
-    localStorage.setItem('t_tag', document.getElementById('firmTagline').value);
-    alert("✅ प्रोफाइल सुरक्षित हो गई!");
-    renderReceipt();
+  // 📄 Word डाउनलोड - MS Word Print Layout XML के साथ
+  function downloadWord() {
+    let cName = document.getElementById('custName').value || "Tent_Order";
+    let billHtml = document.getElementById('billReceipt').innerHTML;
+    let docHtml = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset='utf-8'>
+        <title>Order Receipt</title>
+        <!--[if gte mso 9]>
+        <xml>
+          <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>100</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+          </w:WordDocument>
+        </xml>
+        <![endif]-->
+        <style>
+          @page WordSection1 { size: 21cm 29.7cm; margin: 1.5cm 1.5cm 1.5cm 1.5cm; mso-page-orientation: portrait; }
+          div.WordSection1 { page: WordSection1; }
+          body { font-family: 'Segoe UI', Arial, sans-serif; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 12px; }
+          table, th, td { border: 1px solid #444; }
+          th { background-color: #f0f0f0; padding: 6px 8px; }
+          td { padding: 6px 8px; font-size: 12px; }
+          .cat-menu-row { margin-bottom: 4px; }
+          .cat-menu-title { font-weight: bold; color: #8b0000; }
+        </style>
+      </head>
+      <body>
+        <div class="WordSection1">${billHtml}</div>
+      </body>
+      </html>
+    `;
+    let blob = new Blob(['\ufeff' + docHtml], { type: 'application/msword' });
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `${cName}_Order_Bill.doc`;
+    a.click();
   }
 
-  function loadFirmProfile() {
-    if(localStorage.getItem('t_name')) document.getElementById('firmName').value = localStorage.getItem('t_name');
-    if(localStorage.getItem('t_phone')) document.getElementById('firmPhone').value = localStorage.getItem('t_phone');
-    if(localStorage.getItem('t_tag')) document.getElementById('firmTagline').value = localStorage.getItem('t_tag');
+  function downloadImage() {
+    renderReceipt();
+    let cName = document.getElementById('custName').value.trim() || "Tent_Order";
+    let receiptEl = document.getElementById('billReceipt');
+    html2canvas(receiptEl, { scale: 2, useCORS: true, backgroundColor: "#ffffff" }).then(canvas => {
+      let a = document.createElement("a");
+      a.href = canvas.toDataURL("image/jpeg", 0.95);
+      a.download = `${cName}_बिल_पर्ची.jpg`;
+      a.click();
+    });
   }
 
   function updateEventDates() {
@@ -1278,10 +982,7 @@
     let parts = dateStr.split('-');
     let dt = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
     dt.setDate(dt.getDate() + 1);
-    let nextY = dt.getFullYear();
-    let nextM = String(dt.getMonth() + 1).padStart(2, '0');
-    let nextD = String(dt.getDate()).padStart(2, '0');
-    return `${nextY}-${nextM}-${nextD}`;
+    return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
   }
 
   function addNewDayNextDate() {
@@ -1294,15 +995,6 @@
     let dayId = "d_" + Date.now() + Math.floor(Math.random()*100);
     schedule.push({ id: dayId, date: targetDateStr, hidden: false, sessions: [] });
     addNextSession(dayId, false);
-    renderDaysUI();
-    let sel = document.getElementById('stickyDaySelect');
-    if (sel) sel.value = dayId;
-    calculateBilling();
-  }
-
-  function removeDay(dayId) {
-    saveState();
-    schedule = schedule.filter(d => d.id !== dayId);
     renderDaysUI();
     calculateBilling();
   }
@@ -1322,13 +1014,6 @@
       items: []
     });
     renderDaysUI();
-
-    let dIdx = schedule.findIndex(d => d.id === dayId);
-    setActiveSessionInfo(dIdx + 1, day.date, template.title, dayId);
-
-    let sel = document.getElementById('stickyDaySelect');
-    if (sel) sel.value = dayId;
-
     if (shouldScroll) {
       setTimeout(() => {
         let el = document.getElementById("box_" + newSessId);
@@ -1341,110 +1026,24 @@
     let sel = document.getElementById('stickyDaySelect');
     if (!sel || !sel.value) { 
       if (schedule.length > 0) addNextSession(schedule[0].id, true);
-      else alert("कृपया पहले '+ नई तारीख' बटन दबाएं!"); 
       return; 
     }
     addNextSession(sel.value, true);
-  }
-
-  function copySessionItems(dayId, sessId) {
-    let day = schedule.find(d => d.id === dayId);
-    let sess = day ? day.sessions.find(s => s.id === sessId) : null;
-    if (!sess) return;
-    if (sess.items.length === 0) {
-      alert("⚠️ इस सत्र में अभी कोई सामान नहीं है!");
-      return;
-    }
-    sessionClipboard = {
-      fromSession: sess.title,
-      items: JSON.parse(JSON.stringify(sess.items))
-    };
-    alert(`📋 "${sess.title}" के (${sess.items.length}) सामान कॉपी हो गए!`);
-  }
-
-  function pasteSessionItems(targetDayId, targetSessId) {
-    if (!sessionClipboard || !sessionClipboard.items || sessionClipboard.items.length === 0) {
-      alert("⚠️ पहले किसी सत्र का सामान '📋 कॉपी मेन्यू' करें!");
-      return;
-    }
-    saveState();
-    let day = schedule.find(d => d.id === targetDayId);
-    let sess = day ? day.sessions.find(s => s.id === targetSessId) : null;
-    if (!sess) return;
-
-    let addedCount = 0;
-    sessionClipboard.items.forEach(copiedItem => {
-      let exists = sess.items.some(it => it.name === copiedItem.name && it.isNv === copiedItem.isNv);
-      if (!exists) {
-        sess.items.push(JSON.parse(JSON.stringify(copiedItem)));
-        addedCount++;
-      }
-    });
-
-    renderDaysUI();
-    renderReceipt();
-    alert(`📥 ${addedCount} नए व्यंजन इस सत्र में जोड़ दिए गए!`);
-  }
-
-  function updateStickyDaySelect() {
-    let sel = document.getElementById('stickyDaySelect');
-    let sbList = document.getElementById('sidebarDateList');
-    if (!sel) return;
-    let cur = sel.value;
-    sel.innerHTML = "";
-    if(sbList) sbList.innerHTML = "";
-
-    schedule.forEach((d, i) => {
-      let opt = document.createElement('option');
-      opt.value = d.id;
-      opt.innerText = `दिन ${i+1}: ${formatDisplayDate(d.date)}`;
-      if (d.id === cur) opt.selected = true;
-      sel.appendChild(opt);
-
-      if (sbList) {
-        let sessLinks = d.sessions.map((s) => `
-          <button class="sidebar-btn" style="margin-left:12px; width:calc(100% - 12px); border-left:3px solid var(--maroon);" onclick="document.getElementById('box_${s.id}').scrollIntoView({behavior:'smooth', block:'center'}); setActiveSessionInfo(${i+1}, '${d.date}', '${s.title}', '${d.id}');">
-            ⏱️ ${s.title} (${s.items.length} सामान)
-          </button>
-        `).join("");
-
-        sbList.innerHTML += `
-          <div style="margin-bottom:8px; background:#f9f9f9; padding:4px; border-radius:4px; border:1px solid #e2e8f0;">
-            <button class="sidebar-btn" style="background:#eef2f7; font-weight:bold; color:var(--maroon);" onclick="document.getElementById('day_card_${d.id}').scrollIntoView({behavior:'smooth', block:'start'}); document.getElementById('stickyDaySelect').value='${d.id}';">
-              📅 दिन ${i+1}: ${formatDisplayDate(d.date)}
-            </button>
-            <div style="margin-top:2px;">
-              ${sessLinks || '<small style="color:#999; margin-left:14px;">कोई सत्र नहीं</small>'}
-            </div>
-          </div>
-        `;
-      }
-    });
-
-    if (!sel.value && schedule.length > 0) sel.value = schedule[0].id;
-  }
-
-  function removeSession(dayId, sessId) {
-    saveState();
-    let day = schedule.find(d => d.id === dayId);
-    if (day) {
-      day.sessions = day.sessions.filter(s => s.id !== sessId);
-      renderDaysUI();
-      calculateBilling();
-    }
   }
 
   function toggleMultiDropdown(uniqueId, event) {
     if(event) event.stopPropagation();
     let menu = document.getElementById('menu_' + uniqueId);
     let isOpen = menu.style.display === 'block';
-    closeAllMultiDropdowns();
+    document.querySelectorAll('.multiselect-menu').forEach(m => m.style.display = 'none');
     if (!isOpen) menu.style.display = 'block';
   }
 
-  function closeAllMultiDropdowns() {
-    document.querySelectorAll('.multiselect-menu').forEach(m => m.style.display = 'none');
-  }
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.multiselect-container')) {
+      document.querySelectorAll('.multiselect-menu').forEach(m => m.style.display = 'none');
+    }
+  });
 
   function updateMultiBadge(sessId, catKey) {
     let container = document.getElementById(`ms_${sessId}_${catKey}`);
@@ -1458,30 +1057,11 @@
       badge.style.display = 'inline-block';
       btn.style.borderColor = '#28a745';
       btn.style.backgroundColor = '#e8f8ec';
-      btn.style.fontWeight = 'bold';
     } else {
-      badge.innerText = '0';
       badge.style.display = 'none';
       btn.style.borderColor = '#b0bec5';
       btn.style.backgroundColor = '#ffffff';
-      btn.style.fontWeight = 'normal';
     }
-  }
-
-  function clearCatSelection(sessId, catKey, event) {
-    if(event) event.stopPropagation();
-    let container = document.getElementById(`ms_${sessId}_${catKey}`);
-    if (!container) return;
-    container.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-    updateMultiBadge(sessId, catKey);
-  }
-
-  function filterMultiItems(inp) {
-    let q = inp.value.toLowerCase();
-    let list = inp.closest('.multiselect-menu').querySelectorAll('.ms-item');
-    list.forEach(item => {
-      item.style.display = item.textContent.toLowerCase().includes(q) ? 'flex' : 'none';
-    });
   }
 
   function addAllSelectedItems(dayId, sessId) {
@@ -1505,14 +1085,14 @@
     }
 
     if (itemsToAdd.length === 0) {
-      alert("कृपया किसी व्यंजन पर टिक (✓) लगाएं या नया नाम लिखें!");
+      alert("कृपया किसी व्यंजन पर टिक लगाएं!");
       return;
     }
 
     saveState();
     itemsToAdd.forEach(it => sess.items.push(it));
     document.getElementById(`qty_${sessId}`).value = "";
-    closeAllMultiDropdowns();
+    document.querySelectorAll('.multiselect-menu').forEach(m => m.style.display = 'none');
     renderDaysUI();
   }
 
@@ -1545,13 +1125,7 @@
               <span style="font-size:10px; color:#666; margin-left:4px;">▼</span>
             </div>
           </button>
-          
           <div class="multiselect-menu" id="menu_${uniqueId}">
-            <div class="ms-header">
-              <span style="font-size:11px; font-weight:bold; color:#444;">व्यंजन सूची:</span>
-              <span onclick="clearCatSelection('${sessId}', '${catKey}', event)" style="font-size:11px; color:red; cursor:pointer;">हटाएं ✖</span>
-            </div>
-            <input type="text" placeholder="🔍 खोजें..." onkeyup="filterMultiItems(this)" onclick="event.stopPropagation();" style="padding:4px 6px; font-size:11px; margin-bottom:5px;">
             <div style="max-height:180px; overflow-y:auto;">${itemsHTML}</div>
           </div>
         </div>
@@ -1561,14 +1135,11 @@
 
   function renderDaysUI() {
     let wrap = document.getElementById('daysWrapper');
-    let prevSelectedSticky = document.getElementById('stickyDaySelect') ? document.getElementById('stickyDaySelect').value : null;
     wrap.innerHTML = "";
 
     schedule.forEach((day, dIdx) => {
       let dayBox = document.createElement('div');
       dayBox.className = "day-box";
-      dayBox.id = `day_card_${day.id}`;
-
       let displayDateText = formatDisplayDate(day.date);
 
       let dHtml = `
@@ -1580,15 +1151,11 @@
             <span style="font-size:14px; font-weight:bold; color:var(--maroon);">[ ${displayDateText} ]</span>
           </div>
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button class="btn btn-yellow" id="btn_day_toggle_${day.id}" style="font-size:11px; padding:4px 8px;" onclick="toggleWholeDay('${day.id}')">${day.hidden ? 'दिन खोलें 🔽' : 'दिन छिपाएं 🔼'}</button>
-            <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="toggleAllSessionsInDay('${day.id}', false)">🔼 सभी सत्र छिपाएं</button>
-            <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="toggleAllSessionsInDay('${day.id}', true)">🔽 सभी सत्र खोलें</button>
             <button class="btn btn-blue" style="font-size:11px; padding:4px 8px;" onclick="addNextSession('${day.id}', true)">+ सत्र जोड़ें</button>
-            <button class="btn btn-danger" style="font-size:11px; padding:4px 8px;" onclick="removeDay('${day.id}')">दिन हटाएं</button>
+            <button class="btn btn-danger" style="font-size:11px; padding:4px 8px;" onclick="schedule.splice(${dIdx}, 1); renderDaysUI();">दिन हटाएं</button>
           </div>
         </div>
-        
-        <div class="day-content-area" id="day_content_${day.id}" style="display:${day.hidden ? 'none' : 'block'};">
+        <div class="day-content-area">
       `;
 
       day.sessions.forEach((sess, sIdx) => {
@@ -1604,96 +1171,84 @@
 
         let nvKeys = ['nvSnacks', 'nvMain'];
         let nvDropCols = nvKeys.map(k => generateMultiSelectHTML(sess.id, k, true)).join("");
+        let hasNvItems = sess.items.some(it => it.isNv);
 
         dHtml += `
-          <div class="session-box" id="box_${sess.id}" 
-               data-daynum="${dIdx + 1}" 
-               data-date="${day.date}" 
-               data-title="${sess.title}" 
-               data-dayid="${day.id}">
-            
+          <div class="session-box" id="box_${sess.id}">
             <div class="session-date-banner">
-              <span>👉 <strong>दिन ${dIdx + 1}</strong> | तारीख: <span style="font-size:14px; text-decoration:underline;">${displayDateText}</span> | (${sess.title}) - <small style="color:#28a745;">[${sess.items.length} सामान जुड़ा]</small></span>
-              <div style="display:flex; gap:6px; align-items:center;">
-                <button class="btn btn-yellow" id="tgl_btn_${sess.id}" type="button" style="font-size:11px; padding:3px 8px;" onclick="toggleSessionDetails('${sess.id}', event)">छिपाएं 🔼</button>
-                <button class="btn btn-danger" type="button" style="font-size:10px; padding:2px 6px;" onclick="removeSession('${day.id}', '${sess.id}')">सत्र हटाएं ✖</button>
-              </div>
+              <span>👉 <strong>दिन ${dIdx + 1}</strong> | तारीख: <u>${displayDateText}</u> | (${sess.title})</span>
+              <button class="btn btn-danger" type="button" style="font-size:10px; padding:2px 6px;" onclick="day.sessions.splice(${sIdx}, 1); renderDaysUI();">सत्र हटाएं ✖</button>
             </div>
 
-            <div class="session-body-content" id="body_${sess.id}" style="display:${sess.hidden ? 'none' : 'block'};">
-              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
-                <label style="margin:0;">सत्र नाम:</label>
-                <input type="text" value="${sess.title}" style="width:160px; font-weight:bold;" onfocus="setActiveSessionInfo(${dIdx + 1}, '${day.date}', this.value, '${day.id}');" oninput="schedule[${dIdx}].sessions[${sIdx}].title = this.value; document.getElementById('box_${sess.id}').setAttribute('data-title', this.value); renderReceipt();">
-                <label style="margin:0;">आदमी (Pax):</label>
-                <input type="number" placeholder="उदा. 40" value="${sess.pax}" style="width:110px;" oninput="schedule[${dIdx}].sessions[${sIdx}].pax = this.value; calculateBilling(); saveState(); renderReceipt();">
-                
-                <div style="display:inline-flex; align-items:center; gap:4px; margin-left:auto; background:#f0f4f8; padding:3px 6px; border-radius:4px; border:1px solid #c8d3de;">
-                  <button class="btn btn-secondary" style="font-size:11px; padding:4px 8px;" onclick="copySessionItems('${day.id}', '${sess.id}')" title="इस सत्र के व्यंजन कॉपी करें">📋 कॉपी मेन्यू</button>
-                  <button class="btn btn-purple" style="font-size:11px; padding:4px 8px;" onclick="pasteSessionItems('${day.id}', '${sess.id}')" title="कॉपी किया हुआ मेन्यू इसी सत्र में जोड़ें">📥 यहाँ पेस्ट करें</button>
-                </div>
-              </div>
-
-              <div class="menu-panel" style="background:#f4fbf4; border:1px solid #c3e6cb; border-radius:6px; padding:10px; margin-top:8px;">
-                <div style="font-weight:bold; font-size:12px; color:green; margin-bottom:6px;">🥬 शाकाहारी मेन्यू (${displayDateText} के लिए):</div>
-                <div class="category-line">${vegDropCols}</div>
-              </div>
-
-              <div class="menu-panel" style="background:#fff5f5; border:1px solid #f5c6cb; border-radius:6px; padding:10px; margin-top:8px;">
-                <div style="font-weight:bold; font-size:12px; color:#b22222; margin-bottom:6px;">🍗 मांसाहारी मेन्यू (Non-Veg - ${displayDateText}):</div>
-                <div class="category-line" style="grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));">${nvDropCols}</div>
-              </div>
-
-              <div class="action-row">
-                <span style="font-size:12px; font-weight:bold; color:var(--maroon);">✍️ नया व्यंजन लिखें:</span>
-                <input type="text" id="custom_item_${sess.id}" placeholder="व्यंजन नाम" style="width:220px;">
-                <input type="number" id="qty_${sess.id}" placeholder="मात्रा" style="width:95px;">
-                <select id="unit_${sess.id}" style="width:95px;">
-                  <option value="kg">kg (किलो)</option>
-                  <option value="लीटर">लीटर</option>
-                  <option value="लोग">लोग</option>
-                  <option value="पीस">पीस</option>
-                  <option value="प्लेट">प्लेट</option>
-                  <option value="कप">कप</option>
-                </select>
-                <button class="btn btn-green" style="padding:7px 16px; font-size:13px; font-weight:bold;" onclick="addAllSelectedItems('${day.id}','${sess.id}')">
-                  ➕ चुने हुए सभी सामान जोड़ें
-                </button>
-              </div>
-
-              <div style="margin-top:10px; padding-top:4px;">
-                <strong>जुड़े हुए सामान (${sess.title}):</strong>
-                <div style="margin-top:4px;">
-                  ${badges || '<small style="color:#888;">इस सत्र में अभी कोई सामान नहीं जुड़ा है।</small>'}
-                </div>
-              </div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
+              <label style="margin:0;">सत्र नाम:</label>
+              <input type="text" value="${sess.title}" style="width:160px; font-weight:bold;" oninput="schedule[${dIdx}].sessions[${sIdx}].title = this.value; renderReceipt();">
+              <label style="margin:0;">आदमी (Pax):</label>
+              <input type="number" placeholder="उदा. 40" value="${sess.pax}" style="width:110px;" oninput="schedule[${dIdx}].sessions[${sIdx}].pax = this.value; calculateBilling(); renderReceipt();">
             </div>
 
+            <div class="menu-panel" style="background:#f4fbf4; border:1px solid #c3e6cb; border-radius:6px; padding:10px; margin-top:8px;">
+              <div style="font-weight:bold; font-size:12px; color:green; margin-bottom:6px;">🥬 शाकाहारी मेन्यू (${displayDateText}):</div>
+              <div class="category-line">${vegDropCols}</div>
+            </div>
+
+            <button type="button" class="btn btn-secondary" style="font-size:11px; margin-top:8px;" onclick="const p=document.getElementById('nvPanel_${sess.id}'); p.style.display = p.style.display==='none' ? 'block' : 'none';">${hasNvItems ? '🔼 मांसाहारी मेन्यू छिपाएं' : '🍗 मांसाहारी मेन्यू जोड़ें'}</button>
+            <div class="menu-panel" id="nvPanel_${sess.id}" style="display:${hasNvItems ? 'block' : 'none'}; background:#fff5f5; border:1px solid #f5c6cb; border-radius:6px; padding:10px; margin-top:8px;">
+              <div style="font-weight:bold; font-size:12px; color:#b22222; margin-bottom:6px;">🍗 मांसाहारी मेन्यू:</div>
+              <div class="category-line">${nvDropCols}</div>
+            </div>
+
+            <div class="action-row">
+              <input type="text" id="custom_item_${sess.id}" placeholder="व्यंजन नाम" style="width:200px;">
+              <input type="number" id="qty_${sess.id}" placeholder="मात्रा" style="width:80px;">
+              <select id="unit_${sess.id}" style="width:90px;">
+                <option value="kg">kg</option>
+                <option value="लीटर">लीटर</option>
+                <option value="लोग">लोग</option>
+                <option value="पीस">पीस</option>
+                <option value="प्लेट">प्लेट</option>
+              </select>
+              <button class="btn btn-green" onclick="addAllSelectedItems('${day.id}','${sess.id}')">➕ चुने हुए सभी सामान जोड़ें</button>
+            </div>
+
+            <div style="margin-top:10px;">
+              <strong>जुड़े हुए सामान (${sess.title}):</strong>
+              <div style="margin-top:4px;">${badges || '<small style="color:#888;">कोई सामान नहीं जुड़ा है।</small>'}</div>
+            </div>
           </div>
         `;
       });
 
-      dHtml += `
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; margin-top:10px; background:#fff1f3; border:1px dashed #e57373; border-radius:6px;">
-          <span style="font-size:12.5px; font-weight:bold; color:var(--maroon);">
-            📅 दिन ${dIdx + 1} (${displayDateText}) में नया सत्र जोड़ें:
-          </span>
-          <button class="btn btn-blue" style="font-size:12px; padding:6px 14px;" onclick="addNextSession('${day.id}', true)">
-            ⏱️ + इस दिन में सत्र जोड़ें (नीचे)
-          </button>
-        </div>
-      `;
-
+      dHtml += `</div>`;
       dayBox.innerHTML = dHtml;
       wrap.appendChild(dayBox);
     });
 
-    updateStickyDaySelect();
-    if (prevSelectedSticky && document.querySelector(`#stickyDaySelect option[value="${prevSelectedSticky}"]`)) {
-      document.getElementById('stickyDaySelect').value = prevSelectedSticky;
-    }
+    updateStickySelect();
     renderReceipt();
-    setupScrollSpy();
+  }
+
+  function updateStickySelect() {
+    let sel = document.getElementById('stickyDaySelect');
+    let sbList = document.getElementById('sidebarDateList');
+    if (!sel) return;
+    sel.innerHTML = "";
+    if (sbList) sbList.innerHTML = "";
+
+    schedule.forEach((d, i) => {
+      let opt = document.createElement('option');
+      opt.value = d.id;
+      opt.innerText = `दिन ${i+1}: ${formatDisplayDate(d.date)}`;
+      sel.appendChild(opt);
+
+      if (sbList) {
+        sbList.innerHTML += `
+          <button class="sidebar-btn" onclick="document.getElementById('day_card_${d.id}')?.scrollIntoView({behavior:'smooth'});">
+            📅 दिन ${i+1}: ${formatDisplayDate(d.date)}
+          </button>
+        `;
+      }
+    });
   }
 
   function toggleCustomTent(sel) {
@@ -1703,23 +1258,17 @@
   function addTentItem() {
     let sel = document.getElementById('tentDrop');
     let itemName = (sel.value === "CUSTOM") ? document.getElementById('customTentInput').value.trim() : sel.value;
-    if(!itemName) { alert("सामान का नाम लिखें!"); return; }
+    if(!itemName) return;
 
     saveState();
-    let size = document.getElementById('tentSize').value.trim();
-    let qty = document.getElementById('tentQty').value.trim();
-    let unit = document.getElementById('tentUnit').value;
-
-    tentList.push({ name: itemName, size: size, qty: qty, unit: unit });
+    tentList.push({
+      name: itemName,
+      size: document.getElementById('tentSize').value.trim(),
+      qty: document.getElementById('tentQty').value.trim(),
+      unit: document.getElementById('tentUnit').value
+    });
     document.getElementById('tentSize').value = "";
     document.getElementById('tentQty').value = "";
-    renderTentBadges();
-    renderReceipt();
-  }
-
-  function deleteTent(idx) {
-    saveState();
-    tentList.splice(idx, 1);
     renderTentBadges();
     renderReceipt();
   }
@@ -1728,13 +1277,12 @@
     let box = document.getElementById('tentBadges');
     box.innerHTML = tentList.map((t, i) => `
       <span class="item-badge" style="background:#fff3cd; color:#856404; border-color:#ffeeba;">
-        ${t.name} ${t.size ? '<strong>(साइज: '+t.size+')</strong>' : ''} ${t.qty ? ': '+t.qty+' '+t.unit : ''}
-        <span style="cursor:pointer; color:red; margin-left:4px;" onclick="deleteTent(${i})">✖</span>
+        ${t.name} ${t.size ? '('+t.size+')' : ''} ${t.qty ? ': '+t.qty+' '+t.unit : ''}
+        <span style="cursor:pointer; color:red; margin-left:4px;" onclick="tentList.splice(${i}, 1); renderTentBadges(); renderReceipt();">✖</span>
       </span>
     `).join("") || '<small style="color:#888;">कोई टेंट सामान नहीं जुड़ा।</small>';
   }
 
-  // --- रसीद / पर्ची रेंडरिंग (श्रेणी-वार मेन्यू और बिलिंग के साथ) ---
   function renderReceipt() {
     document.getElementById('outFirmName').innerText = document.getElementById('firmName').value || "टेंट हाउस एवं कैटरर्स";
     document.getElementById('outFirmPhone').innerText = document.getElementById('firmPhone').value || "-";
@@ -1743,7 +1291,6 @@
     document.getElementById('outPhone').innerText = document.getElementById('custPhone').value || "-";
     document.getElementById('outAddress').innerText = document.getElementById('eventAddress').value || "-";
 
-    // 🍲 1. भोजन मेन्यू (सत्र एवं श्रेणी-वार व्यवस्थित)
     let foodHtml = "";
     schedule.forEach((d, i) => {
       if(d.sessions.length > 0) {
@@ -1758,9 +1305,8 @@
         `;
         
         d.sessions.forEach(s => {
-          let paxText = s.pax && s.pax.toString().trim() !== "" ? (s.pax.toString().includes("लोग") ? `(${s.pax})` : `(${s.pax} लोग)`) : "";
+          let paxText = s.pax ? `(${s.pax} लोग)` : "";
           
-          // सत्र के व्यंजनों को श्रेणी-वार अलग-अलग समूहों में बांटें
           let categorizedItems = {};
           s.items.forEach(it => {
             let cat = findCategoryOfItem(it.name);
@@ -1772,7 +1318,7 @@
           let catKeys = Object.keys(categorizedItems);
 
           if (catKeys.length === 0) {
-            itemsHtml = "<span style='color:#888;'>— (कोई व्यंजन दर्ज नहीं)</span>";
+            itemsHtml = "<span style='color:#888;'>—</span>";
           } else {
             itemsHtml = catKeys.map(catTitle => `
               <div class="cat-menu-row">
@@ -1786,7 +1332,7 @@
             <tr>
               <td width="28%" style="background:#fafafa; font-size:12.5px;">
                 <strong style="color:var(--maroon);">${s.title}</strong>
-                ${paxText ? '<br><small style="color:#555; font-weight:bold;">' + paxText + '</small>' : ''}
+                ${paxText ? '<br><small style="color:#555;">' + paxText + '</small>' : ''}
               </td>
               <td width="72%">${itemsHtml}</td>
             </tr>
@@ -1799,7 +1345,6 @@
 
     document.getElementById('outFoodArea').innerHTML = foodHtml || "<p style='font-size:12px; color:#888;'>कोई भोजन मीनू दर्ज नहीं है।</p>";
 
-    // ⛺ 2. टेंट सामान सूची
     let tentRows = "";
     for(let i=0; i<tentList.length; i+=2) {
       let t1 = tentList[i];
@@ -1810,68 +1355,30 @@
     }
     document.getElementById('outTentBody').innerHTML = tentRows || "<tr><td colspan='2' style='color:#888;'>कोई टेंट सामान दर्ज नहीं किया गया।</td></tr>";
 
-    // 💰 3. बिल एवं एडवांस पेमेंट विवरण
-    let bMode = document.getElementById('billMode').value;
-    let modeText = "एकमुश्त तय राशि";
-    if (bMode === "perDay") modeText = "प्रति दिन हिसाब (" + schedule.length + " दिन)";
-    if (bMode === "perPax") {
-      let totalPax = 0;
-      schedule.forEach(d => {
-        (d.sessions || []).forEach(s => {
-          totalPax += (parseFloat(s.pax) || 0);
-        });
-      });
-      modeText = `प्रति प्लेट हिसाब (${totalPax} व्यक्ति)`;
-    }
-
-    document.getElementById('outBillMode').innerText = modeText;
+    let includeBill = document.getElementById('includeBillToggle').checked;
+    document.getElementById('outBillingTable').style.display = includeBill ? 'table' : 'none';
     document.getElementById('outBillTotal').innerText = document.getElementById('billTotal').value || "0";
     document.getElementById('outBillAdvance').innerText = document.getElementById('billAdvance').value || "0";
     document.getElementById('outBillBalance').innerText = document.getElementById('billBalance').value || "0";
-    document.getElementById('outBillPayMode').innerText = document.getElementById('billPayMode').value || "नकद";
   }
 
-  function downloadImage() {
-    renderReceipt();
-    let cName = document.getElementById('custName').value.trim() || "Tent_Order";
-    let receiptEl = document.getElementById('billReceipt');
-    window.scrollTo(0, receiptEl.offsetTop - 70);
-
-    html2canvas(receiptEl, { scale: 2, useCORS: true, backgroundColor: "#ffffff" }).then(canvas => {
-      let a = document.createElement("a");
-      a.href = canvas.toDataURL("image/jpeg", 0.95);
-      a.download = `${cName}_बिल_पर्ची.jpg`;
-      a.click();
-    }).catch(err => { alert("फोटो बनाने में समस्या: " + err.message); });
+  function saveFirmProfile() {
+    localStorage.setItem('t_name', document.getElementById('firmName').value);
+    localStorage.setItem('t_phone', document.getElementById('firmPhone').value);
+    localStorage.setItem('t_tag', document.getElementById('firmTagline').value);
+    alert("✅ प्रोफाइल सुरक्षित हो गई!");
   }
 
-  function downloadWord() {
-    let cName = document.getElementById('custName').value || "Tent_Order";
-    let billHtml = document.getElementById('billReceipt').innerHTML;
-    let docHtml = `
-      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-      <head>
-        <meta charset='utf-8'>
-        <title>Order Receipt</title>
-        <style>
-          body { font-family: 'Segoe UI', Arial, sans-serif; }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 12px; }
-          table, th, td { border: 1px solid #444; }
-          th { background-color: #f0f0f0; padding: 6px 8px; }
-          td { padding: 6px 8px; font-size: 12px; }
-          .cat-menu-row { margin-bottom: 4px; }
-          .cat-menu-title { font-weight: bold; color: #8b0000; }
-        </style>
-      </head>
-      <body>${billHtml}</body>
-      </html>
-    `;
-    let blob = new Blob(['\ufeff' + docHtml], { type: 'application/msword' });
-    let a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = `${cName}_Order_Bill.doc`;
-    a.click();
-  }
+  window.onload = function() {
+    if(localStorage.getItem('t_name')) document.getElementById('firmName').value = localStorage.getItem('t_name');
+    if(localStorage.getItem('t_phone')) document.getElementById('firmPhone').value = localStorage.getItem('t_phone');
+    if(localStorage.getItem('t_tag')) document.getElementById('firmTagline').value = localStorage.getItem('t_tag');
+    renderAdminUI();
+    let today = new Date().toISOString().split('T')[0];
+    document.getElementById('eventStartDate').value = today;
+    updateEventDates();
+    addNewDayWithDate(today);
+  };
 </script>
 
 </body>
