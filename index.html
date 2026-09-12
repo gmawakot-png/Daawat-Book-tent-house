@@ -1022,6 +1022,20 @@
     }
   }
 
+  function deleteSession(dayId, sessId) {
+    saveState();
+    let day = schedule.find(d => d.id === dayId);
+    if (day) {
+      let sIdx = day.sessions.findIndex(s => s.id === sessId);
+      if (sIdx !== -1) {
+        day.sessions.splice(sIdx, 1);
+        renderDaysUI();
+        calculateBilling();
+        renderReceipt();
+      }
+    }
+  }
+
   function addNextSessionFromSticky() {
     let sel = document.getElementById('stickyDaySelect');
     if (!sel || !sel.value) { 
@@ -1177,7 +1191,7 @@
           <div class="session-box" id="box_${sess.id}">
             <div class="session-date-banner">
               <span>👉 <strong>दिन ${dIdx + 1}</strong> | तारीख: <u>${displayDateText}</u> | (${sess.title})</span>
-              <button class="btn btn-danger" type="button" style="font-size:10px; padding:2px 6px;" onclick="day.sessions.splice(${sIdx}, 1); renderDaysUI();">सत्र हटाएं ✖</button>
+              <button class="btn btn-danger" type="button" style="font-size:10px; padding:2px 6px;" onclick="deleteSession('${day.id}', '${sess.id}')">सत्र हटाएं ✖</button>
             </div>
 
             <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px;">
@@ -1215,6 +1229,16 @@
               <strong>जुड़े हुए सामान (${sess.title}):</strong>
               <div style="margin-top:4px;">${badges || '<small style="color:#888;">कोई सामान नहीं जुड़ा है।</small>'}</div>
             </div>
+
+            <!-- जुड़े हुए सामान के ठीक आगे लास्ट में सत्र जोड़ें व सत्र हटाएं का पैनल -->
+            <div style="margin-top:12px; padding:8px 10px; background:#f9f9f9; border:1px solid #e0e0e0; border-radius:5px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+              <span style="font-size:12px; font-weight:bold; color:#444;">⏱️ सत्र नियंत्रण (${sess.title}):</span>
+              <div style="display:flex; gap:6px;">
+                <button type="button" class="btn btn-blue" style="font-size:11px; padding:4px 9px;" onclick="addNextSession('${day.id}', true)">➕ नया सत्र जोड़ें</button>
+                <button type="button" class="btn btn-danger" style="font-size:11px; padding:4px 9px;" onclick="deleteSession('${day.id}', '${sess.id}')">✖ सत्र हटाएं</button>
+              </div>
+            </div>
+
           </div>
         `;
       });
@@ -1357,6 +1381,18 @@
 
     let includeBill = document.getElementById('includeBillToggle').checked;
     document.getElementById('outBillingTable').style.display = includeBill ? 'table' : 'none';
+    
+    // बिलिंग प्रकार और भुगतान माध्यम को रसीद में तुरंत सही दर्शाएं
+    let billModeSelect = document.getElementById('billMode');
+    if (billModeSelect) {
+      let selectedText = billModeSelect.options[billModeSelect.selectedIndex].text.replace(/^\d+\.\s*/, '');
+      document.getElementById('outBillMode').innerText = selectedText;
+    }
+    let payModeSelect = document.getElementById('billPayMode');
+    if (payModeSelect) {
+      document.getElementById('outBillPayMode').innerText = payModeSelect.value;
+    }
+
     document.getElementById('outBillTotal').innerText = document.getElementById('billTotal').value || "0";
     document.getElementById('outBillAdvance').innerText = document.getElementById('billAdvance').value || "0";
     document.getElementById('outBillBalance').innerText = document.getElementById('billBalance').value || "0";
