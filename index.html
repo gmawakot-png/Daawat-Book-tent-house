@@ -1078,9 +1078,35 @@
     }
   }
 
+  // किसी भी सेक्शन से चेक करने पर ऑटो-फिल करने का फंक्शन
+  function handleItemCheckChange(sessId, catKey) {
+    updateMultiBadge(sessId, catKey);
+
+    let allChecked = document.querySelectorAll(`.chk-item-${sessId}:checked`);
+    let customInp = document.getElementById(`custom_item_${sessId}`);
+    if (!customInp) return;
+
+    if (allChecked.length === 1) {
+      // यदि केवल 1 व्यंजन चुना गया है तो उसे 'व्यंजन नाम' में भरें ताकि एडिट किया जा सके
+      customInp.value = allChecked[0].value.trim();
+    } else if (allChecked.length === 0) {
+      // यदि अनचेक कर दिया गया हो तो इनपुट खाली करें
+      customInp.value = "";
+    } else {
+      // यदि मल्टीपल (1 से अधिक) चुने गए हों, और इनपुट में उन चुनी हुई चीज़ों में से ही किसी का नाम हो तो उसे साफ़ कर दें
+      let isFromChecked = Array.from(allChecked).some(cb => cb.value.trim() === customInp.value.trim());
+      if (isFromChecked) {
+        customInp.value = "";
+      }
+    }
+  }
+
   function addAllSelectedItems(dayId, sessId) {
     let day = schedule.find(d => d.id === dayId);
+    if (!day) return;
     let sess = day.sessions.find(s => s.id === sessId);
+    if (!sess) return;
+
     let checkedBoxes = document.querySelectorAll(`.chk-item-${sessId}:checked`);
     let customInput = document.getElementById(`custom_item_${sessId}`);
     let customVal = customInput ? customInput.value.trim() : "";
@@ -1088,18 +1114,39 @@
     let unit = document.getElementById(`unit_${sessId}`).value;
 
     let itemsToAdd = [];
-    checkedBoxes.forEach(cb => {
-      itemsToAdd.push({ name: cb.value.trim(), qty: qty, unit: unit, isNv: cb.getAttribute('data-nv') === '1' });
-      cb.checked = false;
-    });
 
-    if (customVal !== "") {
-      itemsToAdd.push({ name: customVal, qty: qty, unit: unit, isNv: false });
-      customInput.value = "";
+    if (checkedBoxes.length === 1) {
+      // 1 आइटम चुना गया हो तो एडिटेड नाम (customVal) को प्राथमिकता दें ताकि संपादन सुरक्षित रहे
+      let cb = checkedBoxes[0];
+      let finalName = customVal || cb.value.trim();
+      let isNv = cb.getAttribute('data-nv') === '1';
+      itemsToAdd.push({ name: finalName, qty: qty, unit: unit, isNv: isNv });
+      cb.checked = false;
+      if (customInput) customInput.value = "";
+    } else if (checkedBoxes.length > 1) {
+      // मल्टीपल आइटम चुने गए हों तो सभी को जोड़ें
+      checkedBoxes.forEach(cb => {
+        itemsToAdd.push({ name: cb.value.trim(), qty: qty, unit: unit, isNv: cb.getAttribute('data-nv') === '1' });
+        cb.checked = false;
+      });
+      // यदि अलग से कोई नया नाम भी लिखा हो तो उसे भी जोड़ें
+      if (customVal !== "") {
+        let alreadyAdded = itemsToAdd.some(it => it.name === customVal);
+        if (!alreadyAdded) {
+          itemsToAdd.push({ name: customVal, qty: qty, unit: unit, isNv: false });
+        }
+        if (customInput) customInput.value = "";
+      }
+    } else {
+      // केवल मैन्युअली लिखा गया व्यंजन
+      if (customVal !== "") {
+        itemsToAdd.push({ name: customVal, qty: qty, unit: unit, isNv: false });
+        if (customInput) customInput.value = "";
+      }
     }
 
     if (itemsToAdd.length === 0) {
-      alert("कृपया किसी व्यंजन पर टिक लगाएं!");
+      alert("कृपया किसी व्यंजन पर टिक लगाएं या व्यंजन का नाम लिखें!");
       return;
     }
 
@@ -1123,7 +1170,7 @@
 
     let itemsHTML = c.items.map(it => `
       <label class="ms-item">
-        <input type="checkbox" class="chk-item-${sessId}" value="${it}" data-nv="${isNv ? '1' : '0'}" onchange="updateMultiBadge('${sessId}', '${catKey}')">
+        <input type="checkbox" class="chk-item-${sessId}" value="${it}" data-nv="${isNv ? '1' : '0'}" onchange="handleItemCheckChange('${sessId}', '${catKey}')">
         <span>${it}</span>
       </label>
     `).join("");
